@@ -1073,7 +1073,87 @@ function loadData(){
     else if((r.paid||0)===0&&r.paymentStatus==='overdue'&&dds>=today){r.paymentStatus='pending';}
   });
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  syncToFirestore();
   updateStats();renderDash();updateHeader();
+  startRealtimeSync();
+}
+
+function syncToFirestore(){
+  if(!DB||!APP.company)return;
+  setSt('sync');
+  /* Save records */
+  DB.collection('app_data').doc('records_'+APP.company).set({
+    list: APP.records,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: currentUser ? currentUser.email : 'unknown'
+  }).then(()=>{
+    /* Save journal */
+    return DB.collection('app_data').doc('journal_'+APP.company).set({
+      list: APP.journal || [],
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser ? currentUser.email : 'unknown'
+    });
+  }).then(()=>{
+    setSt('ok');
+    console.log('Firestore sync done');
+  }).catch(e=>{
+    console.error('Firestore sync error:', e);
+    setSt('err');
+  });
+}
+
+function startRealtimeSync(){
+  if(!DB||!APP.company)return;
+  /* Unsubscribe previous listeners if any */
+  if(window._unsubRecords) window._unsubRecords();
+  if(window._unsubJournal) window._unsubJournal();
+
+  setSt('load');
+
+  /* Listen to records */
+  window._unsubRecords = DB.collection('app_data').doc('records_'+APP.company)
+    .onSnapshot(doc=>{
+      if(doc.exists && doc.data().list){
+        const serverRecords = doc.data().list;
+        /* Only update if server data is different (avoid loops) */
+        if(JSON.stringify(serverRecords) !== JSON.stringify(APP.records)){
+          APP.records = serverRecords;
+          localStorage.setItem(`data-${APP.company}`, JSON.stringify(APP.records));
+          updateStats(); renderDash(); updateHeader();
+          console.log('Live sync: records updated from server');
+        }
+      }
+      setSt('ok');
+    }, err=>{
+      console.error('Records listener error:', err);
+      setSt('err');
+    });
+
+  /* Listen to journal  */
+  window._unsubJournal = DB.collection('app_data').doc('journal_'+APP.company)
+    .onSnapshot(doc=>{
+      if(doc.exists && doc.data().list){
+        const serverJournal = doc.data().list;
+        if(JSON.stringify(serverJournal) !== JSON.stringify(APP.journal)){
+          APP.journal = serverJournal;
+          localStorage.setItem(`journal-${APP.company}`, JSON.stringify(APP.journal));
+          /* Refresh payment tab if visible */
+          if(document.getElementById('sec-pay') && document.getElementById('sec-pay').style.display!=='none'){
+            filterPayment();
+          }
+          console.log('Live sync: journal updated from server');
+        }
+      }
+    }, err=>{
+      console.error('Journal listener error:', err);
+    });
+
+  /* Initial upload if Firestore is empty */
+  DB.collection('app_data').doc('records_'+APP.company).get().then(doc=>{
+    if(!doc.exists && APP.records && APP.records.length > 0){
+      syncToFirestore(); /* Push localStorage data to Firestore */
+    }
+  });
 }
 
 function SAMPLEDATA(){
@@ -1419,7 +1499,9 @@ function bulkDelete(prefix){
   if(!checked.length){toast('Pehle entries select karo','e');return;}
   if(!confirm(checked.length+' entries delete karni hain?'))return;
   APP.records=APP.records.filter(r=>!checked.includes(r.id));
-  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));loadData();toast(checked.length+' entries deleted','s');
+  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  syncToFirestore();
+  loadData();toast(checked.length+' entries deleted','s');
 }
 function downloadSampleCSV(prefix){
   const type=prefix==='inward'?'inward':prefix==='outward'?'outward':'inward';
@@ -1473,7 +1555,9 @@ function importCSV(prefix){
         createdAt:new Date().toISOString()
       });count++;
     }
-    localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));loadData();toast(count+' entries imported!','s');
+    localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+    syncToFirestore();
+    loadData();toast(count+' entries imported!','s');
   };reader.readAsText(file);};input.click();
 }
 function exportTabCSVPDF(prefix){
@@ -2241,6 +2325,7 @@ function deleteEntry(id){
   if(!confirm('Delete this entry?\n\n'+label+'\n\nYeh action undo nahi hoga!')){return;}
   APP.records=APP.records.filter(e=>e.id!==id);
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  syncToFirestore();
   loadData();toast('Entry deleted!','s');
 }
 
@@ -2270,7 +2355,9 @@ function saveEntry(){
     APP.records[idx]={...old,...entryData,paid:old.paid||0,paymentStatus:old.paymentStatus||'pending',payMode:old.payMode,payDate:old.payDate,payReceived:old.payReceived,payRef:old.payRef,dedCD:old.dedCD,dedBrok:old.dedBrok,dedTDS:old.dedTDS,dedOther:old.dedOther,payNote:old.payNote,lastUpdated:new Date().toISOString()};
   }}
   else{APP.records.push({id:'REC'+Date.now(),...entryData,gp:gp||'GP-'+String(APP.records.length+1).padStart(5,'0'),createdAt:new Date().toISOString()});}
-  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));closeM('entry-modal');loadData();toast('Entry saved!','s');
+  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  syncToFirestore();
+  closeM('entry-modal');loadData();toast('Entry saved!','s');
 }
 
 function showPartyDrop(val,type){
@@ -2429,6 +2516,7 @@ function recordPayment(){
   if(other>0)APP.journal.push({id:'J'+(Date.now()+4),date:payDate,vchNo,party:entry.party,type:'Deduction',particulars:'Other Deduction — GP '+(entry.gp||'-'),mode:'Adjustment',ref:'',bank:'',dr:isInward?other:0,cr:isInward?0:other,note:'Other ded',entryId:id,createdAt:new Date().toISOString()});
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
+  syncToFirestore();
   closeM('payment-modal');loadData();
   toast('Payment recorded + Journal entry created!','s');
 }
@@ -2467,6 +2555,7 @@ function saveJournalEntry(){
     note:'Manual journal',entryId:null,createdAt:new Date().toISOString()
   });
   localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
+  syncToFirestore();
   closeM('journal-modal');filterPayment();
   toast('Journal entry saved — '+party+' — '+fmtINR(amount),'s');
 }
