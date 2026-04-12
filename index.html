@@ -815,6 +815,7 @@ function loadUsers(){
           if(JSON.stringify(serverUsers)!==JSON.stringify(users)){
             users=serverUsers;
             localStorage.setItem('iot_users_'+APP.company,JSON.stringify(users));
+            mergeUserPermissions();applyPermissions();addUserBadge();
             renderUsers();
             console.log('Live sync: users updated from server');
           }
@@ -907,6 +908,9 @@ function checkSession(){
       currentUser={id:profile.id||fbUser.uid,name:profile.name||fbUser.email,username:fbUser.email,email:fbUser.email,role:profile.role||'viewer',permissions:profile.permissions||null};
       hideLoginUI();
       APP.company=localStorage.getItem('app-company')||'aggarwal';
+      /* Match with admin-assigned user from Users tab */
+      loadUsers();
+      mergeUserPermissions();
       applyPermissions();addUserBadge();
       showCompanyOrApp();
       setSt('ok');
@@ -947,6 +951,29 @@ function addUserBadge(){
     +'<span style="font-size:10px;background:rgba(255,255,255,0.2);padding:2px 6px;border-radius:10px;color:#fff">'+esc(currentUser.role)+'</span>'
     +'</div>';
   hdr.insertBefore(wrap,hdr.firstChild);
+}
+
+function mergeUserPermissions(){
+  if(!currentUser||!users||!users.length)return;
+  /* Find matching user by email/username in admin-managed users list */
+  const email=(currentUser.email||currentUser.username||'').toLowerCase();
+  const match=users.find(u=>{
+    const ue=(u.username||u.email||'').toLowerCase();
+    return ue===email||ue===email.split('@')[0];
+  });
+  if(match){
+    /* Admin has assigned specific role & permissions — use those */
+    if(match.permissions&&match.permissions.length>0){
+      currentUser.permissions=match.permissions;
+    }
+    if(match.role){
+      currentUser.role=match.role;
+    }
+    if(match.name){
+      currentUser.name=match.name;
+    }
+    console.log('Permissions merged from Users tab:',currentUser.role,currentUser.permissions);
+  }
 }
 
 function hasPerm(p){
