@@ -742,13 +742,14 @@
       </div>
       <div class="fg2"><label class="flbl">Password *</label><input type="password" class="finp" id="u-pass" placeholder="Password" autocomplete="new-password"></div>
 
-      <div class="sec-title" style="margin-top:14px">🎯 Role Presets</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px">
-        <button class="btn btn-ghost" style="justify-content:center;background:var(--bluebg);border-color:var(--blue);color:var(--blue);font-weight:600" onclick="setPreset('admin')">Admin (Sab)</button>
-        <button class="btn btn-ghost" style="justify-content:center" onclick="setPreset('manager')">Manager</button>
-        <button class="btn btn-ghost" style="justify-content:center" onclick="setPreset('data_entry')">Data Entry</button>
-        <button class="btn btn-ghost" style="justify-content:center" onclick="setPreset('viewer')">Viewer Only</button>
-      </div>
+      <div class="sec-title" style="margin-top:14px">🎯 Role</div>
+      <select class="finp" id="u-role" onchange="setPreset(this.value)" style="font-weight:700;margin-bottom:14px">
+        <option value="admin">Admin (Sab permissions)</option>
+        <option value="manager">Manager</option>
+        <option value="data_entry">Data Entry</option>
+        <option value="viewer" selected>Viewer (sirf dekh sakta hai)</option>
+        <option value="custom">Custom</option>
+      </select>
 
       <div class="sec-title">📋 Permissions</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
@@ -761,9 +762,6 @@
         <label class="perm-lbl" id="pl-import"><input type="checkbox" id="up-import" onchange="syncPerms()"> Import CSV</label>
         <label class="perm-lbl" id="pl-users"><input type="checkbox" id="up-users" onchange="syncPerms()"> Manage Users</label>
       </div>
-
-      <div style="background:var(--bluebg);border:1px solid #c5d8f8;border-radius:6px;padding:10px;font-size:12px;color:var(--blue);font-weight:600" id="u-role-display">Role: Viewer (sirf dekh sakta hai)</div>
-      <input type="hidden" id="u-role" value="viewer">
     </div>
     <div class="mf">
       <div></div>
@@ -807,6 +805,22 @@ function init(){
 function loadUsers(){
   const s=localStorage.getItem('iot_users_'+APP.company);
   users=s?JSON.parse(s):[...DEFAULT_USERS];
+  /* Also load from Firestore and set up listener */
+  if(DB&&APP.company){
+    if(window._unsubUsers) window._unsubUsers();
+    window._unsubUsers = DB.collection('config').doc('users_'+APP.company)
+      .onSnapshot(doc=>{
+        if(doc.exists&&doc.data().list){
+          const serverUsers=doc.data().list;
+          if(JSON.stringify(serverUsers)!==JSON.stringify(users)){
+            users=serverUsers;
+            localStorage.setItem('iot_users_'+APP.company,JSON.stringify(users));
+            renderUsers();
+            console.log('Live sync: users updated from server');
+          }
+        }
+      }, err=>console.error('Users listener error:',err));
+  }
 }
 function saveUsers(){
   localStorage.setItem('iot_users_'+APP.company,JSON.stringify(users));
@@ -944,6 +958,8 @@ function hasPerm(p){
 function applyPermissions(){
   if(!currentUser)return;
   document.querySelectorAll('.btn-add').forEach(b=>b.style.display=hasPerm('add')?'':'none');
+  document.querySelectorAll('[onclick*="bulkDelete"]').forEach(b=>b.style.display=hasPerm('delete')?'':'none');
+  document.querySelectorAll('[onclick*="importCSV"]').forEach(b=>b.style.display=hasPerm('import')?'':'none');
   const usersTab=document.getElementById('tab-users');if(usersTab)usersTab.style.display=hasPerm('users')?'':'none';
   const payTab=document.getElementById('tab-pay');if(payTab)payTab.style.display=hasPerm('payment')?'':'none';
   document.querySelectorAll('[onclick*="exportCurrentReport"],[onclick*="exportTabAsPDF"]').forEach(b=>b.style.display=hasPerm('export')?'':'none');
@@ -1033,8 +1049,6 @@ function syncPerms(){
   else if(checked.includes('add')&&checked.includes('edit')&&!checked.includes('payment'))role='data_entry';
   else if(checked.length===1&&checked[0]==='view')role='viewer';
   document.getElementById('u-role').value=role;
-  const lmap={admin:'Admin (Sab permissions)',manager:'Manager',data_entry:'Data Entry',viewer:'Viewer (sirf dekh sakta hai)',custom:'Custom'};
-  document.getElementById('u-role-display').textContent='Role: '+(lmap[role]||role);
   PALL.forEach(p=>{
     const lbl=document.getElementById('pl-'+p);
     const el=document.getElementById('up-'+p);
@@ -1065,33 +1079,7 @@ function loadData(){
   APP.journal=JSON.parse(localStorage.getItem(`journal-${APP.company}`)||'[]');
   applyOverdueCheck();
   refreshAllViews();
-  /* Step 2: Load from Firestore (source of truth) */
-  if(DB&&APP.company){
-    setSt('load');
-    DB.collection('app_data').doc('records_'+APP.company).get().then(doc=>{
-      if(doc.exists&&doc.data().list&&doc.data().list.length>0){
-        APP.records=doc.data().list;
-        localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
-        applyOverdueCheck();
-        refreshAllViews();
-        console.log('Loaded '+APP.records.length+' records from Firestore');
-      }else if(APP.records.length===0){
-        /* Firestore empty AND localStorage empty = truly new, no sample data */
-        APP.records=[];
-      }
-      return DB.collection('app_data').doc('journal_'+APP.company).get();
-    }).then(doc=>{
-      if(doc&&doc.exists&&doc.data().list){
-        APP.journal=doc.data().list;
-        localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
-      }
-      setSt('ok');
-      refreshAllViews();
-    }).catch(e=>{
-      console.error('Firestore load error:',e);
-      setSt('err');
-    });
-  }
+  /* Step 2: Start real-time listeners (handles Firestore loading + live sync) */
   startRealtimeSync();
 }
 function applyOverdueCheck(){
@@ -1126,7 +1114,6 @@ function refreshAllViews(){
 
 function syncToFirestore(){
   if(!DB||!APP.company)return;
-  setSt('sync');
   /* Save records */
   DB.collection('app_data').doc('records_'+APP.company).set({
     list: APP.records,
@@ -1140,7 +1127,6 @@ function syncToFirestore(){
       updatedBy: currentUser ? currentUser.email : 'unknown'
     });
   }).then(()=>{
-    setSt('ok');
     console.log('Firestore sync done');
   }).catch(e=>{
     console.error('Firestore sync error:', e);
@@ -1169,6 +1155,9 @@ function startRealtimeSync(){
           refreshAllViews();
           console.log('Live sync: records updated from server');
         }
+      }else if(!doc.exists && APP.records.length > 0){
+        /* Firestore empty but localStorage has data — upload it */
+        syncToFirestore();
       }
       setSt('ok');
     }, err=>{
@@ -1393,7 +1382,7 @@ function renderDashDetail(){
       html+=`<td><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td>`;
     }
     if(isOverdue){html+=`<td style="color:var(--red);font-weight:700">${overDays} din</td>`;}
-    html+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button><button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button><button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button></td>`;
+    html+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:''}</td>`;
     html+=`</tr>`;
   });
   document.getElementById('dd-tbody').innerHTML=html;
@@ -1528,7 +1517,7 @@ function buildEntryRow(r,showCheck,checkPrefix){
   h+=`<td>${r.unloadedDate||'<span style="color:var(--text3)">—</span>'}</td>`;
   h+=`<td>${r.vehicle||'-'}</td>`;
   h+=`<td><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td>`;
-  h+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button><button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button><button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button></td>`;
+  h+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:''}</td>`;
   h+=`</tr>`;
   return h;
 }
@@ -1539,6 +1528,7 @@ function toggleAllChecks(prefix){
   const tbl=document.getElementById(tableMap[prefix]);if(!tbl)return;
   tbl.querySelectorAll('.'+prefix+'-chk').forEach(cb=>{cb.checked=chk.checked;});}
 function bulkDelete(prefix){
+  if(!hasPerm('delete')){toast('Aapke paas delete permission nahi hai!','e');return;}
   const cls=prefix+'-chk';const checked=Array.from(document.querySelectorAll('.'+cls+':checked')).map(cb=>cb.value);
   if(!checked.length){toast('Pehle entries select karo','e');return;}
   if(!confirm(checked.length+' entries delete karni hain?'))return;
@@ -1559,6 +1549,7 @@ function downloadSampleCSV(prefix){
 }
 
 function importCSV(prefix){
+  if(!hasPerm('import')){toast('Aapke paas import permission nahi hai!','e');return;}
   const input=document.createElement('input');input.type='file';input.accept='.csv';
   input.onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{
     const raw=ev.target.result;const lines=[];let cur='';let inQ=false;
@@ -1953,7 +1944,7 @@ function filterPayment(){
       +`<td style="${isOverdue?'color:var(--red);font-weight:600':''}">${dds}</td>`
       +`<td>${daysLabel}</td>`
       +`<td><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>`
-      +`<td style="white-space:nowrap">${actionBtn} <button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button><button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button></td>`
+      +`<td style="white-space:nowrap">${actionBtn} <button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}</td>`
       +`</tr>`;
   });
   document.querySelector('#payment-table tbody').innerHTML=html||'<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--text3)">Koi payment entry nahi mila</td></tr>';
@@ -2033,7 +2024,7 @@ function repFullRow(r){
     `<td style="${isOverdue?'color:var(--red);font-weight:600':''}">${dd}</td>` +
     `<td>${r.vehicle||'-'}</td>` +
     `<td><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>` +
-    `<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button><button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button></td></tr>`;
+    `<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}</td></tr>`;
 }
 function repTotalsRow(recs){
   const tB=recs.reduce((s,r)=>s+(r.bags||0),0);const tW=recs.reduce((s,r)=>s+(r.weight||0),0);
@@ -2271,6 +2262,7 @@ function renderPagination(type,pages){
 }
 
 function openEntryModal(){
+  if(!hasPerm('add')){toast('Aapke paas add permission nahi hai!','e');return;}
   document.getElementById('fi-type').value='inward';document.getElementById('fi-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('fi-gp').value='';document.getElementById('fi-party').value='';document.getElementById('fi-mobile').value='';
   document.getElementById('fi-consignee').value='';document.getElementById('fi-con-mobile').value='';document.getElementById('fi-con-addr').value='';
@@ -2292,6 +2284,7 @@ function openEntryModal(){
 }
 
 function editEntry(id){
+  if(!hasPerm('edit')){toast('Aapke paas edit permission nahi hai!','e');return;}
   const entry=APP.records.find(r=>r.id===id);if(!entry)return;
   openEntryModal();/* reset all fields first */
   document.getElementById('fi-type').value=entry.type;document.getElementById('fi-date').value=entry.date;
@@ -2349,7 +2342,7 @@ function viewEntry(id){
     </table>
     <div style="text-align:center;margin-top:16px;display:flex;gap:10px;justify-content:center;">
       <button class="sc" onclick="closeM('view-modal')" style="background:var(--blue);color:#fff;padding:8px 28px;border-radius:8px;cursor:pointer;">Close</button>
-      <button class="sc" onclick="closeM('view-modal');editEntry('${r.id}')" style="background:var(--green);color:#fff;padding:8px 28px;border-radius:8px;cursor:pointer;">📝 Edit</button>
+      ${hasPerm('edit')?`<button class="sc" onclick="closeM('view-modal');editEntry('${r.id}')" style="background:var(--green);color:#fff;padding:8px 28px;border-radius:8px;cursor:pointer;">📝 Edit</button>`:''}
     </div>
   </div>`;
   /* Create or reuse view modal overlay */
@@ -2364,6 +2357,7 @@ function viewEntry(id){
 }
 
 function deleteEntry(id){
+  if(!hasPerm('delete')){toast('Aapke paas delete permission nahi hai!','e');return;}
   const r=APP.records.find(e=>e.id===id);if(!r)return;
   const label=r.party+' | '+r.item+' | '+(r.date||'');
   if(!confirm('Delete this entry?\n\n'+label+'\n\nYeh action undo nahi hoga!')){return;}
@@ -2520,6 +2514,7 @@ function calcPaymentRemaining(){
 }
 
 function recordPayment(){
+  if(!hasPerm('payment')){toast('Aapke paas payment permission nahi hai!','e');return;}
   const id=document.getElementById('pm-entry').value;const amt=parseFloat(document.getElementById('pm-amount').value);
   const direction=document.getElementById('pm-direction').value;
   if(!amt||amt<=0){toast('Payment amount daalo','e');return;}
