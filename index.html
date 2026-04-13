@@ -892,7 +892,6 @@ function checkSession(){
   AUTH.onAuthStateChanged(async(fbUser)=>{
     if(fbUser){
       setSt('load');
-      loadUsers();
       let profile=null;
       if(DB){
         try{
@@ -1139,17 +1138,18 @@ function refreshAllViews(){
   });
 }
 
+function cleanUndefined(obj){if(!obj||typeof obj!=='object')return obj;if(Array.isArray(obj))return obj.map(cleanUndefined);const c={};Object.keys(obj).forEach(k=>{if(obj[k]!==undefined)c[k]=cleanUndefined(obj[k]);});return c;}
 function syncToFirestore(){
   if(!DB||!APP.company)return;
-  /* Save records */
+  /* Save records - clean undefined values that Firestore rejects */
   DB.collection('app_data').doc('records_'+APP.company).set({
-    list: APP.records,
+    list: cleanUndefined(APP.records),
     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     updatedBy: currentUser ? currentUser.email : 'unknown'
   }).then(()=>{
     /* Save journal */
     return DB.collection('app_data').doc('journal_'+APP.company).set({
-      list: APP.journal || [],
+      list: cleanUndefined(APP.journal || []),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy: currentUser ? currentUser.email : 'unknown'
     });
@@ -2288,8 +2288,8 @@ function renderPagination(type,pages){
   document.getElementById(type===''?'rec-pag':type+'-pag').innerHTML=html;
 }
 
-function openEntryModal(){
-  if(!hasPerm('add')){toast('Aapke paas add permission nahi hai!','e');return;}
+function openEntryModal(isEdit){
+  if(!isEdit&&!hasPerm('add')){toast('Aapke paas add permission nahi hai!','e');return;}
   document.getElementById('fi-type').value='inward';document.getElementById('fi-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('fi-gp').value='';document.getElementById('fi-party').value='';document.getElementById('fi-mobile').value='';
   document.getElementById('fi-consignee').value='';document.getElementById('fi-con-mobile').value='';document.getElementById('fi-con-addr').value='';
@@ -2313,7 +2313,7 @@ function openEntryModal(){
 function editEntry(id){
   if(!hasPerm('edit')){toast('Aapke paas edit permission nahi hai!','e');return;}
   const entry=APP.records.find(r=>r.id===id);if(!entry)return;
-  openEntryModal();/* reset all fields first */
+  openEntryModal(true);/* reset all fields first */
   document.getElementById('fi-type').value=entry.type;document.getElementById('fi-date').value=entry.date;
   document.getElementById('fi-gp').value=entry.gp;document.getElementById('fi-party').value=entry.party;document.getElementById('fi-mobile').value=entry.mobile||'';
   document.getElementById('fi-consignee').value=entry.consignee||'';document.getElementById('fi-con-mobile').value=entry.consigneeMobile||'';document.getElementById('fi-con-addr').value=entry.consigneeAddr||'';
@@ -2411,13 +2411,23 @@ function saveEntry(){
   const bags=parseFloat(document.getElementById('fi-bags').value);const weight=parseFloat(document.getElementById('fi-weight').value);const pwt=parseFloat(document.getElementById('fi-pwt').value);const vehicle=document.getElementById('fi-vehicle').value;const driver=document.getElementById('fi-driver').value;
   const rate=parseFloat(document.getElementById('fi-rate').value);const due=parseInt(document.getElementById('fi-due').value);const notes=document.getElementById('fi-notes').value;
   const unloadedDate=document.getElementById('fi-unloaded-date').value;
-  if(!type||!date||!party||!bags||!rate){toast('Please fill required fields','e');return;}
-  const amt=pwt*rate;
+  /* Validate required fields with visual feedback */
+  const missing=[];
+  if(!type)missing.push('Type');if(!date)missing.push('Date');if(!party)missing.push('Party');
+  if(isNaN(bags)||bags===''||bags===null)missing.push('Bags');if(isNaN(rate)||rate===''||rate===null)missing.push('Rate');
+  if(missing.length){
+    /* Highlight empty required fields with red border */
+    const fieldMap={Type:'fi-type',Date:'fi-date',Party:'fi-party',Bags:'fi-bags',Rate:'fi-rate'};
+    missing.forEach(f=>{const el=document.getElementById(fieldMap[f]);if(el){el.style.border='2px solid #dc2626';el.style.background='#fef0f0';setTimeout(()=>{el.style.border='';el.style.background='';},3000);}});
+    toast('Ye fields bharo: '+missing.join(', '),'e');return;
+  }
+  const safePwt=isNaN(pwt)?0:pwt;const safeWeight=isNaN(weight)?0:weight;
+  const amt=safePwt*rate;
   const id=document.getElementById('fi-gp').dataset.id;
-  const entryData={type,date,gp:gp||'AUTO',billFrom,broker,party,mobile,consignee,consigneeMobile,consigneeAddr,item,bags,weight,partyWt:pwt,rate,amount:amt,vehicle,driver,dueNotes:due,notes,unloadedDate,paymentStatus:'pending',paid:0};
+  const entryData={type,date,gp:gp||'AUTO',billFrom,broker,party,mobile,consignee,consigneeMobile,consigneeAddr,item,bags,weight:safeWeight,partyWt:safePwt,rate,amount:amt,vehicle,driver,dueNotes:isNaN(due)?30:due,notes,unloadedDate,paymentStatus:'pending',paid:0};
   if(id){const idx=APP.records.findIndex(r=>r.id===id);if(idx>=0){
     const old=APP.records[idx];/* preserve existing payment data */
-    APP.records[idx]={...old,...entryData,paid:old.paid||0,paymentStatus:old.paymentStatus||'pending',payMode:old.payMode,payDate:old.payDate,payReceived:old.payReceived,payRef:old.payRef,dedCD:old.dedCD,dedBrok:old.dedBrok,dedTDS:old.dedTDS,dedOther:old.dedOther,payNote:old.payNote,lastUpdated:new Date().toISOString()};
+    APP.records[idx]={...old,...entryData,paid:old.paid||0,paymentStatus:old.paymentStatus||'pending',payMode:old.payMode||'',payDate:old.payDate||'',payReceived:old.payReceived||'',payRef:old.payRef||'',dedCD:old.dedCD||0,dedBrok:old.dedBrok||0,dedTDS:old.dedTDS||0,dedOther:old.dedOther||0,payNote:old.payNote||'',lastUpdated:new Date().toISOString()};
   }}
   else{APP.records.push({id:'REC'+Date.now(),...entryData,gp:gp||'GP-'+String(APP.records.length+1).padStart(5,'0'),createdAt:new Date().toISOString()});}
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
