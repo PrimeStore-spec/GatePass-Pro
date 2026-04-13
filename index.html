@@ -36,6 +36,7 @@
 .req-status.completed{background:#e8f0fd;color:#1a5fc8;border:1px solid #bfdbfe;}
 .act-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
 .act-req:hover{background:#fde68a;transform:scale(1.1);}
+.hide-finance .fc{display:none!important;}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -217,7 +218,7 @@
         <button class="btn btn-green" onclick="openEntryModal()" style="font-size:11px">＋ Naya</button>
       </div>
     </div>
-    <div class="tsc"><table id="records-table"><thead><tr><th><input type="checkbox" id="rec-checkall" onchange="toggleAllChecks('rec')"></th><th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee (Ship To)</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Difference</th><th>Rate</th><th>Amount</th><th>Due Days</th><th>Unloaded Date</th><th>Vehicle</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    <div class="tsc"><table id="records-table"><thead><tr><th><input type="checkbox" id="rec-checkall" onchange="toggleAllChecks('rec')"></th><th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee (Ship To)</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Difference</th><th class="fc">Rate</th><th class="fc">Amount</th><th>Due Days</th><th>Unloaded Date</th><th>Vehicle</th><th class="fc">Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
     <div class="pag"><div class="pi" id="rec-info">0 records</div><div class="pbs" id="rec-pag"></div></div>
   </div>
 </div>
@@ -275,7 +276,7 @@
         <button class="btn btn-green" onclick="openEntryModal();document.getElementById('fi-type').value='inward'" style="font-size:11px">＋ Naya</button>
       </div>
     </div>
-    <div class="tsc"><table id="inward-table"><thead><tr><th><input type="checkbox" id="in-checkall" onchange="toggleAllChecks('inward')"></th><th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee (Ship To)</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Difference</th><th>Rate</th><th>Amount</th><th>Due Days</th><th>Unloaded Date</th><th>Vehicle</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    <div class="tsc"><table id="inward-table"><thead><tr><th><input type="checkbox" id="in-checkall" onchange="toggleAllChecks('inward')"></th><th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee (Ship To)</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Difference</th><th class="fc">Rate</th><th class="fc">Amount</th><th>Due Days</th><th>Unloaded Date</th><th>Vehicle</th><th class="fc">Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
     <div class="pag"><div class="pi" id="in-info">0 entries</div><div class="pbs" id="in-pag"></div></div>
   </div>
 </div>
@@ -311,7 +312,7 @@
         <button class="btn btn-green" onclick="openEntryModal();document.getElementById('fi-type').value='outward'" style="font-size:11px">＋ Naya</button>
       </div>
     </div>
-    <div class="tsc"><table id="outward-table"><thead><tr><th><input type="checkbox" id="out-checkall" onchange="toggleAllChecks('outward')"></th><th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee (Ship To)</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Difference</th><th>Rate</th><th>Amount</th><th>Due Days</th><th>Unloaded Date</th><th>Vehicle</th><th>Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
+    <div class="tsc"><table id="outward-table"><thead><tr><th><input type="checkbox" id="out-checkall" onchange="toggleAllChecks('outward')"></th><th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee (Ship To)</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Difference</th><th class="fc">Rate</th><th class="fc">Amount</th><th>Due Days</th><th>Unloaded Date</th><th>Vehicle</th><th class="fc">Status</th><th>Action</th></tr></thead><tbody></tbody></table></div>
     <div class="pag"><div class="pi" id="out-info">0 entries</div><div class="pbs" id="out-pag"></div></div>
   </div>
 </div>
@@ -377,7 +378,7 @@
       </div>
     </div>
     <div class="tsc"><table id="payment-table"><thead><tr>
-      <th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Item</th><th>Bags</th><th>Party Wt</th><th>Rate</th><th>Amount Due</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Remaining</th><th>Status</th><th>Action</th>
+      <th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Item</th><th>Bags</th><th>Party Wt</th><th class="fc">Rate</th><th class="fc">Amount Due</th><th class="fc">Paid</th><th class="fc">Balance</th><th class="fc">Due Date</th><th>Remaining</th><th class="fc">Status</th><th>Action</th>
     </tr></thead><tbody></tbody><tfoot id="pay-tfoot"></tfoot></table></div>
     <div class="pag"><div class="pi" id="p-info">0 entries</div><div class="pbs" id="p-pag"></div></div>
   </div>
@@ -1087,6 +1088,13 @@ function hasPerm(p){
   return perms.includes(p);
 }
 
+function isFullAccess(){return hasPerm('users')||hasPerm('edit')||hasPerm('delete')||hasPerm('payment');}
+function getVisibleRecords(){
+  if(isFullAccess())return APP.records;
+  if(!currentUser)return [];
+  return APP.records.filter(r=>r.createdBy===currentUser.email);
+}
+
 function applyPermissions(){
   if(!currentUser)return;
   document.querySelectorAll('.btn-add').forEach(b=>b.style.display=hasPerm('add')?'':'none');
@@ -1097,6 +1105,12 @@ function applyPermissions(){
   document.querySelectorAll('[onclick*="exportCurrentReport"],[onclick*="exportTabAsPDF"]').forEach(b=>b.style.display=hasPerm('export')?'':'none');
   const reqsTab=document.getElementById('tab-reqs');if(reqsTab)reqsTab.style.display=currentUser?'':'none';
   document.querySelectorAll('[onclick*="openUserModal()"]').forEach(b=>b.style.display=hasPerm('users')?'':'none');
+  /* Hide financial data for restricted users */
+  if(!isFullAccess()){
+    document.body.classList.add('hide-finance');
+  }else{
+    document.body.classList.remove('hide-finance');
+  }
   updateReqBadge();
 }
 
@@ -1377,10 +1391,11 @@ function fmtINR(v){return '₹'+Math.abs(v).toLocaleString('en-IN',{maximumFract
 function updateStats(){
   const today=new Date();today.setHours(0,0,0,0);const todayStr=today.toISOString().split('T')[0];
   const in5=new Date(today);in5.setDate(in5.getDate()+5);
-  const inToday=APP.records.filter(r=>r.date===todayStr&&r.type==='inward');
-  const outToday=APP.records.filter(r=>r.date===todayStr&&r.type==='outward');
+  const visRecs=getVisibleRecords();
+  const inToday=visRecs.filter(r=>r.date===todayStr&&r.type==='inward');
+  const outToday=visRecs.filter(r=>r.date===todayStr&&r.type==='outward');
   let todayDue=0,next5Due=0,overdue=0,totalPayable=0,totalReceivable=0;
-  const pendingRecs=APP.records.filter(r=>r.paymentStatus!=='paid');
+  const pendingRecs=visRecs.filter(r=>r.paymentStatus!=='paid');
   pendingRecs.forEach(r=>{
     const amt=getEntryAmt(r);const bal=amt-(r.paid||0);if(bal<=0)return;
     const dd=getDueDate(r);dd.setHours(0,0,0,0);
@@ -1391,11 +1406,11 @@ function updateStats(){
     if(r.type==='inward')totalPayable+=bal;
     else totalReceivable+=bal;
   });
-  const allPayCount=APP.records.length;
-  const parties=new Set(APP.records.map(r=>r.party)).size;
+  const allPayCount=visRecs.length;
+  const parties=new Set(visRecs.map(r=>r.party)).size;
 
-  document.getElementById('h-inward').textContent=APP.records.filter(r=>r.type==='inward').length;
-  document.getElementById('h-outward').textContent=APP.records.filter(r=>r.type==='outward').length;
+  document.getElementById('h-inward').textContent=visRecs.filter(r=>r.type==='inward').length;
+  document.getElementById('h-outward').textContent=visRecs.filter(r=>r.type==='outward').length;
   document.getElementById('h-parties').textContent=parties;
   document.getElementById('sd-in-today').textContent=inToday.length;
   document.getElementById('sd-out-today').textContent=outToday.length;
@@ -1408,7 +1423,8 @@ function updateStats(){
 }
 
 function renderDash(){
-  const inRecords=APP.records.filter(r=>r.type==='inward');const outRecords=APP.records.filter(r=>r.type==='outward');
+  const visRecs=getVisibleRecords();
+  const inRecords=visRecs.filter(r=>r.type==='inward');const outRecords=visRecs.filter(r=>r.type==='outward');
   const partyInward={};const partyOutward={};
   inRecords.forEach(r=>{partyInward[r.party]=(partyInward[r.party]||0)+r.bags;});
   outRecords.forEach(r=>{partyOutward[r.party]=(partyOutward[r.party]||0)+r.bags;});
@@ -1417,12 +1433,12 @@ function renderDash(){
   let outHTML='';Object.entries(partyOutward).forEach(([p,b])=>{outHTML+=`<div class="br"><div class="bl">${p}</div><div class="bt"><div class="bf" style="width:${(b/maxOut)*100}%"><span class="bv">${b}</span></div></div></div>`;});
   document.getElementById('chart-inward').innerHTML=inHTML||'<div style="text-align:center;color:var(--text3);padding:20px">No data</div>';
   document.getElementById('chart-outward').innerHTML=outHTML||'<div style="text-align:center;color:var(--text3);padding:20px">No data</div>';
-  let tHTML='';const recent=APP.records.slice(-10).reverse();
+  let tHTML='';const recent=visRecs.slice(-10).reverse();
   recent.forEach(r=>{
     tHTML+=`<tr><td>${r.date}</td><td><span class="${r.type==='inward'?'type-in':'type-out'}">${r.type==='inward'?'Inward':'Outward'}</span></td><td>${r.party}</td><td>${r.item||'-'}</td><td>${r.bags}</td><td>${(r.partyWt||0).toFixed(2)}</td><td>${fmtINR(getEntryAmt(r))}</td><td><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td></tr>`;
   });
   document.querySelector('#recent-table tbody').innerHTML=tHTML;
-  document.getElementById('recent-count').textContent=APP.records.length;
+  document.getElementById('recent-count').textContent=visRecs.length;
 }
 
 /* ===== DASHBOARD DETAIL PANEL ===== */
@@ -1433,10 +1449,11 @@ function openDashDetail(view){
   document.getElementById('dash-detail').style.display='block';
   document.getElementById('dash-overview').style.display='none';
   /* Populate party and item dropdowns */
+  const visRecs=getVisibleRecords();
   const pSel=document.getElementById('dd-party');pSel.innerHTML='<option value="">All Parties</option>';
-  Array.from(new Set(APP.records.map(r=>r.party))).sort().forEach(p=>{pSel.innerHTML+=`<option value="${p}">${p}</option>`;});
+  Array.from(new Set(visRecs.map(r=>r.party))).sort().forEach(p=>{pSel.innerHTML+=`<option value="${p}">${p}</option>`;});
   const iSel=document.getElementById('dd-item');iSel.innerHTML='<option value="">All Items</option>';
-  Array.from(new Set(APP.records.map(r=>r.item).filter(Boolean))).sort().forEach(i=>{iSel.innerHTML+=`<option value="${i}">${i}</option>`;});
+  Array.from(new Set(visRecs.map(r=>r.item).filter(Boolean))).sort().forEach(i=>{iSel.innerHTML+=`<option value="${i}">${i}</option>`;});
   document.getElementById('dd-search').value='';document.getElementById('dd-from').value='';document.getElementById('dd-to').value='';
   pSel.value='';iSel.value='';
   buildDashData();filterDashDetail();
@@ -1454,19 +1471,20 @@ function resetDashFilters(){
 function buildDashData(){
   const today=new Date();today.setHours(0,0,0,0);const todayStr=today.toISOString().split('T')[0];
   const in5=new Date(today);in5.setDate(in5.getDate()+5);
+  const visRecs=getVisibleRecords();
   const titles={'todayInward':'📥 Today\'s Inward Entries','todayOutward':'📤 Today\'s Outward Entries','todayDue':'📅 Today\'s Due Payments','next5Due':'⏳ Payments Due in Next 5 Days','overdue':'🚨 Overdue Payments','allPayments':'💳 All Payment Entries','totalPayable':'💸 Total Payable (Humein Dena Hai)','totalReceivable':'💰 Total Receivable (Humein Milna Hai)'};
   document.getElementById('dd-title').textContent=titles[DD.view]||'Details';
   document.getElementById('dd-table-title').textContent=titles[DD.view]||'Details';
 
   let recs=[];
-  if(DD.view==='todayInward'){recs=APP.records.filter(r=>r.date===todayStr&&r.type==='inward');}
-  else if(DD.view==='todayOutward'){recs=APP.records.filter(r=>r.date===todayStr&&r.type==='outward');}
-  else if(DD.view==='todayDue'){recs=APP.records.filter(r=>{if(r.paymentStatus==='paid')return false;const dd=getDueDate(r);dd.setHours(0,0,0,0);return dd.getTime()===today.getTime()&&(getEntryAmt(r)-(r.paid||0))>0;});}
-  else if(DD.view==='next5Due'){recs=APP.records.filter(r=>{if(r.paymentStatus==='paid')return false;const dd=getDueDate(r);dd.setHours(0,0,0,0);return dd>today&&dd<=in5&&(getEntryAmt(r)-(r.paid||0))>0;});}
-  else if(DD.view==='overdue'){recs=APP.records.filter(r=>{if(r.paymentStatus==='paid')return false;const dd=getDueDate(r);dd.setHours(0,0,0,0);return dd<today&&(getEntryAmt(r)-(r.paid||0))>0;});}
-  else if(DD.view==='allPayments'){recs=[...APP.records];}
-  else if(DD.view==='totalPayable'){recs=APP.records.filter(r=>r.type==='inward'&&r.paymentStatus!=='paid'&&(getEntryAmt(r)-(r.paid||0))>0);}
-  else if(DD.view==='totalReceivable'){recs=APP.records.filter(r=>r.type==='outward'&&r.paymentStatus!=='paid'&&(getEntryAmt(r)-(r.paid||0))>0);}
+  if(DD.view==='todayInward'){recs=visRecs.filter(r=>r.date===todayStr&&r.type==='inward');}
+  else if(DD.view==='todayOutward'){recs=visRecs.filter(r=>r.date===todayStr&&r.type==='outward');}
+  else if(DD.view==='todayDue'){recs=visRecs.filter(r=>{if(r.paymentStatus==='paid')return false;const dd=getDueDate(r);dd.setHours(0,0,0,0);return dd.getTime()===today.getTime()&&(getEntryAmt(r)-(r.paid||0))>0;});}
+  else if(DD.view==='next5Due'){recs=visRecs.filter(r=>{if(r.paymentStatus==='paid')return false;const dd=getDueDate(r);dd.setHours(0,0,0,0);return dd>today&&dd<=in5&&(getEntryAmt(r)-(r.paid||0))>0;});}
+  else if(DD.view==='overdue'){recs=visRecs.filter(r=>{if(r.paymentStatus==='paid')return false;const dd=getDueDate(r);dd.setHours(0,0,0,0);return dd<today&&(getEntryAmt(r)-(r.paid||0))>0;});}
+  else if(DD.view==='allPayments'){recs=[...visRecs];}
+  else if(DD.view==='totalPayable'){recs=visRecs.filter(r=>r.type==='inward'&&r.paymentStatus!=='paid'&&(getEntryAmt(r)-(r.paid||0))>0);}
+  else if(DD.view==='totalReceivable'){recs=visRecs.filter(r=>r.type==='outward'&&r.paymentStatus!=='paid'&&(getEntryAmt(r)-(r.paid||0))>0);}
   DD.data=recs;
 }
 
@@ -1626,7 +1644,8 @@ function goTab(tab){
 
 /* ===== UNIVERSAL HELPERS ===== */
 function populateDropdowns(prefix,typeFilter){
-  const recs=typeFilter?APP.records.filter(r=>r.type===typeFilter):APP.records;
+  const allRecs=getVisibleRecords();
+  const recs=typeFilter?allRecs.filter(r=>r.type===typeFilter):allRecs;
   const pEl=document.getElementById(prefix+'-party');if(pEl){const curP=pEl.value;let h='<option value="">All Parties</option>';Array.from(new Set(recs.map(r=>r.party).filter(Boolean))).sort().forEach(p=>{h+=`<option value="${p}"${p===curP?' selected':''}>${p}</option>`;});pEl.innerHTML=h;}
   const iEl=document.getElementById(prefix+'-item');if(iEl){const curI=iEl.value;let h='<option value="">All Items</option>';Array.from(new Set(recs.map(r=>r.item).filter(Boolean))).sort().forEach(i=>{h+=`<option value="${i}"${i===curI?' selected':''}>${i}</option>`;});iEl.innerHTML=h;}
   const bEl=document.getElementById(prefix+'-broker');if(bEl){const curB=bEl.value;let h='<option value="">All Brokers</option>';Array.from(new Set(recs.map(r=>r.broker).filter(Boolean))).sort().forEach(b=>{h+=`<option value="${b}"${b===curB?' selected':''}>${b}</option>`;});bEl.innerHTML=h;}
@@ -1639,7 +1658,7 @@ function getFilteredRecs(prefix,typeFilter){
   const rateFilter=(document.getElementById(prefix+'-rate')||{}).value||'';
   const broker=(document.getElementById(prefix+'-broker')||{}).value||'';
   const status=(document.getElementById(prefix+'-status')||{}).value||'';
-  return APP.records.filter(r=>{
+  return getVisibleRecords().filter(r=>{
     if(typeFilter&&r.type!==typeFilter)return false;
     if(type&&r.type!==type)return false;
     if(sl){const fields=[r.party,r.item,r.gp,r.vehicle,r.consignee,r.broker,r.billFrom,r.mobile,r.consigneeMobile,r.consigneeAddr,r.driver,r.date,r.type,r.notes,r.unloadedDate,String(r.rate||''),String(r.bags||''),String(r.weight||''),String(r.partyWt||'')];if(!fields.some(f=>(f||'').toLowerCase().includes(sl)))return false;}
@@ -1673,12 +1692,12 @@ function buildEntryRow(r,showCheck,checkPrefix){
   h+=`<td>${wt.toFixed(2)}</td>`;
   h+=`<td>${pwt.toFixed(2)}</td>`;
   h+=`<td style="color:${diff>0?'var(--green)':diff<0?'var(--red)':'var(--text3)'};font-weight:600">${diff.toFixed(2)}</td>`;
-  h+=`<td>${r.rate||0}</td>`;
-  h+=`<td class="amt">${fmtINR(amt)}</td>`;
+  h+=`<td class="fc">${r.rate||0}</td>`;
+  h+=`<td class="fc amt">${fmtINR(amt)}</td>`;
   h+=`<td>${dueDays} din</td>`;
   h+=`<td>${r.unloadedDate||'<span style="color:var(--text3)">—</span>'}</td>`;
   h+=`<td>${r.vehicle||'-'}</td>`;
-  h+=`<td><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td>`;
+  h+=`<td class="fc"><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td>`;
   h+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','edit')" title="Edit Request">📩</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','delete')" title="Delete Request">📩</button>`:''}${hasApprovedRequest(r.id,'edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit (Approved)" style="border:2px solid #16a34a;">✏️</button>`:''}${hasApprovedRequest(r.id,'delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete (Approved)" style="border:2px solid #16a34a;">🗑️</button>`:''}</td>`;
   h+=`</tr>`;
   return h;
@@ -1795,20 +1814,21 @@ function filterRecords(){renderRecords(1);}
 
 /* ===== PARTY TAB ===== */
 function renderPartyGrid(){
+  const visRecs=getVisibleRecords();
   const search=(document.getElementById('party-search').value||'').toLowerCase();
   const itemF=(document.getElementById('pty-item')||{}).value||'';
   const typeF=(document.getElementById('pty-type')||{}).value||'';
   /* Populate item dropdown */
-  const iEl=document.getElementById('pty-item');if(iEl){let h='<option value="">All Items</option>';Array.from(new Set(APP.records.map(r=>r.item).filter(Boolean))).sort().forEach(i=>{h+=`<option value="${i}">${i}</option>`;});iEl.innerHTML=h;if(itemF)iEl.value=itemF;}
-  const parties=Array.from(new Set(APP.records.map(r=>r.party))).filter(p=>{
+  const iEl=document.getElementById('pty-item');if(iEl){let h='<option value="">All Items</option>';Array.from(new Set(visRecs.map(r=>r.item).filter(Boolean))).sort().forEach(i=>{h+=`<option value="${i}">${i}</option>`;});iEl.innerHTML=h;if(itemF)iEl.value=itemF;}
+  const parties=Array.from(new Set(visRecs.map(r=>r.party))).filter(p=>{
     if(search&&!p.toLowerCase().includes(search))return false;
-    const precs=APP.records.filter(r=>r.party===p);
+    const precs=visRecs.filter(r=>r.party===p);
     if(typeF&&!precs.some(r=>r.type===typeF))return false;
     if(itemF&&!precs.some(r=>r.item===itemF))return false;
     return true;
   });
   let html='';parties.forEach(p=>{
-    const party_recs=APP.records.filter(r=>r.party===p);const inCount=party_recs.filter(r=>r.type==='inward').length;const outCount=party_recs.filter(r=>r.type==='outward').length;const total=party_recs.reduce((s,r)=>s+getEntryAmt(r),0);const mob=party_recs.find(r=>r.mobile)?.mobile||'';
+    const party_recs=visRecs.filter(r=>r.party===p);const inCount=party_recs.filter(r=>r.type==='inward').length;const outCount=party_recs.filter(r=>r.type==='outward').length;const total=party_recs.reduce((s,r)=>s+getEntryAmt(r),0);const mob=party_recs.find(r=>r.mobile)?.mobile||'';
     const pe=p.replace(/'/g,"\\'");
     const bal=getPartyBalance(p);
     const balLabel=bal===0?'Settled':fmtINR(Math.abs(bal))+' '+(bal>0?'Dr':'Cr');
@@ -1832,7 +1852,7 @@ function getPartyLedgerLines(name){
      Payment on Outward entry (party paid us) → Cr (lena kam hua)
      Balance negative = Cr = we owe; positive = Dr = party owes us */
   const lines=[];
-  APP.records.filter(r=>r.party===name).forEach(r=>{
+  getVisibleRecords().filter(r=>r.party===name).forEach(r=>{
     const amt=getEntryAmt(r);
     const gpLabel='GP '+(r.gp||'—');
     const bags=r.bags||0;
@@ -2099,13 +2119,13 @@ function filterPayment(){
     html+=`<tr style="${isOverdue?'background:#fef0f0':''}">`
       +`<td><span class="${r.type==='inward'?'type-in':'type-out'}">${r.type==='inward'?'Inward':'Outward'}</span></td>`
       +`<td>${r.date}</td><td class="mono">${r.gp||'-'}</td><td>${r.billFrom||'-'}</td><td>${r.broker||'-'}</td>`
-      +`<td><strong>${r.party}</strong></td><td>${r.item||'-'}</td><td>${r.bags||0}</td><td>${(r.partyWt||0).toFixed(2)}</td><td>${r.rate||0}</td>`
-      +`<td class="amt">${fmtINR(due)}</td>`
-      +`<td style="color:var(--green);font-weight:600">${fmtINR(r.paid||0)}</td>`
-      +`<td style="color:${bal>0?'var(--red)':'var(--green)'};font-weight:700">${fmtINR(bal)}</td>`
-      +`<td style="${isOverdue?'color:var(--red);font-weight:600':''}">${dds}</td>`
+      +`<td><strong>${r.party}</strong></td><td>${r.item||'-'}</td><td>${r.bags||0}</td><td>${(r.partyWt||0).toFixed(2)}</td><td class="fc">${r.rate||0}</td>`
+      +`<td class="fc amt">${fmtINR(due)}</td>`
+      +`<td class="fc" style="color:var(--green);font-weight:600">${fmtINR(r.paid||0)}</td>`
+      +`<td class="fc" style="color:${bal>0?'var(--red)':'var(--green)'};font-weight:700">${fmtINR(bal)}</td>`
+      +`<td class="fc" style="${isOverdue?'color:var(--red);font-weight:600':''}">${dds}</td>`
       +`<td>${daysLabel}</td>`
-      +`<td><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>`
+      +`<td class="fc"><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>`
       +`<td style="white-space:nowrap">${actionBtn} <button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}</td>`
       +`</tr>`;
   });
@@ -2117,8 +2137,8 @@ function filterPayment(){
     const tBags=recs.reduce((s,r)=>s+(r.bags||0),0);const tWt=recs.reduce((s,r)=>s+(r.partyWt||0),0);
     document.getElementById('pay-tfoot').innerHTML=`<tr style="background:#e8f0fd;font-weight:700;font-family:Rajdhani,sans-serif;font-size:13px"><td colspan="7" style="padding:10px 11px;text-align:right;text-transform:uppercase;letter-spacing:1px">Grand Total</td><td style="padding:10px 11px">${tBags}</td><td style="padding:10px 11px">${tWt.toFixed(2)}</td><td></td><td style="padding:10px 11px;color:var(--blue)">${fmtINR(tDue)}</td><td style="padding:10px 11px;color:var(--green)">${fmtINR(tPaid)}</td><td style="padding:10px 11px;color:var(--red)">${fmtINR(tBal)}</td><td colspan="4"></td></tr>`;
   }else{document.getElementById('pay-tfoot').innerHTML='';}
-  /* Summary stats from ALL records */
-  const allRecs=APP.records;
+  /* Summary stats from visible records */
+  const allRecs=getVisibleRecords();
   const totalDue=allRecs.reduce((s,r)=>s+getEntryAmt(r),0);
   const totalPaid=allRecs.reduce((s,r)=>s+(r.paid||0),0);
   const paidRecs=allRecs.filter(r=>r.paymentStatus==='paid');
@@ -2169,7 +2189,7 @@ function getSelectedFields(){
 }
 
 /* Full detail row for reports — all columns like Records tab */
-var REP_FULL_HEADERS='<th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Diff</th><th>Rate</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Vehicle</th><th>Status</th><th>Action</th>';
+var REP_FULL_HEADERS='<th>Type</th><th>Date</th><th>GP No</th><th>Bill From</th><th>Broker</th><th>Party (Bill To)</th><th>Consignee</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Diff</th><th class="fc">Rate</th><th class="fc">Amount</th><th class="fc">Paid</th><th class="fc">Balance</th><th class="fc">Due Date</th><th>Vehicle</th><th class="fc">Status</th><th>Action</th>';
 function repFullRow(r){
   const amt=getEntryAmt(r);const wt=r.weight||0;const pwt=r.partyWt||0;const diff=wt-pwt;
   const bal=amt-(r.paid||0);const dd=getDueDate(r).toISOString().split('T')[0];
@@ -2180,19 +2200,19 @@ function repFullRow(r){
     `<td><strong>${r.party}</strong></td><td>${r.consignee||'-'}</td><td>${r.item||'-'}</td>` +
     `<td>${r.bags||0}</td><td>${wt.toFixed(2)}</td><td>${pwt.toFixed(2)}</td>` +
     `<td style="color:${diff>0?'var(--green)':diff<0?'var(--red)':'var(--text3)'};font-weight:600">${diff.toFixed(2)}</td>` +
-    `<td>${r.rate||0}</td><td class="amt">${fmtINR(amt)}</td>` +
-    `<td style="color:var(--green);font-weight:600">${fmtINR(r.paid||0)}</td>` +
-    `<td style="color:${bal>0?'var(--red)':'var(--green)'};font-weight:700">${fmtINR(bal)}</td>` +
-    `<td style="${isOverdue?'color:var(--red);font-weight:600':''}">${dd}</td>` +
+    `<td class="fc">${r.rate||0}</td><td class="fc amt">${fmtINR(amt)}</td>` +
+    `<td class="fc" style="color:var(--green);font-weight:600">${fmtINR(r.paid||0)}</td>` +
+    `<td class="fc" style="color:${bal>0?'var(--red)':'var(--green)'};font-weight:700">${fmtINR(bal)}</td>` +
+    `<td class="fc" style="${isOverdue?'color:var(--red);font-weight:600':''}">${dd}</td>` +
     `<td>${r.vehicle||'-'}</td>` +
-    `<td><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>` +
+    `<td class="fc"><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>` +
     `<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}</td></tr>`;
 }
 function repTotalsRow(recs){
   const tB=recs.reduce((s,r)=>s+(r.bags||0),0);const tW=recs.reduce((s,r)=>s+(r.weight||0),0);
   const tP=recs.reduce((s,r)=>s+(r.partyWt||0),0);const tD=tW-tP;
   const tA=recs.reduce((s,r)=>s+getEntryAmt(r),0);const tPd=recs.reduce((s,r)=>s+(r.paid||0),0);const tBl=tA-tPd;
-  return `<tr style="background:#e8f0fd;font-weight:700;font-family:Rajdhani,sans-serif;font-size:13px"><td colspan="8" style="padding:10px 11px;text-align:right;text-transform:uppercase;letter-spacing:1px">Total</td><td style="padding:10px 11px">${tB}</td><td style="padding:10px 11px">${tW.toFixed(2)}</td><td style="padding:10px 11px">${tP.toFixed(2)}</td><td style="padding:10px 11px;color:${tD>0?'var(--green)':tD<0?'var(--red)':'var(--text3)'}">${tD.toFixed(2)}</td><td></td><td style="padding:10px 11px;color:var(--blue)">${fmtINR(tA)}</td><td style="padding:10px 11px;color:var(--green)">${fmtINR(tPd)}</td><td style="padding:10px 11px;color:var(--red)">${fmtINR(tBl)}</td><td colspan="4"></td></tr>`;
+  return `<tr style="background:#e8f0fd;font-weight:700;font-family:Rajdhani,sans-serif;font-size:13px"><td colspan="8" style="padding:10px 11px;text-align:right;text-transform:uppercase;letter-spacing:1px">Total</td><td style="padding:10px 11px">${tB}</td><td style="padding:10px 11px">${tW.toFixed(2)}</td><td style="padding:10px 11px">${tP.toFixed(2)}</td><td style="padding:10px 11px;color:${tD>0?'var(--green)':tD<0?'var(--red)':'var(--text3)'}">${tD.toFixed(2)}</td><td class="fc"></td><td class="fc" style="padding:10px 11px;color:var(--blue)">${fmtINR(tA)}</td><td class="fc" style="padding:10px 11px;color:var(--green)">${fmtINR(tPd)}</td><td class="fc" style="padding:10px 11px;color:var(--red)">${fmtINR(tBl)}</td><td class="fc" colspan="4"></td></tr>`;
 }
 function repGroupHeader(label,count,amt,color){
   return `<tr style="background:${color||'#f0f4fc'};border-left:4px solid var(--blue)"><td colspan="20" style="padding:10px 14px;font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--blue)">${label} <span style="font-size:12px;color:var(--text2);font-weight:500">(${count} entries · ${fmtINR(amt)})</span></td></tr>`;
@@ -2659,7 +2679,7 @@ function saveEntry(){
     const old=APP.records[idx];/* preserve existing payment data */
     APP.records[idx]={...old,...entryData,paid:old.paid||0,paymentStatus:old.paymentStatus||'pending',payMode:old.payMode||'',payDate:old.payDate||'',payReceived:old.payReceived||'',payRef:old.payRef||'',dedCD:old.dedCD||0,dedBrok:old.dedBrok||0,dedTDS:old.dedTDS||0,dedOther:old.dedOther||0,payNote:old.payNote||'',lastUpdated:new Date().toISOString()};
   }}
-  else{APP.records.push({id:'REC'+Date.now(),...entryData,gp:gp||'GP-'+String(APP.records.length+1).padStart(5,'0'),createdAt:new Date().toISOString()});}
+  else{APP.records.push({id:'REC'+Date.now(),...entryData,gp:gp||'GP-'+String(APP.records.length+1).padStart(5,'0'),createdBy:currentUser?currentUser.email:'unknown',createdAt:new Date().toISOString()});}
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   syncToFirestore();
   closeM('entry-modal');refreshAllViews();toast('Entry saved!','s');
@@ -2669,9 +2689,9 @@ function saveEntry(){
 
 function showPartyDrop(val,type){
   type=type||'party';
-  /* Build party data: name -> {mobile, addr} from records */
+  /* Build party data: name -> {mobile, addr} from visible records */
   const partyData={};
-  APP.records.forEach(r=>{
+  getVisibleRecords().forEach(r=>{
     if(r.party&&!partyData[r.party])partyData[r.party]={mobile:r.mobile||'',addr:''};
     if(r.consignee&&!partyData[r.consignee])partyData[r.consignee]={mobile:r.consigneeMobile||'',addr:r.consigneeAddr||''};
     /* Update addr if we find one */
@@ -2691,9 +2711,9 @@ function showPartyDrop(val,type){
 function hidePartyDrop(type){type=type||'party';const dropId=type==='consignee'?'consignee-drop':'party-drop';document.getElementById(dropId).style.display='none';}
 
 function showBillFromDrop(val){
-  /* Collect unique bill-from names from records + default companies */
+  /* Collect unique bill-from names from visible records + default companies */
   const names=new Set(['Aggarwal Agro Foods','Krishna Rice Mills']);
-  APP.records.forEach(r=>{if(r.billFrom)names.add(r.billFrom);});
+  getVisibleRecords().forEach(r=>{if(r.billFrom)names.add(r.billFrom);});
   const filtered=[...names].filter(n=>n.toLowerCase().includes(val.toLowerCase()));
   let html='';filtered.forEach(n=>{html+=`<div onclick="document.getElementById('fi-billfrom').value='${n.replace(/'/g,"\\'")}';hideBillFromDrop()" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0">${n}</div>`;});
   if(!html&&val)html=`<div style="padding:8px 12px;color:var(--text3);font-size:12px">New firm: "${val}" — type karke save hoga</div>`;
@@ -2703,7 +2723,7 @@ function hideBillFromDrop(){document.getElementById('billfrom-drop').style.displ
 
 function showBrokerDrop(val){
   const names=new Set();
-  APP.records.forEach(r=>{if(r.broker)names.add(r.broker);});
+  getVisibleRecords().forEach(r=>{if(r.broker)names.add(r.broker);});
   const filtered=[...names].filter(n=>n.toLowerCase().includes(val.toLowerCase()));
   let html='';filtered.forEach(n=>{html+=`<div onclick="document.getElementById('fi-broker').value='${n.replace(/'/g,"\\'")}';hideBrokerDrop()" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0">${n}</div>`;});
   if(!html&&val)html=`<div style="padding:8px 12px;color:var(--text3);font-size:12px">New broker: "${val}" — type karke save hoga</div>`;
@@ -2712,7 +2732,7 @@ function showBrokerDrop(val){
 function hideBrokerDrop(){document.getElementById('broker-drop').style.display='none';}
 
 function showItemDrop(val){
-  const items=Array.from(new Set(APP.records.map(r=>r.item).filter(Boolean))).filter(i=>i.toLowerCase().includes(val.toLowerCase()));
+  const items=Array.from(new Set(getVisibleRecords().map(r=>r.item).filter(Boolean))).filter(i=>i.toLowerCase().includes(val.toLowerCase()));
   let html='';items.forEach(i=>{html+=`<div onclick="document.getElementById('fi-item').value='${i.replace(/'/g,"\\'")}';hideItemDrop()" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0">${i}</div>`;});
   if(!html&&val)html=`<div style="padding:8px 12px;color:var(--text3);font-size:12px">New item: "${val}" auto-save hoga</div>`;
   document.getElementById('item-drop').innerHTML=html;document.getElementById('item-drop').style.display=html?'block':'none';
@@ -2720,7 +2740,7 @@ function showItemDrop(val){
 function hideItemDrop(){document.getElementById('item-drop').style.display='none';}
 
 function showVehicleDrop(val){
-  const vehicles=Array.from(new Set(APP.records.map(r=>r.vehicle))).filter(v=>v&&v.toLowerCase().includes(val.toLowerCase()));
+  const vehicles=Array.from(new Set(getVisibleRecords().map(r=>r.vehicle))).filter(v=>v&&v.toLowerCase().includes(val.toLowerCase()));
   let html='';vehicles.forEach(v=>{html+=`<div onclick="document.getElementById('fi-vehicle').value='${v}';hideVehicleDrop()" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0">${v}</div>`;});
   document.getElementById('vehicle-drop').innerHTML=html;document.getElementById('vehicle-drop').style.display=html?'block':'none';
 }
