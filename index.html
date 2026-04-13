@@ -11,6 +11,31 @@
 .ledger-print-layer.is-on{display:block;}
 @media print{body *{visibility:hidden!important;}.ledger-print-layer,.ledger-print-layer *{visibility:visible!important;}.ledger-print-layer{position:absolute;inset:0;display:block!important;background:#fff;box-shadow:none;padding:10mm;}.ledger-print-noprint{display:none!important;}}
 .ledger-btn{background:#1a3a6b;color:#fff;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;}.ledger-btn:hover{background:#1a5fc8;transform:translateY(-1px);}
+.req-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
+.req-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;text-align:center;box-shadow:var(--sh);}
+.req-stat .rs-v{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;}
+.req-stat .rs-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.req-filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+.req-fbtn{padding:5px 12px;border:1px solid var(--border);background:var(--s2);color:var(--text2);border-radius:6px;cursor:pointer;font-size:12px;font-weight:500;transition:all 0.2s;}
+.req-fbtn:hover{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}
+.req-fbtn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.req-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0;margin-bottom:12px;box-shadow:var(--sh);overflow:hidden;transition:all 0.2s;}
+.req-card:hover{border-color:var(--blue);box-shadow:0 4px 18px rgba(26,95,200,0.12);}
+.req-card-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--s2);}
+.req-card-body{padding:14px 16px;}
+.req-card-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;align-items:center;background:var(--s2);flex-wrap:wrap;}
+.req-entry-preview{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-top:8px;font-size:12px;}
+.req-entry-preview table{font-size:12px;}
+.req-entry-preview td{padding:4px 8px;border:none;}
+.req-note{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-top:8px;font-size:12px;color:#92400e;}
+.req-admin-note{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;margin-top:8px;font-size:12px;color:#1e40af;}
+.req-status{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:12px;}
+.req-status.pending{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.req-status.approved{background:#dcfce7;color:#166534;border:1px solid #86efac;}
+.req-status.rejected{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+.req-status.completed{background:#e8f0fd;color:#1a5fc8;border:1px solid #bfdbfe;}
+.act-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.act-req:hover{background:#fde68a;transform:scale(1.1);}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -442,10 +467,31 @@
         <input type="checkbox" id="col-status" class="field-col" value="status" checked> Status
       </label>
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
-        <input type="checkbox" id="col-broker" class="field-col" value="broker"> Broker
+        <input type="checkbox" id="col-billfrom" class="field-col" value="billfrom" checked> Bill From
       </label>
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
-        <input type="checkbox" id="col-vehicle" class="field-col" value="vehicle"> Vehicle
+        <input type="checkbox" id="col-broker" class="field-col" value="broker" checked> Broker
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-consignee" class="field-col" value="consignee" checked> Consignee
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-partywt" class="field-col" value="partywt" checked> Party Wt
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-diff" class="field-col" value="diff" checked> Difference
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-paid" class="field-col" value="paid" checked> Paid
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-balance" class="field-col" value="balance" checked> Balance
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-duedate" class="field-col" value="duedate" checked> Due Date
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px">
+        <input type="checkbox" id="col-vehicle" class="field-col" value="vehicle" checked> Vehicle
       </label>
     </div>
   </div>
@@ -487,9 +533,68 @@
   <div class="users-grid" id="users-grid"></div>
 </div>
 
-<!-- REQUESTS (Admin) -->
+<!-- REQUESTS -->
 <div id="p-reqs" class="hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+    <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">📩 Requests <span id="reqs-count" class="rcnt">0</span></div>
+    <button class="btn btn-blue" onclick="openSendRequestModal()" id="btn-new-req" style="display:none;">＋ New Request</button>
+  </div>
+  <div class="req-stats" id="req-stats"></div>
+  <div class="req-filter-bar" id="req-filter-bar">
+    <button class="req-fbtn active" onclick="filterRequests('all')">All</button>
+    <button class="req-fbtn" onclick="filterRequests('pending')">⏳ Pending</button>
+    <button class="req-fbtn" onclick="filterRequests('approved')">✅ Approved</button>
+    <button class="req-fbtn" onclick="filterRequests('rejected')">❌ Rejected</button>
+    <button class="req-fbtn" onclick="filterRequests('completed')">✔️ Completed</button>
+    <button class="req-fbtn" onclick="filterRequests('edit')">✏️ Edit</button>
+    <button class="req-fbtn" onclick="filterRequests('delete')">🗑️ Delete</button>
+  </div>
   <div id="reqs-list"></div>
+</div>
+
+<!-- SEND REQUEST MODAL -->
+<div class="ov" id="req-modal" onclick="closeOut(event,'req-modal')">
+  <div class="modal" style="max-width:560px">
+    <div class="mh"><div class="mt">📩 <span id="req-modal-title">Send Request</span></div><button class="mx" onclick="closeM('req-modal')">✕</button></div>
+    <div class="mb">
+      <div id="req-modal-entry-info" style="margin-bottom:12px;"></div>
+      <div class="fg2" style="margin-bottom:12px;">
+        <label class="flbl">Request Type</label>
+        <select class="finp" id="req-rtype">
+          <option value="edit">✏️ Edit Request</option>
+          <option value="delete">🗑️ Delete Request</option>
+        </select>
+      </div>
+      <div class="fg2" style="margin-bottom:12px;">
+        <label class="flbl">Note / Kya Change Karna Hai *</label>
+        <textarea class="finp" id="req-note" rows="4" placeholder="Admin ko batao ki kya change karna hai..."></textarea>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-ghost" onclick="closeM('req-modal')">Cancel</button>
+      <button class="btn btn-blue" onclick="submitRequest()">📩 Send Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN ACTION MODAL -->
+<div class="ov" id="req-action-modal" onclick="closeOut(event,'req-action-modal')">
+  <div class="modal" style="max-width:560px">
+    <div class="mh"><div class="mt">⚙️ <span id="req-action-title">Request Action</span></div><button class="mx" onclick="closeM('req-action-modal')">✕</button></div>
+    <div class="mb">
+      <div id="req-action-info"></div>
+      <div class="fg2" style="margin-bottom:12px;margin-top:12px;">
+        <label class="flbl">Admin Note (Optional)</label>
+        <textarea class="finp" id="req-admin-note" rows="3" placeholder="Apna note likho..."></textarea>
+      </div>
+    </div>
+    <div class="mf" style="justify-content:flex-end;gap:8px;">
+      <button class="btn btn-ghost" onclick="closeM('req-action-modal')">Cancel</button>
+      <button class="btn btn-red" onclick="rejectRequest()" id="btn-reject-req">❌ Reject</button>
+      <button class="btn btn-green" onclick="approveRequest()" id="btn-approve-req">✅ Approve</button>
+      <button class="btn btn-blue" onclick="doItMyself()" id="btn-doit-req">🔧 Main Karunga</button>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -774,7 +879,7 @@
 <div class="ledger-print-layer" id="ledger-print-layer"></div>
 <script>
 const COMPANIES={aggarwal:{name:'Aggarwal Agro Foods',icon:'🌾'},krishna:{name:'Krishna Rice Mills',icon:'🍚'}};
-let APP={user:null,company:null,records:[],parties:[],payments:[],users:[],page:{rec:1,inward:1,outward:1,payment:1},editingUserId:null};
+let APP={user:null,company:null,records:[],parties:[],payments:[],users:[],requests:[],page:{rec:1,inward:1,outward:1,payment:1},editingUserId:null};
 const DAYSPERPAGE=15;
 
 // Firebase config
@@ -791,6 +896,7 @@ const firebaseConfig = {
 let AUTH, DB;
 const DEFAULT_USERS=[{id:'1',name:'Admin',username:'admin',password:'admin123',role:'admin',permissions:['view','add','edit','delete','payment','export','import','users']}];
 let currentUser=null,users=[],editUserId=null;
+let REQ_FILTER='all',REQ_EDITING_ID=null,REQ_ENTRY_ID=null;
 
 function init(){
   firebase.initializeApp(firebaseConfig);
@@ -991,6 +1097,7 @@ function applyPermissions(){
   document.querySelectorAll('[onclick*="exportCurrentReport"],[onclick*="exportTabAsPDF"]').forEach(b=>b.style.display=hasPerm('export')?'':'none');
   const reqsTab=document.getElementById('tab-reqs');if(reqsTab)reqsTab.style.display=currentUser?'':'none';
   document.querySelectorAll('[onclick*="openUserModal()"]').forEach(b=>b.style.display=hasPerm('users')?'':'none');
+  updateReqBadge();
 }
 
 function setSt(s){
@@ -1103,6 +1210,7 @@ function loadData(){
   const saved=localStorage.getItem(`data-${APP.company}`);
   if(saved){APP.records=JSON.parse(saved);}else{APP.records=[];}
   APP.journal=JSON.parse(localStorage.getItem(`journal-${APP.company}`)||'[]');
+  APP.requests=JSON.parse(localStorage.getItem(`requests-${APP.company}`))||[];
   applyOverdueCheck();
   refreshAllViews();
   /* Step 2: Start real-time listeners (handles Firestore loading + live sync) */
@@ -1122,7 +1230,7 @@ function applyOverdueCheck(){
 function refreshAllViews(){
   updateStats();renderDash();updateHeader();
   /* Re-render whichever tab is currently active */
-  const tabs=['rec','party','inward','outward','pay','rep','dash','users'];
+  const tabs=['rec','party','inward','outward','pay','rep','dash','users','reqs'];
   tabs.forEach(t=>{
     const el=document.getElementById('tab-'+t);
     if(el&&el.classList.contains('active')){
@@ -1134,6 +1242,7 @@ function refreshAllViews(){
       if(t==='rep')filterReport();
       if(t==='dash')updateDashboard();
       if(t==='users')renderUsers();
+      if(t==='reqs')renderRequests();
     }
   });
 }
@@ -1150,6 +1259,12 @@ function syncToFirestore(){
     /* Save journal */
     return DB.collection('app_data').doc('journal_'+APP.company).set({
       list: cleanUndefined(APP.journal || []),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedBy: currentUser ? currentUser.email : 'unknown'
+    });
+  }).then(()=>{
+    return DB.collection('app_data').doc('requests_'+APP.company).set({
+      list: cleanUndefined(APP.requests || []),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedBy: currentUser ? currentUser.email : 'unknown'
     });
@@ -1206,6 +1321,25 @@ function startRealtimeSync(){
       }
     }, err=>{
       console.error('Journal listener error:', err);
+    });
+
+  /* Listen to requests */
+  if(window._unsubRequests) window._unsubRequests();
+  window._unsubRequests = DB.collection('app_data').doc('requests_'+APP.company)
+    .onSnapshot(doc=>{
+      if(doc.exists && doc.data().list){
+        const serverReqs = doc.data().list;
+        if(JSON.stringify(serverReqs) !== JSON.stringify(APP.requests)){
+          APP.requests = serverReqs;
+          localStorage.setItem(`requests-${APP.company}`, JSON.stringify(APP.requests));
+          updateReqBadge();
+          /* Re-render requests tab if active */
+          const reqTab=document.getElementById('tab-reqs');
+          if(reqTab&&reqTab.classList.contains('active'))renderRequests();
+        }
+      }
+    }, err=>{
+      console.error('Requests listener error:', err);
     });
 
   /* Initial upload if Firestore is empty */
@@ -1487,6 +1621,7 @@ function goTab(tab){
   if(tab==='rep')filterReport();
   if(tab==='dash')updateDashboard();
   if(tab==='users')renderUsers();
+  if(tab==='reqs')renderRequests();
 }
 
 /* ===== UNIVERSAL HELPERS ===== */
@@ -1544,7 +1679,7 @@ function buildEntryRow(r,showCheck,checkPrefix){
   h+=`<td>${r.unloadedDate||'<span style="color:var(--text3)">—</span>'}</td>`;
   h+=`<td>${r.vehicle||'-'}</td>`;
   h+=`<td><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td>`;
-  h+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:''}</td>`;
+  h+=`<td style="white-space:nowrap"><button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','edit')" title="Edit Request">📩</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','delete')" title="Delete Request">📩</button>`:''}${hasApprovedRequest(r.id,'edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit (Approved)" style="border:2px solid #16a34a;">✏️</button>`:''}${hasApprovedRequest(r.id,'delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete (Approved)" style="border:2px solid #16a34a;">🗑️</button>`:''}</td>`;
   h+=`</tr>`;
   return h;
 }
@@ -1628,22 +1763,22 @@ function exportTabCSVPDF(prefix){
   if(!recs.length){toast('No data to export','e');return;}
   const choice=prompt('Type "csv" for CSV or "pdf" for PDF:','csv');
   if(choice==='pdf'){exportTabAsPDF(recs,prefix);return;}
-  let csv='Date,Type,GP No,Bill From,Broker,Party (Bill To),Consignee,Item,Bags,Weight,Party Wt,Difference,Rate,Amount,Vehicle,Status\n';
-  recs.forEach(r=>{const wt=r.weight||0;const pwt=r.partyWt||0;csv+=`${r.date},${r.type},${r.gp||''},\"${r.billFrom||''}\",\"${r.broker||''}\",\"${r.party}\",\"${r.consignee||''}\",${r.item||''},${r.bags||0},${wt.toFixed(2)},${pwt.toFixed(2)},${(wt-pwt).toFixed(2)},${r.rate||0},${getEntryAmt(r).toFixed(2)},${r.vehicle||''},${r.paymentStatus}\n`;});
+  let csv='Date,Type,GP No,Bill From,Broker,Party (Bill To),Consignee,Item,Bags,Weight,Party Wt,Difference,Rate,Amount,Due Days,Unloaded Date,Vehicle,Status\n';
+  recs.forEach(r=>{const wt=r.weight||0;const pwt=r.partyWt||0;csv+=`${r.date},${r.type},${r.gp||''},\"${r.billFrom||''}\",\"${r.broker||''}\",\"${r.party}\",\"${r.consignee||''}\",${r.item||''},${r.bags||0},${wt.toFixed(2)},${pwt.toFixed(2)},${(wt-pwt).toFixed(2)},${r.rate||0},${getEntryAmt(r).toFixed(2)},${r.dueNotes||30},${r.unloadedDate||''},${r.vehicle||''},${r.paymentStatus}\n`;});
   /* Totals row */
   const totBags=recs.reduce((s,r)=>s+(r.bags||0),0);const totWt=recs.reduce((s,r)=>s+(r.weight||0),0);const totPwt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const totAmt=recs.reduce((s,r)=>s+getEntryAmt(r),0);
-  csv+=`TOTAL,,,,,,,,,${totBags},${totWt.toFixed(2)},${totPwt.toFixed(2)},${(totWt-totPwt).toFixed(2)},,${totAmt.toFixed(2)},,\n`;
+  csv+=`TOTAL,,,,,,,,,${totBags},${totWt.toFixed(2)},${totPwt.toFixed(2)},${(totWt-totPwt).toFixed(2)},,${totAmt.toFixed(2)},,,,\n`;
   const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${prefix}-${APP.company}-${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);toast('CSV exported!','s');
 }
 function exportTabAsPDF(recs,prefix){
   const compName=APP.company==='aggarwal'?'Aggarwal Agro Foods':'Krishna Rice Mills';
-  const ths='<th>Date</th><th>Type</th><th>GP</th><th>Bill From</th><th>Broker</th><th>Party</th><th>Consignee</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Diff</th><th>Rate</th><th>Amount</th><th>Vehicle</th><th>Status</th>';
+  const ths='<th>Date</th><th>Type</th><th>GP</th><th>Bill From</th><th>Broker</th><th>Party</th><th>Consignee</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Diff</th><th>Rate</th><th>Amount</th><th>Due Days</th><th>Unloaded</th><th>Vehicle</th><th>Status</th>';
   let tbl='<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;font-size:9px;width:100%"><tr style="background:#1a5fc8;color:#fff;font-size:8px">'+ths+'</tr>';
   recs.forEach((r,i)=>{const wt=r.weight||0;const pwt=r.partyWt||0;const diff=wt-pwt;const amt=getEntryAmt(r);
-    tbl+=`<tr style="background:${i%2?'#f7f8fa':'#fff'}"><td>${r.date}</td><td>${r.type}</td><td>${r.gp||'-'}</td><td>${r.billFrom||'-'}</td><td>${r.broker||'-'}</td><td>${r.party}</td><td>${r.consignee||'-'}</td><td>${r.item||'-'}</td><td>${r.bags||0}</td><td>${wt.toFixed(2)}</td><td>${pwt.toFixed(2)}</td><td style="color:${diff>0?'green':diff<0?'red':'#999'}">${diff.toFixed(2)}</td><td>${r.rate||0}</td><td style="font-weight:600">${fmtINR(amt)}</td><td>${r.vehicle||'-'}</td><td>${r.paymentStatus}</td></tr>`;
+    tbl+=`<tr style="background:${i%2?'#f7f8fa':'#fff'}"><td>${r.date}</td><td>${r.type}</td><td>${r.gp||'-'}</td><td>${r.billFrom||'-'}</td><td>${r.broker||'-'}</td><td>${r.party}</td><td>${r.consignee||'-'}</td><td>${r.item||'-'}</td><td>${r.bags||0}</td><td>${wt.toFixed(2)}</td><td>${pwt.toFixed(2)}</td><td style="color:${diff>0?'green':diff<0?'red':'#999'}">${diff.toFixed(2)}</td><td>${r.rate||0}</td><td style="font-weight:600">${fmtINR(amt)}</td><td>${r.dueNotes||30} din</td><td>${r.unloadedDate||'-'}</td><td>${r.vehicle||'-'}</td><td>${r.paymentStatus}</td></tr>`;
   });
   const totBags=recs.reduce((s,r)=>s+(r.bags||0),0);const totWt=recs.reduce((s,r)=>s+(r.weight||0),0);const totPwt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const totDiff=totWt-totPwt;const totAmt=recs.reduce((s,r)=>s+getEntryAmt(r),0);
-  tbl+=`<tr style="background:#1a3a6b;color:#fff;font-weight:700;font-size:10px"><td colspan="8" style="text-align:right;padding:8px">GRAND TOTAL</td><td style="padding:8px">${totBags}</td><td style="padding:8px">${totWt.toFixed(2)}</td><td style="padding:8px">${totPwt.toFixed(2)}</td><td style="padding:8px">${totDiff.toFixed(2)}</td><td></td><td style="padding:8px">${fmtINR(totAmt)}</td><td colspan="2"></td></tr></table>`;
+  tbl+=`<tr style="background:#1a3a6b;color:#fff;font-weight:700;font-size:10px"><td colspan="8" style="text-align:right;padding:8px">GRAND TOTAL</td><td style="padding:8px">${totBags}</td><td style="padding:8px">${totWt.toFixed(2)}</td><td style="padding:8px">${totPwt.toFixed(2)}</td><td style="padding:8px">${totDiff.toFixed(2)}</td><td></td><td style="padding:8px">${fmtINR(totAmt)}</td><td colspan="4"></td></tr></table>`;
   const w=window.open('','_blank');w.document.write('<html><head><title>'+compName+' - '+prefix+'</title></head><body style="font-family:sans-serif;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px"><div><h2 style="color:#1a3a6b;margin:0">'+compName+'</h2><p style="color:#666;font-size:12px;margin:4px 0 0 0">Samrala, Punjab</p></div><div style="text-align:right"><h3 style="margin:0;color:#333">'+prefix.toUpperCase()+' Report</h3><p style="font-size:11px;color:#666;margin:4px 0 0 0">Date: '+new Date().toLocaleDateString('en-IN')+'</p></div></div>'+tbl+'<div style="margin-top:20px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#999"><span>Generated by Inward Outward Pro</span><span>Total Entries: '+recs.length+'</span></div><script>setTimeout(()=>{window.print()},500)<\/script></body></html>');w.document.close();
 }
 
@@ -2030,7 +2165,7 @@ function toggleFieldSelector(){
 function getSelectedFields(){
   const fields=[];
   document.querySelectorAll('.field-col:checked').forEach(cb=>{fields.push(cb.value);});
-  return fields.length?fields:['type','date','gp','party','item','bags','weight','rate','amount','status'];
+  return fields.length?fields:['type','date','gp','billfrom','broker','party','consignee','item','bags','weight','partywt','diff','rate','amount','paid','balance','duedate','vehicle','status'];
 }
 
 /* Full detail row for reports — all columns like Records tab */
@@ -2253,32 +2388,116 @@ function filterReport(){
 function exportCurrentReport(){
   if(!REP_FILTERED_DATA.length){toast('No data to export','e');return;}
   const choice=prompt('Type "csv" for CSV or "pdf" for PDF:','csv');
-  if(choice==='pdf'){exportTabAsPDF(REP_FILTERED_DATA,'rep');return;}
+  if(choice==='pdf'){exportReportAsPDF(REP_FILTERED_DATA);return;}
   const fields=getSelectedFields();
-  let csv=fields.join(',')+'\n';
+  /* Map field keys to header labels */
+  const labelMap={type:'Type',date:'Date',gp:'GP No',billfrom:'Bill From',broker:'Broker',party:'Party (Bill To)',consignee:'Consignee',item:'Item',bags:'Bags',weight:'Weight',partywt:'Party Wt',diff:'Difference',rate:'Rate',amount:'Amount',paid:'Paid',balance:'Balance',duedate:'Due Date',vehicle:'Vehicle',status:'Status'};
+  let csv=fields.map(f=>labelMap[f]||f).join(',')+'\n';
   REP_FILTERED_DATA.forEach(r=>{
-    const row=[];
+    const row=[];const wt=r.weight||0;const pwt=r.partyWt||0;const amt=getEntryAmt(r);
     fields.forEach(f=>{
       let val='';
       switch(f){
         case 'type':val=r.type;break;
         case 'date':val=r.date;break;
         case 'gp':val=r.gp||'';break;
+        case 'billfrom':val='"'+(r.billFrom||'')+'"';break;
+        case 'broker':val='"'+(r.broker||'')+'"';break;
         case 'party':val='"'+r.party+'"';break;
+        case 'consignee':val='"'+(r.consignee||'')+'"';break;
         case 'item':val=r.item||'';break;
         case 'bags':val=r.bags||0;break;
-        case 'weight':val=(r.weight||0).toFixed(2);break;
+        case 'weight':val=wt.toFixed(2);break;
+        case 'partywt':val=pwt.toFixed(2);break;
+        case 'diff':val=(wt-pwt).toFixed(2);break;
         case 'rate':val=r.rate||0;break;
-        case 'amount':val=getEntryAmt(r).toFixed(2);break;
-        case 'status':val=r.paymentStatus||'pending';break;
-        case 'broker':val=r.broker||'';break;
+        case 'amount':val=amt.toFixed(2);break;
+        case 'paid':val=(r.paid||0).toFixed(2);break;
+        case 'balance':val=(amt-(r.paid||0)).toFixed(2);break;
+        case 'duedate':val=getDueDate(r).toISOString().split('T')[0];break;
         case 'vehicle':val=r.vehicle||'';break;
+        case 'status':val=r.paymentStatus||'pending';break;
       }
       row.push(val);
     });
     csv+=row.join(',')+'\n';
   });
+  /* Totals row */
+  const totRow=[];const tB=REP_FILTERED_DATA.reduce((s,r)=>s+(r.bags||0),0);const tW=REP_FILTERED_DATA.reduce((s,r)=>s+(r.weight||0),0);const tP=REP_FILTERED_DATA.reduce((s,r)=>s+(r.partyWt||0),0);const tA=REP_FILTERED_DATA.reduce((s,r)=>s+getEntryAmt(r),0);const tPd=REP_FILTERED_DATA.reduce((s,r)=>s+(r.paid||0),0);
+  fields.forEach(f=>{
+    switch(f){case 'party':totRow.push('TOTAL');break;case 'bags':totRow.push(tB);break;case 'weight':totRow.push(tW.toFixed(2));break;case 'partywt':totRow.push(tP.toFixed(2));break;case 'diff':totRow.push((tW-tP).toFixed(2));break;case 'amount':totRow.push(tA.toFixed(2));break;case 'paid':totRow.push(tPd.toFixed(2));break;case 'balance':totRow.push((tA-tPd).toFixed(2));break;default:totRow.push('');}
+  });
+  csv+=totRow.join(',')+'\n';
   const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${REP_VIEW}-${APP.company}-${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);toast('CSV exported!','s');
+}
+/* Report PDF export — matches on-screen grouped report layout exactly */
+function exportReportAsPDF(recs){
+  const compName=APP.company==='aggarwal'?'Aggarwal Agro Foods':'Krishna Rice Mills';
+  const ths='<th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Type</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Date</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">GP No</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Bill From</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Broker</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Party (Bill To)</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Consignee</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Item</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Bags</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Weight</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Party Wt</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Diff</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Rate</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Amount</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Paid</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Balance</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Due Date</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Vehicle</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Status</th>';
+  /* Helper: build a data row for PDF */
+  function pdfRow(r,i){
+    const wt=r.weight||0;const pwt=r.partyWt||0;const diff=wt-pwt;const amt=getEntryAmt(r);const bal=amt-(r.paid||0);const dd=getDueDate(r).toISOString().split('T')[0];const today=new Date().toISOString().split('T')[0];const isOverdue=dd<today&&(r.paymentStatus||'pending')!=='paid';
+    const bg=isOverdue?'#fef0f0':i%2?'#f7f8fa':'#fff';const s='padding:4px;font-size:8px;border:1px solid #dde1e9;';
+    return `<tr style="background:${bg}"><td style="${s}color:${r.type==='inward'?'#15803d':'#7c3aed'};font-weight:700">${r.type==='inward'?'INWARD':'OUTWARD'}</td><td style="${s}">${r.date}</td><td style="${s}font-family:monospace">${r.gp||'-'}</td><td style="${s}">${r.billFrom||'-'}</td><td style="${s}">${r.broker||'-'}</td><td style="${s}font-weight:700">${r.party}</td><td style="${s}">${r.consignee||'-'}</td><td style="${s}">${r.item||'-'}</td><td style="${s}">${r.bags||0}</td><td style="${s}">${wt.toFixed(2)}</td><td style="${s}">${pwt.toFixed(2)}</td><td style="${s}color:${diff>0?'#15803d':diff<0?'#b91c1c':'#999'};font-weight:600">${diff.toFixed(2)}</td><td style="${s}">${r.rate||0}</td><td style="${s}font-weight:700;color:#1a5fc8">${fmtINR(amt)}</td><td style="${s}color:#15803d;font-weight:600">${fmtINR(r.paid||0)}</td><td style="${s}color:${bal>0?'#b91c1c':'#15803d'};font-weight:700">${fmtINR(bal)}</td><td style="${s}${isOverdue?'color:#b91c1c;font-weight:600':''}">${dd}</td><td style="${s}">${r.vehicle||'-'}</td><td style="${s}">${r.paymentStatus||'pending'}</td></tr>`;
+  }
+  /* Helper: build a totals row for PDF */
+  function pdfTotals(grp){
+    const tB=grp.reduce((s,r)=>s+(r.bags||0),0);const tW=grp.reduce((s,r)=>s+(r.weight||0),0);const tP=grp.reduce((s,r)=>s+(r.partyWt||0),0);const tD=tW-tP;const tA=grp.reduce((s,r)=>s+getEntryAmt(r),0);const tPd=grp.reduce((s,r)=>s+(r.paid||0),0);const tBl=tA-tPd;
+    const s='padding:6px 4px;font-size:9px;font-weight:700;border:1px solid #c5d8f8;';
+    return `<tr style="background:#e8f0fd"><td colspan="8" style="${s}text-align:right;text-transform:uppercase;letter-spacing:1px">TOTAL</td><td style="${s}">${tB}</td><td style="${s}">${tW.toFixed(2)}</td><td style="${s}">${tP.toFixed(2)}</td><td style="${s}color:${tD>0?'#15803d':tD<0?'#b91c1c':'#999'}">${tD.toFixed(2)}</td><td style="${s}"></td><td style="${s}color:#1a5fc8">${fmtINR(tA)}</td><td style="${s}color:#15803d">${fmtINR(tPd)}</td><td style="${s}color:#b91c1c">${fmtINR(tBl)}</td><td colspan="3" style="${s}"></td></tr>`;
+  }
+  /* Determine grouping based on current report view */
+  let groups={};let groupOrder=[];let groupIcon='';let groupColor='';let viewLabel='ALL ENTRIES';
+  if(REP_VIEW==='partywise'){
+    recs.forEach(r=>{const k=r.party||'Unknown';if(!groups[k])groups[k]=[];groups[k].push(r);});
+    groupOrder=Object.keys(groups).sort();groupIcon='👥';groupColor='#f3e8ff';viewLabel='PARTY WISE';
+  } else if(REP_VIEW==='itemwise'){
+    recs.forEach(r=>{const k=r.item||'Unknown';if(!groups[k])groups[k]=[];groups[k].push(r);});
+    groupOrder=Object.keys(groups).sort();groupIcon='📦';groupColor='#e8f5ed';viewLabel='ITEM WISE';
+  } else if(REP_VIEW==='monthwise'){
+    recs.forEach(r=>{const k=(r.date||'').substring(0,7)||'Unknown';if(!groups[k])groups[k]=[];groups[k].push(r);});
+    groupOrder=Object.keys(groups).sort().reverse();groupIcon='📅';groupColor='#fef3e2';viewLabel='MONTHLY';
+  } else if(REP_VIEW==='datewise'){
+    recs.forEach(r=>{const k=r.date||'Unknown';if(!groups[k])groups[k]=[];groups[k].push(r);});
+    groupOrder=Object.keys(groups).sort().reverse();groupIcon='📆';groupColor='#e8f0fd';viewLabel='DATE WISE';
+  } else if(REP_VIEW==='brokerwise'){
+    recs.forEach(r=>{const k=r.broker||'No Broker';if(!groups[k])groups[k]=[];groups[k].push(r);});
+    groupOrder=Object.keys(groups).sort();groupIcon='🤝';groupColor='#f0fdfa';viewLabel='BROKER WISE';
+  } else {
+    /* all / overdue / outstanding — single flat table */
+    groups={'all':recs};groupOrder=['all'];groupIcon='📋';groupColor='#e8f0fd';
+    if(REP_VIEW==='overdue')viewLabel='OVERDUE';else if(REP_VIEW==='outstanding')viewLabel='OUTSTANDING';
+  }
+  /* Build PDF HTML with grouped tables */
+  let body='';
+  groupOrder.forEach(key=>{
+    const grp=groups[key];if(!grp.length)return;
+    const grpAmt=grp.reduce((s,r)=>s+getEntryAmt(r),0);const grpBal=grp.reduce((s,r)=>s+(getEntryAmt(r)-(r.paid||0)),0);
+    const inC=grp.filter(r=>r.type==='inward').length;const outC=grp.filter(r=>r.type==='outward').length;
+    /* Group header */
+    if(key!=='all'){
+      let headerText=groupIcon+' '+key+' — In: '+inC+' | Out: '+outC+' | Due: '+fmtINR(grpBal);
+      headerText+=' <span style="font-size:10px;color:#666;font-weight:400">('+grp.length+' entries · '+fmtINR(grpAmt)+')</span>';
+      body+='<div style="background:'+groupColor+';border:1px solid #dde1e9;border-left:4px solid #1a5fc8;border-radius:6px;padding:10px 14px;margin:18px 0 6px 0;font-size:13px;font-weight:700;color:#1a3a6b">'+headerText+'</div>';
+    }
+    /* Group table */
+    body+='<table border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin-bottom:4px"><tr>'+ths+'</tr>';
+    grp.forEach((r,i)=>{body+=pdfRow(r,i);});
+    body+=pdfTotals(grp)+'</table>';
+  });
+  /* Grand total bar */
+  const tA=recs.reduce((s,r)=>s+getEntryAmt(r),0);const tPd=recs.reduce((s,r)=>s+(r.paid||0),0);const tBl=tA-tPd;const tB=recs.reduce((s,r)=>s+(r.bags||0),0);
+  body+='<div style="background:linear-gradient(135deg,#1a3a6b,#1a5fc8);border-radius:8px;padding:12px 18px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:12px;font-weight:700"><span>Grand Total: '+recs.length+' entries · '+tB+' bags</span><span>Amount: '+fmtINR(tA)+' · Paid: '+fmtINR(tPd)+' · Due: '+fmtINR(tBl)+'</span></div>';
+  /* Open print window */
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>${compName} - ${viewLabel} Report</title><style>@page{size:landscape;margin:10mm;}body{font-family:'Segoe UI',sans-serif;padding:12px;color:#1a2332;font-size:9px;}@media print{body{padding:0;}}</style></head><body>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:10px;border-bottom:3px solid #1a5fc8">
+    <div><h1 style="color:#1a3a6b;margin:0;font-size:22px">${compName}</h1><p style="color:#666;font-size:11px;margin:3px 0 0 0">Samrala, Punjab</p></div>
+    <div style="text-align:right"><h2 style="margin:0;color:#1a5fc8;font-size:16px">${viewLabel} Report</h2><p style="font-size:10px;color:#666;margin:3px 0 0 0">Date: ${new Date().toLocaleDateString('en-IN')} · Entries: ${recs.length}</p></div>
+  </div>${body}
+  <div style="margin-top:16px;padding-top:8px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:9px;color:#999"><span>Generated by Inward Outward Pro</span><span>Printed: ${new Date().toLocaleString('en-IN')}</span></div>
+  <script>setTimeout(()=>{window.print()},600)<\/script></body></html>`);
+  w.document.close();
 }
 
 function renderPagination(type,pages){
@@ -2311,7 +2530,13 @@ function openEntryModal(isEdit){
 }
 
 function editEntry(id){
-  if(!hasPerm('edit')){toast('Aapke paas edit permission nahi hai!','e');return;}
+  if(!hasPerm('edit')){
+    /* Check if this specific entry has an approved request for this user */
+    const approvedReq=APP.requests.find(rq=>rq.entryId===id&&rq.type==='edit'&&rq.status==='approved'&&rq.requestedBy===currentUser.email);
+    if(!approvedReq){openSendRequestModal(id,'edit');return;}
+    /* Has approved request — allow edit, mark completed after save */
+    window._pendingReqComplete=approvedReq.id;
+  }
   const entry=APP.records.find(r=>r.id===id);if(!entry)return;
   openEntryModal(true);/* reset all fields first */
   document.getElementById('fi-type').value=entry.type;document.getElementById('fi-date').value=entry.date;
@@ -2384,7 +2609,11 @@ function viewEntry(id){
 }
 
 function deleteEntry(id){
-  if(!hasPerm('delete')){toast('Aapke paas delete permission nahi hai!','e');return;}
+  if(!hasPerm('delete')){
+    const approvedReq=APP.requests.find(rq=>rq.entryId===id&&rq.type==='delete'&&rq.status==='approved'&&rq.requestedBy===currentUser.email);
+    if(!approvedReq){openSendRequestModal(id,'delete');return;}
+    window._pendingReqComplete=approvedReq.id;
+  }
   const r=APP.records.find(e=>e.id===id);if(!r)return;
   const label=r.party+' | '+r.item+' | '+(r.date||'');
   if(!confirm('Delete this entry?\n\n'+label+'\n\nYeh action undo nahi hoga!')){return;}
@@ -2392,6 +2621,7 @@ function deleteEntry(id){
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   syncToFirestore();
   refreshAllViews();toast('Entry deleted!','s');
+  if(window._pendingReqComplete){completeRequest(window._pendingReqComplete);window._pendingReqComplete=null;}
 }
 
 function calcEntry(){
@@ -2433,6 +2663,8 @@ function saveEntry(){
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   syncToFirestore();
   closeM('entry-modal');refreshAllViews();toast('Entry saved!','s');
+  /* Complete any pending approved request */
+  if(window._pendingReqComplete){completeRequest(window._pendingReqComplete);window._pendingReqComplete=null;}
 }
 
 function showPartyDrop(val,type){
@@ -2665,6 +2897,249 @@ function closeOut(e,id){if(e.target.id===id){document.getElementById(id).classLi
 function updateHeader(){document.getElementById('ss').textContent='⟳ Connected';}
 function showErr(t,m){document.getElementById('login-err').textContent=m;document.getElementById('login-err').classList.add('show');setTimeout(()=>document.getElementById('login-err').classList.remove('show'),3000);}
 function toast(m,t='i'){const html=`<div class="toast ${t}"><span>${t==='s'?'✓':t==='e'?'✕':'ℹ'}</span>${m}</div>`;const tc=document.getElementById('toast-container');tc.innerHTML+=html;setTimeout(()=>{if(tc.children.length)tc.children[0].remove();},3000);}
+
+/* ===== REQUEST SYSTEM ===== */
+function hasApprovedRequest(entryId,type){
+  if(!currentUser)return false;
+  return APP.requests.some(r=>r.entryId===entryId&&r.type===type&&r.status==='approved'&&r.requestedBy===currentUser.email);
+}
+
+function openSendRequestModal(entryId,type){
+  if(!currentUser)return;
+  const entry=entryId?APP.records.find(r=>r.id===entryId):null;
+  REQ_ENTRY_ID=entryId||null;
+  document.getElementById('req-modal-title').textContent=entryId?'Send Request':'New Request';
+  if(type)document.getElementById('req-rtype').value=type;
+  document.getElementById('req-note').value='';
+  /* Show entry info if editing specific entry */
+  const infoDiv=document.getElementById('req-modal-entry-info');
+  if(entry){
+    infoDiv.innerHTML=`<div class="req-entry-preview"><table><tr><td style="font-weight:600;color:var(--text3);">Entry:</td><td>${entry.type==='inward'?'📥':'📤'} ${entry.party} | ${entry.item||'-'} | ${entry.date}</td></tr><tr><td style="font-weight:600;color:var(--text3);">GP:</td><td>${entry.gp||'-'} | Bags: ${entry.bags} | Amt: ₹${(entry.partyWt*entry.rate||0).toLocaleString('en-IN')}</td></tr></table></div>`;
+  }else{infoDiv.innerHTML='';}
+  document.getElementById('req-modal').classList.add('open');
+}
+
+function submitRequest(){
+  const type=document.getElementById('req-rtype').value;
+  const note=document.getElementById('req-note').value.trim();
+  if(!note){toast('Note likhna zaroori hai!','e');return;}
+  if(!REQ_ENTRY_ID){toast('Entry select karo!','e');return;}
+  /* Check for duplicate pending request */
+  const dup=APP.requests.find(r=>r.entryId===REQ_ENTRY_ID&&r.type===type&&r.status==='pending'&&r.requestedBy===currentUser.email);
+  if(dup){toast('Is entry ke liye pehle se pending request hai!','e');return;}
+  const req={
+    id:'req_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),
+    type:type,
+    entryId:REQ_ENTRY_ID,
+    requestedBy:currentUser.email,
+    requestedByName:currentUser.name||currentUser.email,
+    note:note,
+    status:'pending',
+    adminNote:'',
+    actionBy:'',
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  APP.requests.push(req);
+  localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+  syncToFirestore();
+  closeM('req-modal');
+  toast('Request sent to admin!','s');
+  updateReqBadge();
+  renderRequests();
+}
+
+function updateReqBadge(){
+  const badge=document.getElementById('req-badge');if(!badge)return;
+  const isAdmin=hasPerm('users');
+  let count=0;
+  if(isAdmin){
+    count=APP.requests.filter(r=>r.status==='pending').length;
+  }else{
+    count=APP.requests.filter(r=>r.requestedBy===(currentUser?currentUser.email:'')&&r.status==='approved').length;
+  }
+  badge.textContent=count;
+  badge.style.display=count>0?'flex':'none';
+}
+
+function filterRequests(f){
+  REQ_FILTER=f;
+  document.querySelectorAll('.req-fbtn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderRequests();
+}
+
+function renderRequests(){
+  if(!currentUser)return;
+  const isAdmin=hasPerm('users');
+  /* Show/hide new request button for non-admin users with add permission */
+  const btnNew=document.getElementById('btn-new-req');
+  if(btnNew)btnNew.style.display=(!isAdmin&&hasPerm('add'))?'':'none';
+
+  let reqs=[...APP.requests].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  /* Non-admin: only see their own requests */
+  if(!isAdmin){
+    reqs=reqs.filter(r=>r.requestedBy===currentUser.email);
+  }
+  /* Apply filter */
+  if(REQ_FILTER==='pending')reqs=reqs.filter(r=>r.status==='pending');
+  else if(REQ_FILTER==='approved')reqs=reqs.filter(r=>r.status==='approved');
+  else if(REQ_FILTER==='rejected')reqs=reqs.filter(r=>r.status==='rejected');
+  else if(REQ_FILTER==='completed')reqs=reqs.filter(r=>r.status==='completed');
+  else if(REQ_FILTER==='edit')reqs=reqs.filter(r=>r.type==='edit');
+  else if(REQ_FILTER==='delete')reqs=reqs.filter(r=>r.type==='delete');
+
+  /* Stats */
+  const allReqs=isAdmin?APP.requests:APP.requests.filter(r=>r.requestedBy===currentUser.email);
+  const pending=allReqs.filter(r=>r.status==='pending').length;
+  const approved=allReqs.filter(r=>r.status==='approved').length;
+  const rejected=allReqs.filter(r=>r.status==='rejected').length;
+  const completed=allReqs.filter(r=>r.status==='completed').length;
+  document.getElementById('req-stats').innerHTML=`
+    <div class="req-stat" style="--cc:#f59e0b;"><div class="rs-v" style="color:#f59e0b;">${pending}</div><div class="rs-l">Pending</div></div>
+    <div class="req-stat" style="--cc:#16a34a;"><div class="rs-v" style="color:#16a34a;">${approved}</div><div class="rs-l">Approved</div></div>
+    <div class="req-stat" style="--cc:#dc2626;"><div class="rs-v" style="color:#dc2626;">${rejected}</div><div class="rs-l">Rejected</div></div>
+    <div class="req-stat" style="--cc:#1a5fc8;"><div class="rs-v" style="color:#1a5fc8;">${completed}</div><div class="rs-l">Completed</div></div>
+  `;
+  document.getElementById('reqs-count').textContent=reqs.length;
+
+  if(!reqs.length){
+    document.getElementById('reqs-list').innerHTML='<div class="empty"><div class="ei">📩</div><h3>Koi request nahi</h3><p>Abhi tak koi request nahi hai</p></div>';
+    return;
+  }
+
+  let html='';
+  reqs.forEach(rq=>{
+    const entry=APP.records.find(e=>e.id===rq.entryId);
+    const entryLabel=entry?`${entry.type==='inward'?'📥':'📤'} ${entry.party} | ${entry.item||'-'} | ${entry.date} | GP:${entry.gp||'-'}`:'❌ Entry deleted';
+    const typeClass=rq.type==='edit'?'edit-req':'delete-req';
+    const typeIcon=rq.type==='edit'?'✏️':'🗑️';
+    const timeAgo=getTimeAgo(rq.createdAt);
+
+    html+=`<div class="req-card">
+      <div class="req-card-head">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="req-type ${typeClass}">${typeIcon} ${rq.type}</span>
+          <span class="req-status ${rq.status}">${rq.status==='pending'?'⏳':''}${rq.status==='approved'?'✅':''}${rq.status==='rejected'?'❌':''}${rq.status==='completed'?'✔️':''} ${rq.status}</span>
+        </div>
+        <span style="font-size:11px;color:var(--text3);">${timeAgo}</span>
+      </div>
+      <div class="req-card-body">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">${isAdmin?'👤 '+rq.requestedByName:''}${isAdmin?' · ':''}${new Date(rq.createdAt).toLocaleString('en-IN')}</div>
+        <div class="req-entry-preview">${entryLabel}</div>
+        <div class="req-note">📝 ${rq.note}</div>
+        ${rq.adminNote?`<div class="req-admin-note">👨‍💼 Admin: ${rq.adminNote}</div>`:''}
+        ${rq.actionBy?`<div style="font-size:11px;color:var(--text3);margin-top:6px;">Action by: ${rq.actionBy} · ${new Date(rq.updatedAt).toLocaleString('en-IN')}</div>`:''}
+      </div>
+      <div class="req-card-footer">
+        ${isAdmin&&rq.status==='pending'?`
+          <button class="btn btn-ghost" onclick="viewEntry('${rq.entryId}')" ${!entry?'disabled':''}>👁 View</button>
+          <button class="btn btn-red" style="font-size:11px;" onclick="openReqActionModal('${rq.id}','reject')">❌ Reject</button>
+          <button class="btn btn-green" style="font-size:11px;" onclick="openReqActionModal('${rq.id}','approve')">✅ Approve</button>
+          <button class="btn btn-blue" style="font-size:11px;" onclick="adminDoItMyself('${rq.id}')">🔧 Khud Karunga</button>
+        `:''}
+        ${!isAdmin&&rq.status==='approved'&&entry?`
+          <button class="btn btn-green" onclick="${rq.type==='edit'?`editEntry('${rq.entryId}')`:`deleteEntry('${rq.entryId}')`}">
+            ${rq.type==='edit'?'✏️ Edit Now':'🗑️ Delete Now'}
+          </button>
+        `:''}
+        ${!isAdmin&&rq.status==='pending'?`<span style="font-size:11px;color:var(--text3);">⏳ Admin ke response ka wait karo...</span>`:''}
+      </div>
+    </div>`;
+  });
+  document.getElementById('reqs-list').innerHTML=html;
+}
+
+function getTimeAgo(dateStr){
+  const diff=Date.now()-new Date(dateStr).getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return 'Abhi';
+  if(mins<60)return mins+' min pehle';
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return hrs+' hr pehle';
+  const days=Math.floor(hrs/24);
+  return days+' din pehle';
+}
+
+function openReqActionModal(reqId,action){
+  const rq=APP.requests.find(r=>r.id===reqId);if(!rq)return;
+  REQ_EDITING_ID=reqId;
+  const entry=APP.records.find(e=>e.id===rq.entryId);
+  const entryLabel=entry?`${entry.party} | ${entry.item||'-'} | ${entry.date}`:'Entry not found';
+  document.getElementById('req-action-title').textContent=action==='approve'?'Approve Request':'Reject Request';
+  document.getElementById('req-action-info').innerHTML=`
+    <div style="margin-bottom:8px;"><span class="req-type ${rq.type==='edit'?'edit-req':'delete-req'}">${rq.type==='edit'?'✏️ Edit':'🗑️ Delete'}</span></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">👤 ${rq.requestedByName}</div>
+    <div class="req-entry-preview">${entryLabel}</div>
+    <div class="req-note">📝 ${rq.note}</div>
+  `;
+  document.getElementById('req-admin-note').value='';
+  /* Show/hide buttons based on action */
+  document.getElementById('btn-approve-req').style.display=action==='approve'?'':'none';
+  document.getElementById('btn-reject-req').style.display=action==='reject'?'':'none';
+  document.getElementById('btn-doit-req').style.display='none';
+  document.getElementById('req-action-modal').classList.add('open');
+}
+
+function approveRequest(){
+  if(!REQ_EDITING_ID)return;
+  const rq=APP.requests.find(r=>r.id===REQ_EDITING_ID);if(!rq)return;
+  rq.status='approved';
+  rq.adminNote=document.getElementById('req-admin-note').value.trim();
+  rq.actionBy=currentUser.email;
+  rq.updatedAt=new Date().toISOString();
+  localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+  syncToFirestore();
+  closeM('req-action-modal');
+  toast('Request approved! User ab '+rq.type+' kar sakta hai.','s');
+  updateReqBadge();renderRequests();refreshAllViews();
+}
+
+function rejectRequest(){
+  if(!REQ_EDITING_ID)return;
+  const rq=APP.requests.find(r=>r.id===REQ_EDITING_ID);if(!rq)return;
+  const note=document.getElementById('req-admin-note').value.trim();
+  if(!note){toast('Reject karne ke liye reason likhna zaroori hai!','e');return;}
+  rq.status='rejected';
+  rq.adminNote=note;
+  rq.actionBy=currentUser.email;
+  rq.updatedAt=new Date().toISOString();
+  localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+  syncToFirestore();
+  closeM('req-action-modal');
+  toast('Request rejected.','s');
+  updateReqBadge();renderRequests();
+}
+
+function adminDoItMyself(reqId){
+  const rq=APP.requests.find(r=>r.id===reqId);if(!rq)return;
+  const entry=APP.records.find(e=>e.id===rq.entryId);
+  if(!entry){toast('Entry nahi mili!','e');return;}
+  if(rq.type==='edit'){
+    rq.status='completed';rq.adminNote='Admin ne khud edit kiya';rq.actionBy=currentUser.email;rq.updatedAt=new Date().toISOString();
+    localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+    syncToFirestore();updateReqBadge();renderRequests();
+    editEntry(rq.entryId);
+  }else{
+    if(!confirm('Delete this entry?\n\n'+entry.party+' | '+entry.item+'\n\nYeh action undo nahi hoga!')){return;}
+    rq.status='completed';rq.adminNote='Admin ne khud delete kiya';rq.actionBy=currentUser.email;rq.updatedAt=new Date().toISOString();
+    APP.records=APP.records.filter(e=>e.id!==rq.entryId);
+    localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+    localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+    syncToFirestore();refreshAllViews();toast('Entry deleted by admin!','s');
+    updateReqBadge();renderRequests();
+  }
+}
+
+function completeRequest(reqId){
+  const rq=APP.requests.find(r=>r.id===reqId);if(!rq)return;
+  rq.status='completed';
+  rq.updatedAt=new Date().toISOString();
+  localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+  syncToFirestore();
+  updateReqBadge();
+  toast('Request completed!','s');
+}
 
 document.addEventListener('DOMContentLoaded',init);
 </script>
