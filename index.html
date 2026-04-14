@@ -1043,9 +1043,15 @@ function hideLoginUI(){document.getElementById('login-wrap').classList.remove('s
 
 async function logout(){
   if(AUTH){try{await AUTH.signOut();}catch(e){console.log('Signout err:',e);}}
-  currentUser=null;
+  /* If the current firm was accessible ONLY via session grant (not permanent), clear it
+     so a different user (or same user without permanent access) doesn't inherit it on next login */
+  if(APP.company&&SESSION_FIRM_GRANTS.has(APP.company)){
+    APP.company=null;
+    localStorage.removeItem('app-company');
+  }
   /* Clear session-based firm access grants */
   SESSION_FIRM_GRANTS.clear();
+  currentUser=null;
   showLoginUI();
   document.getElementById('l-email').value='';
   document.getElementById('l-pass').value='';
@@ -1192,7 +1198,14 @@ function requestFirmAccess(companyId){
   const approved=allReqs.find(r=>r.type==='firm-access'&&r.companyId===companyId&&r.requestedBy===currentUser.email&&r.status==='approved');
   if(approved){
     grantSessionAccess(companyId);
+    /* Mark the approved request as completed so it no longer lingers as a pending notification
+       Admin still sees it (in Completed filter) but it no longer counts in badge. */
+    approved.status='completed';
+    approved.updatedAt=new Date().toISOString();
+    if(!approved.adminNote)approved.adminNote='User ne session use kar liya';
+    broadcastFirmRequest(approved,'update');
     refreshFirmUI();
+    updateReqBadge();
     selectCompany(companyId);
     toast('Access granted! Session ke liye firm open hui.','s');
     return;
@@ -1380,6 +1393,12 @@ function initDateFields(){
 }
 
 function showCompanyOrApp(){
+  /* If stored company is no longer accessible (e.g. session access expired after logout),
+     clear it and force company selection. Admin always has access to all. */
+  if(APP.company&&!canAccessCompany(APP.company)){
+    APP.company=null;
+    localStorage.removeItem('app-company');
+  }
   if(APP.company){closeCompanyScreen();loadData();}else{showCompanyScreen();}
 }
 
