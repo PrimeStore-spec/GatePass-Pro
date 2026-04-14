@@ -212,7 +212,7 @@
     <div class="th2">
       <div class="ttl">📋 Records <span class="rcnt" id="rec-count">0</span></div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-red" onclick="bulkDelete('rec')" style="font-size:11px">🗑 Bulk Delete</button>
+        <button class="btn btn-ghost" onclick="clearBulkSelection('rec')" style="font-size:11px" title="Clear selection">✕ Clear</button><button class="btn btn-red" onclick="bulkDelete('rec')" style="font-size:11px">🗑 Bulk Delete<span id="rec-bulk-count"></span></button>
         <button class="btn btn-ghost" onclick="downloadSampleCSV('rec')" style="font-size:11px" title="Download sample CSV template">📄 Sample CSV</button><button class="btn btn-green" onclick="importCSV('rec')" style="font-size:11px">📥 Import CSV</button>
         <button class="btn btn-blue" onclick="exportTabCSVPDF('rec')" style="font-size:11px">📤 Export CSV/PDF</button>
         <button class="btn btn-green" onclick="openEntryModal()" style="font-size:11px">＋ Naya</button>
@@ -270,7 +270,7 @@
     <div class="th2">
       <div class="ttl">📥 Inward Entries <span class="rcnt" id="in-count">0</span></div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-red" onclick="bulkDelete('inward')" style="font-size:11px">🗑 Bulk Delete</button>
+        <button class="btn btn-ghost" onclick="clearBulkSelection('inward')" style="font-size:11px" title="Clear selection">✕ Clear</button><button class="btn btn-red" onclick="bulkDelete('inward')" style="font-size:11px">🗑 Bulk Delete<span id="inward-bulk-count"></span></button>
         <button class="btn btn-ghost" onclick="downloadSampleCSV('inward')" style="font-size:11px" title="Download sample CSV template">📄 Sample CSV</button><button class="btn btn-green" onclick="importCSV('inward')" style="font-size:11px">📥 Import CSV</button>
         <button class="btn btn-blue" onclick="exportTabCSVPDF('inward')" style="font-size:11px">📤 Export CSV/PDF</button>
         <button class="btn btn-green" onclick="openEntryModal();document.getElementById('fi-type').value='inward'" style="font-size:11px">＋ Naya</button>
@@ -306,7 +306,7 @@
     <div class="th2">
       <div class="ttl">📤 Outward Entries <span class="rcnt" id="out-count">0</span></div>
       <div style="display:flex;gap:6px">
-        <button class="btn btn-red" onclick="bulkDelete('outward')" style="font-size:11px">🗑 Bulk Delete</button>
+        <button class="btn btn-ghost" onclick="clearBulkSelection('outward')" style="font-size:11px" title="Clear selection">✕ Clear</button><button class="btn btn-red" onclick="bulkDelete('outward')" style="font-size:11px">🗑 Bulk Delete<span id="outward-bulk-count"></span></button>
         <button class="btn btn-ghost" onclick="downloadSampleCSV('outward')" style="font-size:11px" title="Download sample CSV template">📄 Sample CSV</button><button class="btn btn-green" onclick="importCSV('outward')" style="font-size:11px">📥 Import CSV</button>
         <button class="btn btn-blue" onclick="exportTabCSVPDF('outward')" style="font-size:11px">📤 Export CSV/PDF</button>
         <button class="btn btn-green" onclick="openEntryModal();document.getElementById('fi-type').value='outward'" style="font-size:11px">＋ Naya</button>
@@ -1678,7 +1678,7 @@ function resetFilter(prefix){
 function buildEntryRow(r,showCheck,checkPrefix){
   const amt=getEntryAmt(r);
   let h='<tr>';
-  if(showCheck)h+=`<td><input type="checkbox" class="${checkPrefix}-chk" value="${r.id}"></td>`;
+  if(showCheck){const isChk=BULK_SELECTED[checkPrefix]&&BULK_SELECTED[checkPrefix].has(r.id);h+=`<td><input type="checkbox" class="${checkPrefix}-chk" value="${r.id}" ${isChk?'checked':''} onchange="toggleRowCheck('${checkPrefix}',this.value,this.checked)"></td>`;}
   const wt=r.weight||0;const pwt=r.partyWt||0;const diff=wt-pwt;
   const dueDays=r.dueNotes||30;
   h+=`<td><span class="${r.type==='inward'?'type-in':'type-out'}">${r.type==='inward'?'Inward':'Outward'}</span></td>`;
@@ -1703,78 +1703,199 @@ function buildEntryRow(r,showCheck,checkPrefix){
   h+=`</tr>`;
   return h;
 }
+/* Persistent bulk selection across pages — selection survives pagination/filter changes */
+const BULK_SELECTED={rec:new Set(),inward:new Set(),outward:new Set()};
+function getFilteredForBulk(prefix){
+  /* Return filtered records that would appear in this tab */
+  if(prefix==='rec')return getFilteredRecs('rec');
+  if(prefix==='inward')return getFilteredRecs('in','inward');
+  if(prefix==='outward')return getFilteredRecs('out','outward');
+  return [];
+}
 function toggleAllChecks(prefix){
   const checkMap={rec:'rec-checkall',inward:'in-checkall',outward:'out-checkall'};
   const tableMap={rec:'records-table',inward:'inward-table',outward:'outward-table'};
   const chk=document.getElementById(checkMap[prefix]);if(!chk)return;
   const tbl=document.getElementById(tableMap[prefix]);if(!tbl)return;
-  tbl.querySelectorAll('.'+prefix+'-chk').forEach(cb=>{cb.checked=chk.checked;});}
+  if(chk.checked){
+    /* Select ALL filtered records across all pages */
+    const filtered=getFilteredForBulk(prefix);
+    filtered.forEach(r=>BULK_SELECTED[prefix].add(r.id));
+    toast(filtered.length+' entries selected (all filtered)','i');
+  }else{
+    /* Clear only those visible in current filter, preserving unrelated */
+    const filteredIds=getFilteredForBulk(prefix).map(r=>r.id);
+    filteredIds.forEach(id=>BULK_SELECTED[prefix].delete(id));
+  }
+  /* Sync DOM checkboxes on current page */
+  tbl.querySelectorAll('.'+prefix+'-chk').forEach(cb=>{cb.checked=BULK_SELECTED[prefix].has(cb.value);});
+  updateBulkCount(prefix);
+}
+function toggleRowCheck(prefix,id,checked){
+  if(checked)BULK_SELECTED[prefix].add(id);
+  else BULK_SELECTED[prefix].delete(id);
+  updateBulkCount(prefix);
+}
+function updateBulkCount(prefix){
+  const countEl=document.getElementById(prefix+'-bulk-count');
+  const n=BULK_SELECTED[prefix].size;
+  if(countEl){countEl.textContent=n?' ('+n+')':'';countEl.style.color=n?'#fff':'';}
+}
+function clearBulkSelection(prefix){
+  BULK_SELECTED[prefix].clear();
+  const tableMap={rec:'records-table',inward:'inward-table',outward:'outward-table'};
+  const tbl=document.getElementById(tableMap[prefix]);
+  if(tbl)tbl.querySelectorAll('.'+prefix+'-chk').forEach(cb=>cb.checked=false);
+  const checkMap={rec:'rec-checkall',inward:'in-checkall',outward:'out-checkall'};
+  const chk=document.getElementById(checkMap[prefix]);if(chk)chk.checked=false;
+  updateBulkCount(prefix);
+}
 function bulkDelete(prefix){
   if(!hasPerm('delete')){toast('Aapke paas delete permission nahi hai!','e');return;}
-  const cls=prefix+'-chk';const checked=Array.from(document.querySelectorAll('.'+cls+':checked')).map(cb=>cb.value);
-  if(!checked.length){toast('Pehle entries select karo','e');return;}
-  if(!confirm(checked.length+' entries delete karni hain?'))return;
-  APP.records=APP.records.filter(r=>!checked.includes(r.id));
+  /* Sync any unchecked/checked DOM state back into the set (in case user clicked without onchange firing) */
+  document.querySelectorAll('.'+prefix+'-chk').forEach(cb=>{
+    if(cb.checked)BULK_SELECTED[prefix].add(cb.value);
+  });
+  const selected=Array.from(BULK_SELECTED[prefix]);
+  if(!selected.length){toast('Pehle entries select karo','e');return;}
+  if(!confirm(selected.length+' entries delete karni hain?\n\nYeh action undo nahi hoga!'))return;
+  APP.records=APP.records.filter(r=>!selected.includes(r.id));
+  BULK_SELECTED[prefix].clear();
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   syncToFirestore();
-  refreshAllViews();toast(checked.length+' entries deleted','s');
+  refreshAllViews();toast(selected.length+' entries deleted','s');
 }
 function downloadSampleCSV(prefix){
   const type=prefix==='inward'?'inward':prefix==='outward'?'outward':'inward';
-  const headers='Type,Date,GP No,Bill From,Broker,Party (Bill To),Mobile,Consignee,Consignee Mobile,Consignee Address,Item,Bags,Weight,Party Wt,Rate,Due Days,Unloaded Date,Vehicle,Driver,Notes';
-  const sample1=type+',2026-04-10,GP-00001,Aggarwal Agro Foods,Mohit Broker,Ram Singh,9876543210,Godown Samrala,9988776655,Main Road Samrala,Basmati Rice,50,2500,2480,65,30,2026-04-11,PB10AB1234,Harpreet,First sample entry';
-  const sample2=type+',2026-04-11,GP-00002,Krishna Rice Mills,Deepak Commission,Sharma Ji,9812345678,Cold Store Ludhiana,9871234567,GT Road Ludhiana,Sela Rice,80,4000,3980,55,25,2026-04-12,PB10CD5678,Ranjit,Second sample entry';
+  /* Headers match export format exactly — full round-trip support */
+  const headers='Type,Date,GP No,Bill From,Broker,Party (Bill To),Mobile,Consignee,Consignee Mobile,Consignee Address,Item,Bags,Weight,Party Wt,Difference,Rate,Amount,Due Days,Unloaded Date,Vehicle,Driver,Notes,Status,Paid';
+  const sample1=type+',2026-04-10,GP-00001,Aggarwal Agro Foods,Mohit Broker,Ram Singh,9876543210,Godown Samrala,9988776655,Main Road Samrala,Basmati Rice,50,2500,2480,20,65,161200,30,2026-04-11,PB10AB1234,Harpreet,First sample entry,pending,0';
+  const sample2=type+',2026-04-11,GP-00002,Krishna Rice Mills,Deepak Commission,Sharma Ji,9812345678,Cold Store Ludhiana,9871234567,GT Road Ludhiana,Sela Rice,80,4000,3980,20,55,218900,25,2026-04-12,PB10CD5678,Ranjit,Second sample entry,pending,0';
   const csv=headers+'\n'+sample1+'\n'+sample2+'\n';
   const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='sample_import_'+type+'.csv';a.click();URL.revokeObjectURL(url);
-  toast('Sample CSV downloaded! Fill it & import.','s');
+  toast('Sample CSV downloaded! Fill karo & import karo.','s');
 }
 
+function parseCSVLine(line){
+  /* Proper CSV parser — handles quoted fields with embedded commas and escaped quotes */
+  const vals=[];let cur='';let inQ=false;
+  for(let c=0;c<line.length;c++){
+    const ch=line[c];
+    if(ch==='"'){
+      if(inQ&&line[c+1]==='"'){cur+='"';c++;}/* escaped quote */
+      else{inQ=!inQ;}
+    }else if(ch===','&&!inQ){vals.push(cur);cur='';}
+    else{cur+=ch;}
+  }
+  vals.push(cur);
+  return vals.map(v=>v.trim());
+}
 function importCSV(prefix){
   if(!hasPerm('import')){toast('Aapke paas import permission nahi hai!','e');return;}
   const input=document.createElement('input');input.type='file';input.accept='.csv';
   input.onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{
-    const raw=ev.target.result;const lines=[];let cur='';let inQ=false;
-    for(let c=0;c<raw.length;c++){const ch=raw[c];if(ch==='"'){inQ=!inQ;}else if(ch==='\n'&&!inQ){if(cur.trim())lines.push(cur);cur='';}else{cur+=ch;}}
+    /* Strip BOM if present, split by newline respecting quoted fields */
+    let raw=ev.target.result.replace(/^\uFEFF/,'');
+    const lines=[];let cur='';let inQ=false;
+    for(let c=0;c<raw.length;c++){
+      const ch=raw[c];
+      if(ch==='"'){inQ=!inQ;cur+=ch;}
+      else if((ch==='\n'||ch==='\r')&&!inQ){if(cur.trim())lines.push(cur);cur='';if(ch==='\r'&&raw[c+1]==='\n')c++;}
+      else{cur+=ch;}
+    }
     if(cur.trim())lines.push(cur);
-    if(lines.length<2){toast('CSV empty','e');return;}
-    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/[()]/g,''));let count=0;
-    /* Header mapping: flexible matching */
-    const hmap=(name)=>{const idx=headers.findIndex(h=>h.includes(name));return idx;};
+    if(lines.length<2){toast('CSV empty ya invalid hai','e');return;}
+    /* Normalize headers: lowercase, remove parens, trim, strip quotes */
+    const headers=parseCSVLine(lines[0]).map(h=>h.toLowerCase().replace(/[()"]/g,'').trim());
+    /* Exact + partial header matcher */
+    const hmap=(...names)=>{
+      for(const n of names){
+        let idx=headers.indexOf(n);
+        if(idx>=0)return idx;
+        idx=headers.findIndex(h=>h.includes(n));
+        if(idx>=0)return idx;
+      }
+      return -1;
+    };
+    /* Pre-resolve header positions */
+    const H={
+      type:hmap('type'),
+      date:hmap('date'),
+      gp:hmap('gp no','gp'),
+      billFrom:hmap('bill from','billfrom','bill_from'),
+      broker:hmap('broker'),
+      party:hmap('party bill to','party','bill to'),
+      mobile:hmap('mobile','phone'),
+      consignee:hmap('consignee','ship to'),
+      consigneeMobile:hmap('consignee mobile','con. mobile','consignee phone'),
+      consigneeAddr:hmap('consignee address','con. address','address'),
+      item:hmap('item','product'),
+      bags:hmap('bags','qty'),
+      weight:hmap('weight'),
+      partyWt:hmap('party wt','partywt','party_wt'),
+      rate:hmap('rate'),
+      dueDays:hmap('due days','due_days','due'),
+      unloadedDate:hmap('unloaded date','unloaded'),
+      vehicle:hmap('vehicle','truck'),
+      driver:hmap('driver'),
+      notes:hmap('notes','remarks'),
+      status:hmap('status','payment status'),
+      paid:hmap('paid','paid amount')
+    };
+    let count=0,skipped=0;
+    const errors=[];
     for(let i=1;i<lines.length;i++){
-      const vals=lines[i].split(',').map(v=>v.trim().replace(/^"|"$/g,''));
-      const get=(name)=>{const idx=hmap(name);return idx>=0?(vals[idx]||''):'';};
-      const type=(prefix==='inward'?'inward':prefix==='outward'?'outward':get('type'))||'inward';
-      const pwt=parseFloat(get('party wt')||get('party_wt')||get('partywt'))||parseFloat(get('weight'))||0;
-      const wt=parseFloat(get('weight'))||pwt;
-      const rate=parseFloat(get('rate'))||0;
+      const vals=parseCSVLine(lines[i]);
+      /* Skip TOTAL / blank rows */
+      if(vals[0]&&vals[0].toUpperCase().trim()==='TOTAL'){skipped++;continue;}
+      if(!vals.join('').trim()){skipped++;continue;}
+      const get=(idx)=>idx>=0&&idx<vals.length?(vals[idx]||'').replace(/^"|"$/g,''):'';
+      const getNum=(idx)=>{const v=parseFloat(get(idx));return isNaN(v)?0:v;};
+      const rawType=get(H.type).toLowerCase();
+      const type=(prefix==='inward')?'inward':(prefix==='outward')?'outward':(rawType==='inward'||rawType==='outward'?rawType:'inward');
+      const party=get(H.party);
+      if(!party){errors.push('Row '+(i+1)+': Party missing');continue;}
+      const pwt=getNum(H.partyWt)||getNum(H.weight);
+      const wt=getNum(H.weight)||pwt;
+      const rate=getNum(H.rate);
       const amt=pwt*rate;
+      const statusRaw=get(H.status).toLowerCase();
+      const status=['pending','partial','paid','overdue'].includes(statusRaw)?statusRaw:'pending';
       APP.records.push({
-        id:'REC'+Date.now()+i,type,
-        date:get('date')||new Date().toISOString().split('T')[0],
-        gp:get('gp no')||get('gp')||'',
-        billFrom:get('bill from')||get('billfrom')||'',
-        broker:get('broker')||'',
-        party:get('party')||get('bill to')||'',
-        mobile:get('mobile')||'',
-        consignee:get('consignee')||get('ship to')||'',
-        consigneeMobile:get('consignee mobile')||get('con. mobile')||'',
-        consigneeAddr:get('consignee address')||get('con. address')||get('address')||'',
-        item:get('item')||'',
-        bags:parseFloat(get('bags'))||0,
+        id:'REC'+Date.now()+'_'+i,type,
+        date:get(H.date)||new Date().toISOString().split('T')[0],
+        gp:get(H.gp)||'GP-IMP-'+(i)+'-'+Date.now().toString().slice(-5),
+        billFrom:get(H.billFrom),
+        broker:get(H.broker),
+        party:party,
+        mobile:get(H.mobile),
+        consignee:get(H.consignee),
+        consigneeMobile:get(H.consigneeMobile),
+        consigneeAddr:get(H.consigneeAddr),
+        item:get(H.item),
+        bags:getNum(H.bags),
         weight:wt,partyWt:pwt,rate,amount:amt,
-        dueNotes:parseInt(get('due days')||get('due'))||30,
-        unloadedDate:get('unloaded date')||get('unloaded')||'',
-        vehicle:get('vehicle')||'',
-        driver:get('driver')||'',
-        notes:get('notes')||'',
-        paymentStatus:'pending',paid:0,
+        dueNotes:parseInt(get(H.dueDays))||30,
+        unloadedDate:get(H.unloadedDate),
+        vehicle:get(H.vehicle),
+        driver:get(H.driver),
+        notes:get(H.notes),
+        paymentStatus:status,
+        paid:getNum(H.paid),
+        needsReview:!rate,
+        createdBy:currentUser?currentUser.email:'import',
         createdAt:new Date().toISOString()
       });count++;
     }
     localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
     syncToFirestore();
-    refreshAllViews();toast(count+' entries imported!','s');
+    refreshAllViews();
+    let msg=count+' entries imported!';
+    if(skipped)msg+=' ('+skipped+' rows skipped: total/blank)';
+    if(errors.length)msg+=' ❌ '+errors.length+' errors';
+    toast(msg,count>0?'s':'e');
+    if(errors.length)console.warn('Import errors:',errors);
   };reader.readAsText(file);};input.click();
 }
 function exportTabCSVPDF(prefix){
@@ -1783,11 +1904,13 @@ function exportTabCSVPDF(prefix){
   if(!recs.length){toast('No data to export','e');return;}
   const choice=prompt('Type "csv" for CSV or "pdf" for PDF:','csv');
   if(choice==='pdf'){exportTabAsPDF(recs,prefix);return;}
-  let csv='Date,Type,GP No,Bill From,Broker,Party (Bill To),Consignee,Item,Bags,Weight,Party Wt,Difference,Rate,Amount,Due Days,Unloaded Date,Vehicle,Status\n';
-  recs.forEach(r=>{const wt=r.weight||0;const pwt=r.partyWt||0;csv+=`${r.date},${r.type},${r.gp||''},\"${r.billFrom||''}\",\"${r.broker||''}\",\"${r.party}\",\"${r.consignee||''}\",${r.item||''},${r.bags||0},${wt.toFixed(2)},${pwt.toFixed(2)},${(wt-pwt).toFixed(2)},${r.rate||0},${getEntryAmt(r).toFixed(2)},${r.dueNotes||30},${r.unloadedDate||''},${r.vehicle||''},${r.paymentStatus}\n`;});
+  /* Format matches import format exactly — columns align with downloadSampleCSV headers + extra audit/status columns */
+  let csv='Type,Date,GP No,Bill From,Broker,Party (Bill To),Mobile,Consignee,Consignee Mobile,Consignee Address,Item,Bags,Weight,Party Wt,Difference,Rate,Amount,Due Days,Unloaded Date,Vehicle,Driver,Notes,Status,Paid\n';
+  const esc=(v)=>{const s=String(v==null?'':v);return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;};
+  recs.forEach(r=>{const wt=r.weight||0;const pwt=r.partyWt||0;csv+=`${esc(r.type)},${esc(r.date)},${esc(r.gp||'')},${esc(r.billFrom||'')},${esc(r.broker||'')},${esc(r.party)},${esc(r.mobile||'')},${esc(r.consignee||'')},${esc(r.consigneeMobile||'')},${esc(r.consigneeAddr||'')},${esc(r.item||'')},${r.bags||0},${wt.toFixed(2)},${pwt.toFixed(2)},${(wt-pwt).toFixed(2)},${r.rate||0},${getEntryAmt(r).toFixed(2)},${r.dueNotes||30},${esc(r.unloadedDate||'')},${esc(r.vehicle||'')},${esc(r.driver||'')},${esc(r.notes||'')},${esc(r.paymentStatus||'pending')},${r.paid||0}\n`;});
   /* Totals row */
-  const totBags=recs.reduce((s,r)=>s+(r.bags||0),0);const totWt=recs.reduce((s,r)=>s+(r.weight||0),0);const totPwt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const totAmt=recs.reduce((s,r)=>s+getEntryAmt(r),0);
-  csv+=`TOTAL,,,,,,,,,${totBags},${totWt.toFixed(2)},${totPwt.toFixed(2)},${(totWt-totPwt).toFixed(2)},,${totAmt.toFixed(2)},,,,\n`;
+  const totBags=recs.reduce((s,r)=>s+(r.bags||0),0);const totWt=recs.reduce((s,r)=>s+(r.weight||0),0);const totPwt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const totAmt=recs.reduce((s,r)=>s+getEntryAmt(r),0);const totPaid=recs.reduce((s,r)=>s+(r.paid||0),0);
+  csv+=`TOTAL,,,,,,,,,,,${totBags},${totWt.toFixed(2)},${totPwt.toFixed(2)},${(totWt-totPwt).toFixed(2)},,${totAmt.toFixed(2)},,,,,,,${totPaid.toFixed(2)}\n`;
   const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${prefix}-${APP.company}-${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);toast('CSV exported!','s');
 }
 function exportTabAsPDF(recs,prefix){
@@ -1810,6 +1933,7 @@ function renderRecords(page){
   document.querySelector('#records-table tbody').innerHTML=html||'<tr><td colspan="21" style="text-align:center;padding:30px;color:var(--text3)">Koi record nahi mila</td></tr>';
   document.getElementById('rec-count').textContent=recs.length;
   document.getElementById('rec-info').textContent=`${recs.length} records`;renderPagination('rec',Math.ceil(recs.length/DAYSPERPAGE));
+  updateBulkCount('rec');
 }
 function filterRecords(){renderRecords(1);}
 
@@ -2046,6 +2170,7 @@ function filterInward(){
   const tbags=recs.reduce((s,r)=>s+(r.bags||0),0);const twt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const tamt=recs.reduce((s,r)=>s+getEntryAmt(r),0);
   document.getElementById('inward-total-bags').textContent=tbags;document.getElementById('inward-total-wt').textContent=twt.toFixed(2)+' kg';document.getElementById('inward-total-amt').textContent=fmtINR(tamt);
   document.getElementById('in-info').textContent=`${recs.length} entries`;
+  updateBulkCount('inward');
 }
 function renderInwardTable(page){updateInwardFilter();filterInward();}
 
@@ -2059,6 +2184,7 @@ function filterOutward(){
   const tbags=recs.reduce((s,r)=>s+(r.bags||0),0);const twt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const tamt=recs.reduce((s,r)=>s+getEntryAmt(r),0);
   document.getElementById('outward-total-bags').textContent=tbags;document.getElementById('outward-total-wt').textContent=twt.toFixed(2)+' kg';document.getElementById('outward-total-amt').textContent=fmtINR(tamt);
   document.getElementById('out-info').textContent=`${recs.length} entries`;
+  updateBulkCount('outward');
 }
 function renderOutwardTable(page){updateOutwardFilter();filterOutward();}
 
@@ -2522,10 +2648,29 @@ function exportReportAsPDF(recs){
 }
 
 function renderPagination(type,pages){
-  if(pages<=1)return;
-  let html='';for(let i=1;i<=Math.min(pages,10);i++){html+=`<button class="pb2${i==APP.page[type]?' on':''}" onclick="goTab('${type.replace('_','')}')||render${type.charAt(0).toUpperCase()+type.slice(1)}Table(${i})">${i}</button>`;
+  /* Map prefix to correct render function name */
+  const renderFnMap={rec:'renderRecords',in:'renderInwardTable',out:'renderOutwardTable',p:'renderPaymentTable',rep:'renderReportPage',dd:'renderDashDetailPage'};
+  const pagElMap={rec:'rec-pag',in:'in-pag',out:'out-pag',p:'p-pag',rep:'rep-pag',dd:'dd-pag'};
+  const pagEl=document.getElementById(pagElMap[type]||type+'-pag');
+  if(!pagEl)return;
+  if(pages<=1){pagEl.innerHTML='';return;}
+  const cur=APP.page[type]||1;
+  const fn=renderFnMap[type]||('render'+type.charAt(0).toUpperCase()+type.slice(1)+'Table');
+  /* Smart pagination window: show up to 7 page buttons centered on current */
+  let start=Math.max(1,cur-3);let end=Math.min(pages,start+6);start=Math.max(1,end-6);
+  let html='';
+  /* First + Prev */
+  html+=`<button class="pb2" onclick="${fn}(1)" title="First" ${cur===1?'disabled':''}>«</button>`;
+  html+=`<button class="pb2" onclick="${fn}(${Math.max(1,cur-1)})" title="Prev" ${cur===1?'disabled':''}>‹</button>`;
+  if(start>1)html+=`<span class="pb2" style="border:none;background:transparent">…</span>`;
+  for(let i=start;i<=end;i++){
+    html+=`<button class="pb2${i===cur?' on':''}" onclick="${fn}(${i})">${i}</button>`;
   }
-  document.getElementById(type===''?'rec-pag':type+'-pag').innerHTML=html;
+  if(end<pages)html+=`<span class="pb2" style="border:none;background:transparent">…</span>`;
+  /* Next + Last */
+  html+=`<button class="pb2" onclick="${fn}(${Math.min(pages,cur+1)})" title="Next" ${cur===pages?'disabled':''}>›</button>`;
+  html+=`<button class="pb2" onclick="${fn}(${pages})" title="Last" ${cur===pages?'disabled':''}>»</button>`;
+  pagEl.innerHTML=html;
 }
 
 function openEntryModal(isEdit){
