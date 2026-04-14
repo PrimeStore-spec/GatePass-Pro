@@ -1091,9 +1091,11 @@ function hasPerm(p){
 
 function isFullAccess(){return hasPerm('users')||hasPerm('edit')||hasPerm('delete')||hasPerm('payment');}
 function getVisibleRecords(){
-  if(isFullAccess())return APP.records;
+  /* All users can SEE all entries (admin + other users' entries).
+     Financial data is hidden via CSS (hide-finance class) for non-admin users.
+     Edit/delete permission is enforced separately in editEntry/deleteEntry. */
   if(!currentUser)return [];
-  return APP.records.filter(r=>r.createdBy===currentUser.email);
+  return APP.records;
 }
 
 function applyPermissions(){
