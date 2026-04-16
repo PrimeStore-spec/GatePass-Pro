@@ -1937,7 +1937,7 @@ function buildEntryRow(r,showCheck,checkPrefix){
   h+=`<td>${r.unloadedDate||'<span style="color:var(--text3)">—</span>'}</td>`;
   h+=`<td>${r.vehicle||'-'}</td>`;
   h+=`<td class="fc"><span class="ps-${r.paymentStatus}">${r.paymentStatus}</span></td>`;
-  h+=`<td style="white-space:nowrap">${r.photoUrl?`<button class="act-btn act-photo" onclick="zoomPhoto('${r.photoUrl}')" title="View Photo">📷</button>`:''}<button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','edit')" title="Edit Request">📩</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','delete')" title="Delete Request">📩</button>`:''}${hasApprovedRequest(r.id,'edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit (Approved)" style="border:2px solid #16a34a;">✏️</button>`:''}${hasApprovedRequest(r.id,'delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete (Approved)" style="border:2px solid #16a34a;">🗑️</button>`:''}</td>`;
+  h+=`<td style="white-space:nowrap">${r.photoUrl?`<button class="act-btn act-photo" onclick="zoomPhoto('${driveImgUrl(r.photoUrl)}')" title="View Photo">📷</button>`:''}<button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','edit')" title="Edit Request">📩</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:hasPerm('add')?`<button class="act-btn act-req" onclick="openSendRequestModal('${r.id}','delete')" title="Delete Request">📩</button>`:''}${hasApprovedRequest(r.id,'edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit (Approved)" style="border:2px solid #16a34a;">✏️</button>`:''}${hasApprovedRequest(r.id,'delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete (Approved)" style="border:2px solid #16a34a;">🗑️</button>`:''}</td>`;
   h+=`</tr>`;
   return h;
 }
@@ -3003,7 +3003,7 @@ function viewEntry(id){
     ${r.photoUrl?`
     <div style="margin-top:18px;padding:14px;background:#f7f9fc;border:1px solid var(--border);border-radius:8px;">
       <div style="font-weight:700;color:var(--blue);margin-bottom:10px;font-size:13px;">📷 Attached Photo</div>
-      <img src="${r.photoUrl}" style="max-width:100%;max-height:400px;border-radius:6px;cursor:pointer;display:block;margin:0 auto;border:1px solid var(--border);" onclick="zoomPhoto('${r.photoUrl}')" title="Click to zoom">
+      <img src="${driveImgUrl(r.photoUrl)}" style="max-width:100%;max-height:400px;border-radius:6px;cursor:pointer;display:block;margin:0 auto;border:1px solid var(--border);" onclick="zoomPhoto('${driveImgUrl(r.photoUrl)}')" title="Click to zoom" onerror="this.onerror=null;this.style.display='none';this.parentElement.innerHTML='<div style=\\'text-align:center;color:var(--red);padding:20px;\\'>Photo load nahi ho payi. <a href=${r.photoUrl} target=_blank style=\\'color:var(--blue)\\'>Drive mein dekho →</a></div>';">
       <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text3);">Click image to zoom</div>
     </div>`:''}
     <div style="text-align:center;margin-top:16px;display:flex;gap:10px;justify-content:center;">
@@ -3775,20 +3775,33 @@ function loadExistingPhoto(url){
   if(!url){resetPhotoState();return;}
   EXISTING_PHOTO_URL=url;PENDING_PHOTO=null;PHOTO_REMOVED=false;
   const prev=document.getElementById('photo-preview');
-  if(prev)prev.src=url;
+  if(prev)prev.src=driveImgUrl(url);
   const wrap=document.getElementById('photo-preview-wrap');if(wrap)wrap.style.display='block';
   const btn=document.getElementById('btn-remove-photo');if(btn)btn.style.display='inline-flex';
   const st=document.getElementById('photo-status');if(st)st.textContent='📎 Existing photo attached';
+}
+/* Convert any Google Drive URL to the lh3 CDN format that works in <img> tags */
+function driveImgUrl(url){
+  if(!url)return'';
+  /* Extract file ID from various Drive URL formats */
+  let m=url.match(/[?&]id=([a-zA-Z0-9_-]+)/)||url.match(/\/d\/([a-zA-Z0-9_-]+)/)||url.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+  if(m&&m[1])return'https://lh3.googleusercontent.com/d/'+m[1];
+  return url;/* fallback — return as-is */
 }
 async function uploadPhotoToDrive(base64,fileName,entryInfo){
   try{
     const res=await fetch(PHOTO_UPLOAD_URL,{
       method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      redirect:'follow',
       body:JSON.stringify({image:base64,fileName:fileName,mimeType:'image/jpeg',entryInfo:entryInfo||''})
     });
-    return await res.json();
-  }catch(e){return{success:false,error:e.message||'Network error'};}
+    const data=await res.json();
+    /* Convert URL to lh3 CDN format for reliable <img> display */
+    if(data&&data.success&&data.fileId){
+      data.url='https://lh3.googleusercontent.com/d/'+data.fileId;
+    }
+    return data;
+  }catch(e){console.error('Photo upload error:',e);return{success:false,error:e.message||'Network error'};}
 }
 function zoomPhoto(src){
   src=src||(document.getElementById('photo-preview')||{}).src;
