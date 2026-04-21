@@ -1601,16 +1601,22 @@ function loadData(){
 function applyOverdueCheck(){
   const today=new Date().toISOString().split('T')[0];
   APP.records.forEach(r=>{
-    const due=getEntryAmt(r);
-    const paid=r.paid||0;
-    const bal=due-paid;
-    /* Recalculate status from scratch based on actual balance */
-    if(bal<=1){r.paymentStatus='paid';return;}
-    const dd=getDueDate(r);const dds=dd.toISOString().split('T')[0];
-    if(paid>0){
-      r.paymentStatus=dds<today?'overdue':'partial';
-    }else{
-      r.paymentStatus=dds<today?'overdue':'pending';
+    try{
+      const due=getEntryAmt(r);
+      const paid=r.paid||0;
+      const bal=due-paid;
+      /* Recalculate status from scratch based on actual balance */
+      if(bal<=1){r.paymentStatus='paid';return;}
+      const dd=getDueDate(r);
+      if(!dd||isNaN(dd.getTime())){/* Invalid date — skip */if(!r.paymentStatus)r.paymentStatus='pending';return;}
+      const dds=dd.toISOString().split('T')[0];
+      if(paid>0){
+        r.paymentStatus=dds<today?'overdue':'partial';
+      }else{
+        r.paymentStatus=dds<today?'overdue':'pending';
+      }
+    }catch(e){/* Safety net — don't let one bad record break the whole app */
+      if(!r.paymentStatus)r.paymentStatus='pending';
     }
   });
 }
@@ -2465,7 +2471,7 @@ function printPartyLedger(name){
     lines.forEach((l,i)=>{
       const isSub=l.sub&&l.sub>0;
       const hasRecId=l.recId!=null;
-      const clickHandler=hasRecId?(l.vch==='Inward'||l.vch==='Outward'?`onclick="closeLedgerPrintLayer();viewEntry('${l.recId}')"`:l.vch==='Payment'||l.vch==='Receipt'?`onclick="closeLedgerPrintLayer();viewPaymentDetails('${l.recId}')"`:'')`:'';
+      const clickHandler=hasRecId?(l.vch==='Inward'||l.vch==='Outward'?`onclick="closeLedgerPrintLayer();viewEntry('${l.recId}')"`:l.vch==='Payment'||l.vch==='Receipt'?`onclick="closeLedgerPrintLayer();viewPaymentDetails('${l.recId}')"`:''):'';
       const cursorStyle=hasRecId?'cursor:pointer;':'';
       html+='<tr style="background:'+(isSub?'#f9fafb':i%2?'#f8fafc':'#fff')+';border-bottom:1px solid #e5e7eb;'+cursorStyle+'" '+clickHandler+' title="'+(hasRecId?'Click to open details':'no-action')+'">'
         +'<td style="padding:6px 8px;font-family:JetBrains Mono,monospace;white-space:nowrap;font-size:10px">'+(isSub?'':esc(l.date))+'</td>'
