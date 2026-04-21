@@ -3267,7 +3267,7 @@ function viewPaymentDetails(id){
     <!-- Action Buttons -->
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
       <button class="btn btn-ghost" onclick="closeM('view-modal')" style="min-width:90px;">Close</button>
-      ${paid>0&&hasPerm('payment')?`<button class="btn btn-purple" onclick="closeM('view-modal');editPaidAmount('${r.id}')" style="min-width:90px;">✏️ Edit Payment</button>`:''}
+      ${paid>0&&hasPerm('payment')?`<button class="btn btn-purple" onclick="closeM('view-modal');openPaymentModal('${r.id}','${r.type==='inward'?'pay':'receive'}',true)" style="min-width:90px;">✏️ Edit Payment</button>`:''}
       ${bal>0&&hasPerm('payment')?`<button class="btn btn-green" onclick="closeM('view-modal');openPaymentModal('${r.id}','${r.type==='inward'?'pay':'receive'}')" style="min-width:90px;">💸 Add Payment</button>`:''}
       ${hasPerm('edit')?`<button class="btn btn-blue" onclick="closeM('view-modal');editEntry('${r.id}')" style="min-width:90px;">📝 Edit Entry</button>`:''}
       <button class="btn btn-ghost" onclick="closeM('view-modal');viewEntry('${r.id}')" style="min-width:90px;">📄 Full Entry</button>
@@ -3473,37 +3473,98 @@ function saveParty(){
   toast('Party added!','s');closeM('party-modal');
 }
 
-function openPaymentModal(id,direction){
+function openPaymentModal(id,direction,editMode){
   const entry=APP.records.find(r=>r.id===id);if(!entry)return;
-  const due=getEntryAmt(entry);const bal=due-(entry.paid||0);
-  const dd=getDueDate(entry);
+  const due=getEntryAmt(entry);
   const isInward=entry.type==='inward';
   direction=direction||(isInward?'pay':'receive');
+
+  /* Edit mode: find last payment journal entries to pre-fill */
+  let editData=null;
+  window._paymentEditMode=null;
+  if(editMode){
+    const journal=APP.journal||[];
+    /* Find all non-deduction payment journals for this entry, get the last one */
+    const payJournals=journal.filter(j=>j.entryId===id&&(j.type==='Payment'||j.type==='Receipt'||j.type==='Correction'));
+    if(payJournals.length>0){
+      const lastPay=payJournals[payJournals.length-1];
+      const vchNo=lastPay.vchNo;
+      /* Find sibling deduction entries with same vchNo */
+      const siblings=journal.filter(j=>j.entryId===id&&j.vchNo===vchNo&&j.type==='Deduction');
+      let oldCd=0,oldBrok=0,oldTds=0,oldOther=0;
+      siblings.forEach(s=>{
+        if(s.note==='CD')oldCd=s.dr||s.cr||0;
+        else if(s.note==='Brokerage')oldBrok=s.dr||s.cr||0;
+        else if(s.note==='TDS')oldTds=s.dr||s.cr||0;
+        else oldOther=s.dr||s.cr||0;
+      });
+      const oldAmt=lastPay.dr||lastPay.cr||0;
+      editData={
+        journalId:lastPay.id,vchNo:vchNo,
+        amt:oldAmt,date:lastPay.date,mode:lastPay.mode||'Cash',ref:lastPay.ref||'',bank:lastPay.bank||'',
+        note:lastPay.note||'',cd:oldCd,brok:oldBrok,tds:oldTds,other:oldOther,
+        oldNet:oldAmt+oldCd+oldBrok+oldTds+oldOther
+      };
+      window._paymentEditMode=editData;
+    }else{
+      toast('Koi payment entry nahi mili edit karne ke liye!','e');return;
+    }
+  }
+
+  /* In edit mode, balance should include the old payment (as if it's being reversed) */
+  const currentPaid=entry.paid||0;
+  const bal=editMode&&editData?due-(currentPaid-editData.oldNet):due-currentPaid;
+
   document.getElementById('pm-entry').value=id;
   document.getElementById('pm-direction').value=direction;
-  document.getElementById('pm-title').textContent=direction==='pay'?'💸 Make Payment (Pay to Party)':'💰 Receive Payment (From Party)';
+  if(editMode){
+    document.getElementById('pm-title').textContent='✏️ Edit Payment — '+(direction==='pay'?'Pay to Party':'From Party');
+  }else{
+    document.getElementById('pm-title').textContent=direction==='pay'?'💸 Make Payment (Pay to Party)':'💰 Receive Payment (From Party)';
+  }
   document.getElementById('pm-party-display').textContent=entry.party;
   document.getElementById('pm-type-badge').innerHTML='<span class="'+(isInward?'type-in':'type-out')+'">'+(isInward?'Inward':'Outward')+'</span>';
   document.getElementById('pm-status-badge').innerHTML='<span class="ps-'+(entry.paymentStatus||'pending')+'">'+(entry.paymentStatus||'pending')+'</span>';
   document.getElementById('pm-gp-display').textContent=entry.gp||'-';
   document.getElementById('pm-item-display').textContent=entry.item||'-';
   document.getElementById('pm-date-display').textContent=entry.date||'-';
+  const dd=getDueDate(entry);
   document.getElementById('pm-duedate-display').textContent=dd.toISOString().split('T')[0];
   document.getElementById('pm-total').textContent=fmtINR(due);
-  document.getElementById('pm-paid').textContent=fmtINR(entry.paid||0);
+  document.getElementById('pm-paid').textContent=editMode&&editData?fmtINR(currentPaid-editData.oldNet):fmtINR(currentPaid);
   document.getElementById('pm-balance').textContent=fmtINR(bal);
-  document.getElementById('pm-amount').value='';document.getElementById('pm-date').value=new Date().toISOString().split('T')[0];
-  document.getElementById('pm-method').value='Cash';document.getElementById('pm-ref').value='';document.getElementById('pm-bank').value='';
-  document.getElementById('pm-ded-cd').value='';document.getElementById('pm-ded-brok').value='';document.getElementById('pm-ded-tds').value='';document.getElementById('pm-ded-other').value='';
-  document.getElementById('pm-note').value='';
+
+  /* Pre-fill fields: edit mode uses old data, new mode clears */
+  if(editMode&&editData){
+    document.getElementById('pm-amount').value=editData.amt;
+    document.getElementById('pm-date').value=editData.date||new Date().toISOString().split('T')[0];
+    document.getElementById('pm-method').value=editData.mode;
+    document.getElementById('pm-ref').value=editData.ref;
+    document.getElementById('pm-bank').value=editData.bank;
+    document.getElementById('pm-ded-cd').value=editData.cd||'';
+    document.getElementById('pm-ded-brok').value=editData.brok||'';
+    document.getElementById('pm-ded-tds').value=editData.tds||'';
+    document.getElementById('pm-ded-other').value=editData.other||'';
+    document.getElementById('pm-note').value=editData.note;
+  }else{
+    document.getElementById('pm-amount').value='';document.getElementById('pm-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('pm-method').value='Cash';document.getElementById('pm-ref').value='';document.getElementById('pm-bank').value='';
+    document.getElementById('pm-ded-cd').value='';document.getElementById('pm-ded-brok').value='';document.getElementById('pm-ded-tds').value='';document.getElementById('pm-ded-other').value='';
+    document.getElementById('pm-note').value='';
+  }
   document.getElementById('pm-net').textContent='₹0';document.getElementById('pm-after-bal').textContent=fmtINR(bal);
+  calcPaymentRemaining();
   document.getElementById('payment-modal').classList.add('open');
 }
 
 function calcPaymentRemaining(){
   const id=document.getElementById('pm-entry').value;
   const entry=APP.records.find(r=>r.id===id);if(!entry)return;
-  const due=getEntryAmt(entry);const bal=due-(entry.paid||0);
+  const due=getEntryAmt(entry);
+  /* In edit mode, balance = due - (currentPaid - oldPayment) so the old payment is "reversed" for calculation */
+  const editInfo=window._paymentEditMode;
+  const effectivePaid=editInfo?(entry.paid||0)-editInfo.oldNet:(entry.paid||0);
+  const bal=due-effectivePaid;
   const amt=parseFloat(document.getElementById('pm-amount').value)||0;
   const cd=parseFloat(document.getElementById('pm-ded-cd').value)||0;
   const brok=parseFloat(document.getElementById('pm-ded-brok').value)||0;
@@ -3534,7 +3595,24 @@ function recordPayment(){
   const payRef=document.getElementById('pm-ref').value;
   const payBank=document.getElementById('pm-bank').value;
   const payNote=document.getElementById('pm-note').value;
-  /* Update entry */
+  const isInward=entry.type==='inward';
+  if(!APP.journal)APP.journal=[];
+
+  /* ===== EDIT MODE: Reverse old payment first, then remove old journal entries ===== */
+  const editInfo=window._paymentEditMode;
+  if(editInfo){
+    /* Reverse old paid amount and deductions from entry */
+    entry.paid=(entry.paid||0)-editInfo.oldNet;
+    entry.dedCD=(entry.dedCD||0)-(editInfo.cd||0);
+    entry.dedBrok=(entry.dedBrok||0)-(editInfo.brok||0);
+    entry.dedTDS=(entry.dedTDS||0)-(editInfo.tds||0);
+    entry.dedOther=(entry.dedOther||0)-(editInfo.other||0);
+    /* Remove old journal entries with same vchNo */
+    APP.journal=APP.journal.filter(j=>!(j.entryId===id&&j.vchNo===editInfo.vchNo));
+    window._paymentEditMode=null;
+  }
+
+  /* Update entry with new payment */
   entry.paid=(entry.paid||0)+net;
   entry.payDate=payDate;entry.payMode=payMode;entry.payRef=payRef;entry.payBank=payBank;
   entry.dedCD=(entry.dedCD||0)+cd;entry.dedBrok=(entry.dedBrok||0)+brok;entry.dedTDS=(entry.dedTDS||0)+tds;entry.dedOther=(entry.dedOther||0)+other;
@@ -3544,15 +3622,17 @@ function recordPayment(){
     const ddStr=getDueDate(entry).toISOString().split('T')[0];
     const todayStr=new Date().toISOString().split('T')[0];
     entry.paymentStatus=ddStr<todayStr?'overdue':'partial';
+  }else{
+    const ddStr=getDueDate(entry).toISOString().split('T')[0];
+    const todayStr=new Date().toISOString().split('T')[0];
+    entry.paymentStatus=ddStr<todayStr?'overdue':'pending';
   }
   /* Create journal entry */
-  if(!APP.journal)APP.journal=[];
-  const vchNo='JV-'+Date.now();
-  const isInward=entry.type==='inward';
+  const vchNo=editInfo?editInfo.vchNo:('JV-'+Date.now());
   /* Main payment journal */
   APP.journal.push({
     id:'J'+Date.now(),date:payDate,vchNo,party:entry.party,type:direction==='pay'?'Payment':'Receipt',
-    particulars:(direction==='pay'?'Payment to ':'Received from ')+entry.party+' — GP '+(entry.gp||'-')+' | '+(entry.item||'-'),
+    particulars:(direction==='pay'?'Payment to ':'Received from ')+entry.party+' — GP '+(entry.gp||'-')+' | '+(entry.item||'-')+(editInfo?' (Edited)':''),
     mode:payMode,ref:payRef,bank:payBank,
     dr:isInward?amt:0,cr:isInward?0:amt,
     note:payNote,entryId:id,createdAt:new Date().toISOString()
@@ -3566,7 +3646,7 @@ function recordPayment(){
   localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
   syncToFirestore();
   closeM('payment-modal');refreshAllViews();
-  toast('Payment recorded + Journal entry created!','s');
+  toast(editInfo?'Payment updated successfully!':'Payment recorded + Journal entry created!','s');
 }
 
 /* ===== EDIT PAID AMOUNT DIRECTLY ===== */
