@@ -423,7 +423,7 @@
       </div>
     </div>
     <div class="tsc"><table id="journal-table"><thead><tr>
-      <th>Date</th><th>Vch No</th><th>Party</th><th>Type</th><th>Particulars</th><th>Mode</th><th>Reference</th><th>Dr</th><th>Cr</th><th>Notes</th>
+      <th>Date</th><th>Vch No</th><th>Party</th><th>Type</th><th>Particulars</th><th>Mode</th><th>Reference</th><th>Dr</th><th>Cr</th><th>Notes</th><th>Actions</th>
     </tr></thead><tbody></tbody></table></div>
   </div>
 </div>
@@ -1601,11 +1601,17 @@ function loadData(){
 function applyOverdueCheck(){
   const today=new Date().toISOString().split('T')[0];
   APP.records.forEach(r=>{
-    if(r.paymentStatus==='paid')return;
+    const due=getEntryAmt(r);
+    const paid=r.paid||0;
+    const bal=due-paid;
+    /* Recalculate status from scratch based on actual balance */
+    if(bal<=1){r.paymentStatus='paid';return;}
     const dd=getDueDate(r);const dds=dd.toISOString().split('T')[0];
-    if(dds<today&&r.paymentStatus!=='paid'){r.paymentStatus='overdue';}
-    else if((r.paid||0)>0&&r.paymentStatus==='overdue'){r.paymentStatus='partial';}
-    else if((r.paid||0)===0&&r.paymentStatus==='overdue'&&dds>=today){r.paymentStatus='pending';}
+    if(paid>0){
+      r.paymentStatus=dds<today?'overdue':'partial';
+    }else{
+      r.paymentStatus=dds<today?'overdue':'pending';
+    }
   });
 }
 
@@ -2452,22 +2458,27 @@ function printPartyLedger(name){
     +'<th style="padding:7px 8px;text-align:right;color:#fff;font-size:10px;font-weight:600">Debit (Dr)</th>'
     +'<th style="padding:7px 8px;text-align:right;color:#fff;font-size:10px;font-weight:600">Credit (Cr)</th>'
     +'<th style="padding:7px 8px;text-align:right;color:#fff;font-size:10px;font-weight:600">Balance</th>'
+    +'<th style="padding:7px 8px;text-align:center;color:#fff;font-size:10px;font-weight:600">Actions</th>'
     +'</tr></thead><tbody>';
 
   if(lines.length){
     lines.forEach((l,i)=>{
       const isSub=l.sub&&l.sub>0;
-      html+='<tr style="background:'+(isSub?'#f9fafb':i%2?'#f8fafc':'#fff')+';border-bottom:1px solid #e5e7eb">'
+      const hasRecId=l.recId!=null;
+      const clickHandler=hasRecId?(l.vch==='Inward'||l.vch==='Outward'?`onclick="closeLedgerPrintLayer();viewEntry('${l.recId}')"`:l.vch==='Payment'||l.vch==='Receipt'?`onclick="closeLedgerPrintLayer();viewPaymentDetails('${l.recId}')"`:'')`:'';
+      const cursorStyle=hasRecId?'cursor:pointer;':'';
+      html+='<tr style="background:'+(isSub?'#f9fafb':i%2?'#f8fafc':'#fff')+';border-bottom:1px solid #e5e7eb;'+cursorStyle+'" '+clickHandler+' title="'+(hasRecId?'Click to open details':'no-action')+'">'
         +'<td style="padding:6px 8px;font-family:JetBrains Mono,monospace;white-space:nowrap;font-size:10px">'+(isSub?'':esc(l.date))+'</td>'
         +'<td style="padding:6px 8px;max-width:340px;white-space:normal;line-height:1.35;'+(isSub?'color:#64748b;font-size:10px;padding-left:20px':'')+'">'+esc(l.particulars)+'</td>'
         +'<td style="padding:6px 8px;text-align:center;font-size:10px;'+(isSub?'color:#94a3b8':'')+'">'+esc(l.vch)+'</td>'
         +'<td style="padding:6px 8px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;'+(l.dr?'color:#dc2626':'')+'">'+(l.dr?fmtINR(l.dr):'\u2014')+'</td>'
         +'<td style="padding:6px 8px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;color:#15803d">'+(l.cr?fmtINR(l.cr):'\u2014')+'</td>'
         +'<td style="padding:6px 8px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:700;color:'+(l.balance>=0?'#166534':'#dc2626')+'">'+fmtINR(Math.abs(l.balance))+' '+(l.balance<0?'Cr':l.balance>0?'Dr':'')+'</td>'
+        +'<td style="padding:6px 8px;text-align:center;font-size:10px;white-space:nowrap;">'+(hasRecId?'✏️ Edit | 👁 View':'—')+'</td>'
         +'</tr>';
     });
   }else{
-    html+='<tr><td colspan="6" style="padding:20px;text-align:center;color:#8a95a8">Koi ledger entry nahi mili</td></tr>';
+    html+='<tr><td colspan="7" style="padding:20px;text-align:center;color:#8a95a8">Koi ledger entry nahi mili</td></tr>';
   }
 
   html+='</tbody><tfoot><tr style="background:#f0f4fc;border-top:2px solid #1a3a6b;font-weight:700">'
@@ -2475,6 +2486,7 @@ function printPartyLedger(name){
     +'<td style="padding:8px;text-align:right;font-family:Rajdhani,sans-serif;font-size:13px">'+fmtINR(drTotal)+'</td>'
     +'<td style="padding:8px;text-align:right;font-family:Rajdhani,sans-serif;font-size:13px;color:#dc2626">'+fmtINR(crTotal)+'</td>'
     +'<td style="padding:8px;text-align:right;font-family:Rajdhani,sans-serif;font-size:14px;color:'+(closingBal>=0?'#166534':'#dc2626')+'">'+fmtINR(Math.abs(closingBal))+' '+(closingBal<0?'Cr':closingBal>0?'Dr':'')+'</td>'
+    +'<td style="padding:8px;"></td>'
     +'</tr></tfoot></table>';
 
   html+='<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e5e7eb;padding-top:8px;font-size:10px;color:#94a3b8">'
@@ -3552,6 +3564,7 @@ function recordPayment(){
 
 /* ===== JOURNAL ENTRY SYSTEM ===== */
 function openJournalEntry(){
+  window._editingJournalId=null;
   document.getElementById('je-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('je-vch').value='';document.getElementById('je-party').value='';
   document.getElementById('je-type').value='dr';document.getElementById('je-amount').value='';
@@ -3576,13 +3589,38 @@ function saveJournalEntry(){
   if(!date||!party||!amount||!narration){toast('Sab required fields bharo','e');return;}
   if(!APP.journal)APP.journal=[];
   const vchNo=document.getElementById('je-vch').value||('MJV-'+Date.now());
-  APP.journal.push({
-    id:'J'+Date.now(),date,vchNo,party,type:type==='dr'?'Dr (Manual)':'Cr (Manual)',
-    particulars:narration,
-    mode:document.getElementById('je-mode').value,ref:document.getElementById('je-ref').value,bank:'',
-    dr:type==='dr'?amount:0,cr:type==='cr'?amount:0,
-    note:'Manual journal',entryId:null,createdAt:new Date().toISOString()
-  });
+  const modeVal=document.getElementById('je-mode').value;
+  const refVal=document.getElementById('je-ref').value;
+
+  if(window._editingJournalId){
+    const idx=APP.journal.findIndex(x=>x.id===window._editingJournalId);
+    if(idx>=0){
+      /* If linked entry, reverse old amount and apply new */
+      const oldJ=APP.journal[idx];
+      if(oldJ.entryId){
+        const entry=APP.records.find(r=>r.id===oldJ.entryId);
+        if(entry){
+          entry.paid=Math.max(0,(entry.paid||0)-(oldJ.dr||oldJ.cr||0));
+          entry.paid+=amount;
+          const due=getEntryAmt(entry);const bal=due-entry.paid;
+          if(bal<=1){entry.paymentStatus='paid';}
+          else if(entry.paid>0){entry.paymentStatus='partial';}
+          else{entry.paymentStatus='pending';}
+        }
+      }
+      APP.journal[idx]={...APP.journal[idx],date,vchNo,party,type:type==='dr'?'Dr (Edited)':'Cr (Edited)',particulars:narration,mode:modeVal,ref:refVal,dr:type==='dr'?amount:0,cr:type==='cr'?amount:0,note:'Edited',updatedAt:new Date().toISOString()};
+    }
+    window._editingJournalId=null;
+  }else{
+    APP.journal.push({
+      id:'J'+Date.now(),date,vchNo,party,type:type==='dr'?'Dr (Manual)':'Cr (Manual)',
+      particulars:narration,
+      mode:modeVal,ref:refVal,bank:'',
+      dr:type==='dr'?amount:0,cr:type==='cr'?amount:0,
+      note:'Manual journal',entryId:null,createdAt:new Date().toISOString()
+    });
+  }
+  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
   syncToFirestore();
   closeM('journal-modal');filterPayment();
@@ -3593,10 +3631,81 @@ function renderJournalLog(){
   if(!APP.journal)APP.journal=JSON.parse(localStorage.getItem(`journal-${APP.company}`)||'[]');
   const entries=APP.journal.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   document.getElementById('journal-count').textContent=entries.length;
-  let html='';entries.forEach(j=>{
-    html+=`<tr><td>${j.date}</td><td class="mono">${j.vchNo||'-'}</td><td><strong>${j.party}</strong></td><td>${j.type}</td><td style="max-width:250px;white-space:normal;font-size:11px">${j.particulars}</td><td>${j.mode||'-'}</td><td class="mono">${j.ref||'-'}</td><td style="text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;${j.dr?'color:#dc2626':''}">${j.dr?fmtINR(j.dr):'\u2014'}</td><td style="text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;color:#15803d">${j.cr?fmtINR(j.cr):'\u2014'}</td><td style="font-size:11px;color:var(--text3)">${j.note||'-'}</td></tr>`;
+  let html='';entries.forEach((j,idx)=>{
+    html+=`<tr>
+      <td>${j.date}</td>
+      <td class="mono">${j.vchNo||'-'}</td>
+      <td><strong>${j.party}</strong></td>
+      <td>${j.type}</td>
+      <td style="max-width:250px;white-space:normal;font-size:11px">${j.particulars}</td>
+      <td>${j.mode||'-'}</td>
+      <td class="mono">${j.ref||'-'}</td>
+      <td style="text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;${j.dr?'color:#dc2626':''}">${j.dr?fmtINR(j.dr):'\u2014'}</td>
+      <td style="text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;color:#15803d">${j.cr?fmtINR(j.cr):'\u2014'}</td>
+      <td style="font-size:11px;color:var(--text3)">${j.note||'-'}</td>
+      <td style="white-space:nowrap">
+        ${j.entryId?`<button class="act-btn act-view" onclick="viewPaymentDetails('${j.entryId}')" title="View Payment Details">👁</button>`:''}
+        ${hasPerm('payment')?`<button class="act-btn act-edit" onclick="editJournalEntry('${j.id}')" title="Edit">✏️</button><button class="act-btn act-del" onclick="deleteJournalEntry('${j.id}')" title="Delete">🗑️</button>`:''}
+      </td>
+    </tr>`;
   });
-  document.querySelector('#journal-table tbody').innerHTML=html||'<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--text3)">Koi journal entry nahi — payment record karo ya manual journal banao</td></tr>';
+  document.querySelector('#journal-table tbody').innerHTML=html||'<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text3)">Koi journal entry nahi — payment record karo ya manual journal banao</td></tr>';
+}
+
+function editJournalEntry(jId){
+  if(!hasPerm('payment')){toast('Payment permission chahiye!','e');return;}
+  const j=APP.journal.find(x=>x.id===jId);if(!j){toast('Journal entry nahi mili','e');return;}
+  /* Populate the existing journal modal with the entry's data for editing */
+  document.getElementById('je-date').value=j.date||'';
+  document.getElementById('je-vch').value=j.vchNo||'';
+  document.getElementById('je-party').value=j.party||'';
+  document.getElementById('je-type').value=j.dr>0?'dr':'cr';
+  document.getElementById('je-amount').value=j.dr||j.cr||'';
+  document.getElementById('je-mode').value=j.mode||'Cash';
+  document.getElementById('je-ref').value=j.ref||'';
+  document.getElementById('je-narration').value=j.particulars||'';
+  /* Store editing ID */
+  window._editingJournalId=jId;
+  document.getElementById('journal-modal').classList.add('open');
+}
+
+function deleteJournalEntry(jId){
+  if(!hasPerm('payment')){toast('Payment permission chahiye!','e');return;}
+  const j=APP.journal.find(x=>x.id===jId);if(!j)return;
+  const label=j.party+' | '+fmtINR(j.dr||j.cr)+' | '+j.date;
+  if(!confirm('Journal entry delete karni hai?\n\n'+label+'\n\nLinked entry ka paid amount bhi adjust hoga!')){return;}
+  /* If linked to an entry, reverse the payment amount */
+  if(j.entryId){
+    const entry=APP.records.find(r=>r.id===j.entryId);
+    if(entry){
+      const reverseAmt=j.dr||j.cr||0;
+      entry.paid=Math.max(0,(entry.paid||0)-reverseAmt);
+      /* Also reverse deductions based on note */
+      if(j.note==='CD')entry.dedCD=Math.max(0,(entry.dedCD||0)-reverseAmt);
+      else if(j.note==='Brokerage')entry.dedBrok=Math.max(0,(entry.dedBrok||0)-reverseAmt);
+      else if(j.note==='TDS')entry.dedTDS=Math.max(0,(entry.dedTDS||0)-reverseAmt);
+      else if(j.note==='Other ded')entry.dedOther=Math.max(0,(entry.dedOther||0)-reverseAmt);
+      /* Recalculate payment status */
+      const due=getEntryAmt(entry);const bal=due-entry.paid;
+      if(bal<=1){entry.paymentStatus='paid';}
+      else if(entry.paid>0){
+        const ddStr=getDueDate(entry).toISOString().split('T')[0];
+        const todayStr=new Date().toISOString().split('T')[0];
+        entry.paymentStatus=ddStr<todayStr?'overdue':'partial';
+      }else{
+        const ddStr=getDueDate(entry).toISOString().split('T')[0];
+        const todayStr=new Date().toISOString().split('T')[0];
+        entry.paymentStatus=ddStr<todayStr?'overdue':'pending';
+      }
+    }
+  }
+  /* Remove from journal */
+  APP.journal=APP.journal.filter(x=>x.id!==jId);
+  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
+  syncToFirestore();
+  refreshAllViews();
+  toast('Journal entry deleted + payment adjusted','s');
 }
 
 function exportJournalCSV(){
