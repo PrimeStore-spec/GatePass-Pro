@@ -2640,7 +2640,7 @@ function filterPayment(){
       +`<td class="fc" style="${isOverdue?'color:var(--red);font-weight:600':''}">${dds}</td>`
       +`<td>${daysLabel}</td>`
       +`<td class="fc"><span class="ps-${r.paymentStatus||'pending'}">${r.paymentStatus||'pending'}</span></td>`
-      +`<td style="white-space:nowrap">${actionBtn} <button class="act-btn act-view" onclick="viewEntry('${r.id}')" title="View">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}</td>`
+      +`<td style="white-space:nowrap">${actionBtn} <button class="act-btn act-view" onclick="viewPaymentDetails('${r.id}')" title="Payment Details">👁</button>${hasPerm('edit')?`<button class="act-btn act-edit" onclick="editEntry('${r.id}')" title="Edit">✏️</button>`:''}${hasPerm('delete')?`<button class="act-btn act-del" onclick="deleteEntry('${r.id}')" title="Delete">🗑️</button>`:''}</td>`
       +`</tr>`;
   });
   document.querySelector('#payment-table tbody').innerHTML=html||'<tr><td colspan="17" style="text-align:center;padding:30px;color:var(--text3)">Koi payment entry nahi mila</td></tr>';
@@ -3171,6 +3171,100 @@ function viewEntry(id){
   vm.querySelector('.modal').innerHTML=html;vm.classList.add('open');
 }
 
+function viewPaymentDetails(id){
+  const r=APP.records.find(e=>e.id===id);if(!r)return;
+  const due=getEntryAmt(r);const paid=r.paid||0;const bal=due-paid;
+  const dueDate=getDueDate(r);
+  const dueDateStr=dueDate.toISOString().split('T')[0];
+  const today=new Date().toISOString().split('T')[0];
+  const daysLeft=Math.ceil((dueDate-new Date(today))/(86400000));
+  const isOverdue=dueDateStr<today&&(r.paymentStatus||'pending')!=='paid';
+  const statusText=r.paymentStatus||'pending';
+  const statusColors={paid:'#27ae60',partial:'#3498db',pending:'#e67e22',overdue:'#c0392b'};
+  const statusBgColors={paid:'#dcfce7',partial:'#e0f2fe',pending:'#fef3e2',overdue:'#fee2e2'};
+
+  /* Get journal entries for this entry */
+  const journal=APP.journal||[];
+  const entryJournals=journal.filter(j=>j.entryId===id);
+
+  /* Build payment history table */
+  let journalHtml='<table style="width:100%;border-collapse:collapse;font-size:.9rem;"><thead><tr style="background:#f0f4fc;"><th style="padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dae4f8;font-size:.75rem;text-transform:uppercase;">Date</th><th style="padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dae4f8;font-size:.75rem;text-transform:uppercase;">Dr (Received)</th><th style="padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dae4f8;font-size:.75rem;text-transform:uppercase;">Cr (Paid)</th><th style="padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dae4f8;font-size:.75rem;text-transform:uppercase;">Mode</th><th style="padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dae4f8;font-size:.75rem;text-transform:uppercase;">Reference</th><th style="padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #dae4f8;font-size:.75rem;text-transform:uppercase;">Note</th></tr></thead><tbody>';
+  if(entryJournals.length){
+    entryJournals.forEach(j=>{
+      journalHtml+=`<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 10px;font-size:.85rem;">${j.date||'-'}</td><td style="padding:6px 10px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;color:${j.dr?'#27ae60':'transparent'}">${j.dr?fmtINR(j.dr):'-'}</td><td style="padding:6px 10px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;color:${j.cr?'#dc2626':'transparent'}">${j.cr?fmtINR(j.cr):'-'}</td><td style="padding:6px 10px;font-size:.85rem;">${j.mode||'-'}</td><td style="padding:6px 10px;font-size:.85rem;font-family:JetBrains Mono,monospace;">${j.ref||'-'}</td><td style="padding:6px 10px;font-size:.8rem;color:var(--text3);">${j.note||'-'}</td></tr>`;
+    });
+  }else{
+    journalHtml+='<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--text3);font-size:.9rem;">Koi payment history nahi</td></tr>';
+  }
+  journalHtml+='</tbody></table>';
+
+  /* Calculate progress bar percentage */
+  const paidPct=due>0?Math.min(Math.round((paid/due)*100),100):0;
+
+  /* Deduction summary */
+  let dedText='';
+  const cd=r.dedCD||0;const brok=r.dedBrok||0;const tds=r.dedTDS||0;const oth=r.dedOther||0;
+  if(cd>0)dedText+=`CD: ${fmtINR(cd)} `;
+  if(brok>0)dedText+=`Brokerage: ${fmtINR(brok)} `;
+  if(tds>0)dedText+=`TDS: ${fmtINR(tds)} `;
+  if(oth>0)dedText+=`Other: ${fmtINR(oth)} `;
+
+  const html=`
+  <div style="padding:18px 22px;">
+    <!-- Summary Card -->
+    <div style="background:linear-gradient(135deg,#1a3a6b,#1a5fc8);border-radius:10px;padding:14px 16px;margin-bottom:14px;color:#fff;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;font-size:.92rem;">
+        <div><div style="opacity:0.7;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;">Party / Item</div><div style="font-weight:600;font-family:Rajdhani,sans-serif;font-size:1.05rem;">${r.party||'-'} | ${r.item||'-'}</div></div>
+        <div><div style="opacity:0.7;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;">Type / GP</div><div style="font-weight:600;font-family:Rajdhani,sans-serif;font-size:1.05rem;">${r.type==='inward'?'📥 Inward':'📤 Outward'} | ${r.gp||'-'}</div></div>
+        <div><div style="opacity:0.7;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;">Entry Date</div><div style="font-weight:600;font-family:Rajdhani,sans-serif;font-size:1rem;">${r.date||'-'}</div></div>
+        <div><div style="opacity:0.7;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;">Status</div><div style="background:${statusColors[statusText]};padding:2px 8px;border-radius:4px;font-weight:600;font-size:.9rem;display:inline-block;width:fit-content;">✓ ${statusText.charAt(0).toUpperCase()+statusText.slice(1)}</div></div>
+      </div>
+    </div>
+
+    <!-- Payment Summary -->
+    <div style="background:#f8f9fa;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+      <div style="font-weight:700;color:var(--blue);font-size:.95rem;margin-bottom:10px;">💰 Payment Summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px;font-size:.9rem;">
+        <div style="display:flex;justify-content:space-between;"><span>Total Amount Due:</span><span style="font-weight:700;font-family:Rajdhani,sans-serif;color:var(--blue);">${fmtINR(due)}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Total Paid:</span><span style="font-weight:700;font-family:Rajdhani,sans-serif;color:var(--green);">${fmtINR(paid)}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Balance Remaining:</span><span style="font-weight:700;font-family:Rajdhani,sans-serif;color:${bal>0?'var(--red)':'var(--green)'};">${fmtINR(bal)}</span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Due Date:</span><span style="font-weight:600;font-family:Rajdhani,sans-serif;">${dueDateStr}</span></div>
+      </div>
+
+      <!-- Progress Bar -->
+      ${bal>0?`<div style="background:#ddd;border-radius:4px;height:12px;overflow:hidden;margin-bottom:8px;"><div style="background:${paidPct>70?'var(--green)':paidPct>30?'var(--yellow)':'var(--red)'};width:${paidPct}%;height:100%;transition:width 0.3s ease;"></div></div><div style="text-align:center;font-size:.8rem;color:var(--text3);">${paidPct}% paid</div>`:'<div style="padding:8px;background:var(--gbg);border:1px solid var(--gb);border-radius:4px;text-align:center;color:var(--green);font-weight:600;font-size:.9rem;">✓ Fully Paid</div>'}
+
+      ${isOverdue?`<div style="margin-top:8px;padding:8px;background:#fee2e2;border:1px solid #fca5a5;border-radius:4px;color:#c0392b;font-weight:600;font-size:.85rem;">⚠ ${Math.abs(daysLeft)} din late</div>`:(bal>0?`<div style="margin-top:8px;padding:8px;background:#e0f2fe;border:1px solid #bfdbfe;border-radius:4px;color:#0369a1;font-weight:600;font-size:.85rem;">📅 ${daysLeft} din baaki</div>`:'<div style="margin-top:8px;padding:8px;background:var(--gbg);border:1px solid var(--gb);border-radius:4px;color:var(--green);font-weight:600;font-size:.85rem;">✓ On time</div>')}
+    </div>
+
+    <!-- Deductions -->
+    ${dedText?`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:.85rem;"><span style="color:#b45309;font-weight:600;">Deductions: </span><span style="color:#92400e;">${dedText}</span></div>`:''}
+
+    <!-- Payment History -->
+    <div style="margin-bottom:14px;">
+      <div style="font-weight:700;color:var(--blue);font-size:.95rem;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid var(--bluebg);">📋 Payment History</div>
+      ${journalHtml}
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
+      <button class="btn btn-ghost" onclick="closeM('view-modal')" style="min-width:100px;">Close</button>
+      ${bal>0&&hasPerm('payment')?`<button class="btn btn-green" onclick="closeM('view-modal');openPaymentModal('${r.id}','${r.type==='inward'?'pay':'receive'}')" style="min-width:100px;">💸 Payment</button>`:''}
+      ${hasPerm('edit')?`<button class="btn btn-blue" onclick="closeM('view-modal');editEntry('${r.id}')" style="min-width:100px;">✏️ Edit</button>`:''}
+      <button class="btn btn-ghost" onclick="closeM('view-modal');viewEntry('${r.id}')" style="min-width:100px;">📄 Full Entry</button>
+    </div>
+  </div>`;
+
+  let vm=document.getElementById('view-modal');
+  if(!vm){
+    vm=document.createElement('div');vm.id='view-modal';vm.className='ov';
+    vm.onclick=function(e){if(e.target===vm)closeM('view-modal');};
+    vm.innerHTML='<div class="modal" style="max-width:680px;border-radius:12px;"></div>';
+    document.body.appendChild(vm);
+  }
+  vm.querySelector('.modal').innerHTML=html;vm.classList.add('open');
+}
+
 function deleteEntry(id){
   if(!hasPerm('delete')){
     const approvedReq=APP.requests.find(rq=>rq.entryId===id&&rq.type==='delete'&&rq.status==='approved'&&rq.requestedBy===currentUser.email);
@@ -3426,7 +3520,12 @@ function recordPayment(){
   entry.payDate=payDate;entry.payMode=payMode;entry.payRef=payRef;entry.payBank=payBank;
   entry.dedCD=(entry.dedCD||0)+cd;entry.dedBrok=(entry.dedBrok||0)+brok;entry.dedTDS=(entry.dedTDS||0)+tds;entry.dedOther=(entry.dedOther||0)+other;
   entry.payNote=payNote;entry.lastPayDate=payDate;
-  if(entry.paid>=due){entry.paymentStatus='paid';}else if(entry.paid>0){entry.paymentStatus='partial';}
+  const bal=due-entry.paid;
+  if(bal<=1){entry.paymentStatus='paid';}else if(entry.paid>0){
+    const ddStr=getDueDate(entry).toISOString().split('T')[0];
+    const todayStr=new Date().toISOString().split('T')[0];
+    entry.paymentStatus=ddStr<todayStr?'overdue':'partial';
+  }
   /* Create journal entry */
   if(!APP.journal)APP.journal=[];
   const vchNo='JV-'+Date.now();
