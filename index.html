@@ -3266,10 +3266,11 @@ function viewPaymentDetails(id){
 
     <!-- Action Buttons -->
     <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;">
-      <button class="btn btn-ghost" onclick="closeM('view-modal')" style="min-width:100px;">Close</button>
-      ${bal>0&&hasPerm('payment')?`<button class="btn btn-green" onclick="closeM('view-modal');openPaymentModal('${r.id}','${r.type==='inward'?'pay':'receive'}')" style="min-width:100px;">💸 Payment</button>`:''}
-      ${hasPerm('edit')?`<button class="btn btn-blue" onclick="closeM('view-modal');editEntry('${r.id}')" style="min-width:100px;">✏️ Edit</button>`:''}
-      <button class="btn btn-ghost" onclick="closeM('view-modal');viewEntry('${r.id}')" style="min-width:100px;">📄 Full Entry</button>
+      <button class="btn btn-ghost" onclick="closeM('view-modal')" style="min-width:90px;">Close</button>
+      ${paid>0&&hasPerm('payment')?`<button class="btn btn-purple" onclick="closeM('view-modal');editPaidAmount('${r.id}')" style="min-width:90px;">✏️ Edit Payment</button>`:''}
+      ${bal>0&&hasPerm('payment')?`<button class="btn btn-green" onclick="closeM('view-modal');openPaymentModal('${r.id}','${r.type==='inward'?'pay':'receive'}')" style="min-width:90px;">💸 Add Payment</button>`:''}
+      ${hasPerm('edit')?`<button class="btn btn-blue" onclick="closeM('view-modal');editEntry('${r.id}')" style="min-width:90px;">📝 Edit Entry</button>`:''}
+      <button class="btn btn-ghost" onclick="closeM('view-modal');viewEntry('${r.id}')" style="min-width:90px;">📄 Full Entry</button>
     </div>
   </div>`;
 
@@ -3566,6 +3567,71 @@ function recordPayment(){
   syncToFirestore();
   closeM('payment-modal');refreshAllViews();
   toast('Payment recorded + Journal entry created!','s');
+}
+
+/* ===== EDIT PAID AMOUNT DIRECTLY ===== */
+function editPaidAmount(entryId){
+  if(!hasPerm('payment')){toast('Payment permission chahiye!','e');return;}
+  const entry=APP.records.find(r=>r.id===entryId);if(!entry){toast('Entry nahi mili!','e');return;}
+  const due=getEntryAmt(entry);
+  const oldPaid=entry.paid||0;
+  const bal=due-oldPaid;
+  const newPaidStr=prompt(
+    'Party: '+entry.party+'\nItem: '+(entry.item||'-')+'\nGP: '+(entry.gp||'-')+
+    '\n\nTotal Amount: '+fmtINR(due)+
+    '\nCurrent Paid: '+fmtINR(oldPaid)+
+    '\nBalance: '+fmtINR(bal)+
+    '\n\n— Naya TOTAL paid amount daalo —',oldPaid
+  );
+  if(newPaidStr===null)return;
+  const newPaid=parseFloat(newPaidStr);
+  if(isNaN(newPaid)||newPaid<0){toast('Valid amount daalo!','e');return;}
+  if(newPaid>due&&!confirm('Amount ('+fmtINR(newPaid)+') total due ('+fmtINR(due)+') se zyada hai.\nOverpayment record karni hai?'))return;
+  /* Update entry */
+  const oldStatus=entry.paymentStatus;
+  entry.paid=newPaid;
+  /* Recalculate status */
+  const newBal=due-newPaid;
+  if(newBal<=1){entry.paymentStatus='paid';}
+  else if(newPaid>0){
+    const dd=getDueDate(entry);
+    const dds=(dd&&!isNaN(dd.getTime()))?dd.toISOString().split('T')[0]:'9999-12-31';
+    const todayStr=new Date().toISOString().split('T')[0];
+    entry.paymentStatus=dds<todayStr?'overdue':'partial';
+  }else{
+    const dd=getDueDate(entry);
+    const dds=(dd&&!isNaN(dd.getTime()))?dd.toISOString().split('T')[0]:'9999-12-31';
+    const todayStr=new Date().toISOString().split('T')[0];
+    entry.paymentStatus=dds<todayStr?'overdue':'pending';
+  }
+  /* Also update journal entries linked to this entry */
+  if(APP.journal&&APP.journal.length){
+    const linked=APP.journal.filter(j=>j.entryId===entryId&&j.type!=='Deduction');
+    if(linked.length===1){
+      /* Single payment entry — update its amount */
+      const j=linked[0];
+      if(j.dr>0)j.dr=newPaid;else j.cr=newPaid;
+      j.note=(j.note||'')+' (Edited: '+fmtINR(oldPaid)+'→'+fmtINR(newPaid)+')';
+      j.updatedAt=new Date().toISOString();
+    }else if(linked.length===0&&newPaid!==oldPaid){
+      /* No journal entry exists — create one for the correction */
+      if(!APP.journal)APP.journal=[];
+      const isInward=entry.type==='inward';
+      APP.journal.push({
+        id:'J'+Date.now(),date:new Date().toISOString().split('T')[0],
+        vchNo:'EDIT-'+Date.now(),party:entry.party,
+        type:'Correction',
+        particulars:'Payment corrected — GP '+(entry.gp||'-')+' | '+fmtINR(oldPaid)+'→'+fmtINR(newPaid),
+        mode:entry.payMode||'Cash',ref:entry.payRef||'',bank:'',
+        dr:isInward?newPaid:0,cr:isInward?0:newPaid,
+        note:'Paid amount edited',entryId:entryId,createdAt:new Date().toISOString()
+      });
+    }
+  }
+  localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
+  syncToFirestore();refreshAllViews();
+  toast('Payment updated: '+fmtINR(oldPaid)+' → '+fmtINR(newPaid)+' (Status: '+entry.paymentStatus+')','s');
 }
 
 /* ===== JOURNAL ENTRY SYSTEM ===== */
