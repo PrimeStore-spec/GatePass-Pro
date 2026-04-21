@@ -3661,7 +3661,38 @@ function renderJournalLog(){
 function editJournalEntry(jId){
   if(!hasPerm('payment')){toast('Payment permission chahiye!','e');return;}
   const j=APP.journal.find(x=>x.id===jId);if(!j){toast('Journal entry nahi mili','e');return;}
-  /* Populate the existing journal modal with the entry's data for editing */
+  /* For linked payment entries — use a direct edit approach */
+  if(j.entryId){
+    const entry=APP.records.find(r=>r.id===j.entryId);
+    const oldAmt=j.dr||j.cr||0;
+    const newAmtStr=prompt('Current amount: '+fmtINR(oldAmt)+'\n\nNaya amount daalo:',oldAmt);
+    if(newAmtStr===null)return;/* cancelled */
+    const newAmt=parseFloat(newAmtStr);
+    if(isNaN(newAmt)||newAmt<0){toast('Valid amount daalo!','e');return;}
+    /* Reverse old amount from entry and apply new */
+    if(entry){
+      entry.paid=Math.max(0,(entry.paid||0)-oldAmt+newAmt);
+      /* Recalculate status */
+      const due=getEntryAmt(entry);const bal=due-entry.paid;
+      if(bal<=1){entry.paymentStatus='paid';}
+      else if(entry.paid>0){
+        const ddStr=getDueDate(entry);
+        const dds=ddStr&&!isNaN(ddStr.getTime())?ddStr.toISOString().split('T')[0]:'9999-12-31';
+        const todayStr=new Date().toISOString().split('T')[0];
+        entry.paymentStatus=dds<todayStr?'overdue':'partial';
+      }else{entry.paymentStatus='pending';}
+    }
+    /* Update journal entry */
+    if(j.dr>0){j.dr=newAmt;}else{j.cr=newAmt;}
+    j.updatedAt=new Date().toISOString();
+    j.note=(j.note||'')+' (Edited)';
+    localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+    localStorage.setItem(`journal-${APP.company}`,JSON.stringify(APP.journal));
+    syncToFirestore();refreshAllViews();
+    toast('Payment updated: '+fmtINR(oldAmt)+' → '+fmtINR(newAmt),'s');
+    return;
+  }
+  /* For manual journal entries — use the journal modal */
   document.getElementById('je-date').value=j.date||'';
   document.getElementById('je-vch').value=j.vchNo||'';
   document.getElementById('je-party').value=j.party||'';
@@ -3670,7 +3701,6 @@ function editJournalEntry(jId){
   document.getElementById('je-mode').value=j.mode||'Cash';
   document.getElementById('je-ref').value=j.ref||'';
   document.getElementById('je-narration').value=j.particulars||'';
-  /* Store editing ID */
   window._editingJournalId=jId;
   document.getElementById('journal-modal').classList.add('open');
 }
