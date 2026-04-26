@@ -3286,9 +3286,10 @@ function viewEntry(id){
       <img src="${driveImgUrl(r.photoUrl)}" style="max-width:100%;max-height:400px;border-radius:6px;cursor:pointer;display:block;margin:0 auto;border:1px solid var(--border);" onclick="zoomPhoto('${driveImgUrl(r.photoUrl)}')" title="Click to zoom" onerror="this.onerror=null;this.style.display='none';this.parentElement.innerHTML='<div style=\\'text-align:center;color:var(--red);padding:20px;\\'>Photo load nahi ho payi. <a href=${r.photoUrl} target=_blank style=\\'color:var(--blue)\\'>Drive mein dekho →</a></div>';">
       <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text3);">Click image to zoom</div>
     </div>`:''}
-    <div style="text-align:center;margin-top:16px;display:flex;gap:10px;justify-content:center;">
+    <div style="text-align:center;margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button class="sc" onclick="closeM('view-modal')" style="background:var(--blue);color:#fff;padding:8px 28px;border-radius:8px;cursor:pointer;">Close</button>
       ${hasPerm('edit')?`<button class="sc" onclick="closeM('view-modal');editEntry('${r.id}')" style="background:var(--green);color:#fff;padding:8px 28px;border-radius:8px;cursor:pointer;">📝 Edit</button>`:''}
+      <button class="sc" onclick="exportEntry('${r.id}')" style="background:var(--purple);color:#fff;padding:8px 28px;border-radius:8px;cursor:pointer;" title="Share via WhatsApp / Email / etc.">📤 Export</button>
     </div>
   </div>`;
   /* Create or reuse view modal overlay */
@@ -3300,6 +3301,72 @@ function viewEntry(id){
     document.body.appendChild(vm);
   }
   vm.querySelector('.modal').innerHTML=html;vm.classList.add('open');
+}
+
+/* === EXPORT / SHARE A SINGLE ENTRY ===
+   Builds a clean receipt-style text. Tries native share sheet (WhatsApp, Email, etc.)
+   on mobile + modern desktops. Falls back to clipboard copy with a toast hint. */
+function buildEntryShareText(r){
+  const amt=getEntryAmt(r);
+  const diff=((r.weight||0)-(r.partyWt||0)).toFixed(2);
+  const dueDate=getDueDate(r);
+  const dueStr=(dueDate&&!isNaN(dueDate.getTime()))?localDateStr(dueDate):'-';
+  const compName=COMPANIES[APP.company]?COMPANIES[APP.company].name:(APP.company||'');
+  const stat=statusLabel(r.paymentStatus);
+  const paid=r.paid||0;const bal=Math.max(0,amt-paid);
+  const lines=[];
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push((r.type==='inward'?'📥 INWARD ENTRY':'📤 OUTWARD ENTRY'));
+  if(compName)lines.push(compName);
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  lines.push('Date         : '+(r.date||'-'));
+  lines.push('GP No        : '+(r.gp||'-'));
+  if(r.billFrom)lines.push('Bill From    : '+r.billFrom);
+  if(r.broker)lines.push('Broker       : '+r.broker);
+  lines.push('Party        : '+(r.party||'-'));
+  if(r.mobile)lines.push('Mobile       : '+r.mobile);
+  if(r.consignee)lines.push('Consignee    : '+r.consignee);
+  if(r.consigneeMobile)lines.push('Cnee Mobile  : '+r.consigneeMobile);
+  if(r.consigneeAddr)lines.push('Cnee Address : '+r.consigneeAddr);
+  lines.push('Item         : '+(r.item||'-'));
+  lines.push('Bags         : '+(r.bags||0));
+  lines.push('Weight       : '+(r.weight||0)+' kg');
+  lines.push('Party Wt     : '+(r.partyWt||0)+' kg');
+  lines.push('Difference   : '+diff+' kg');
+  lines.push('Rate         : ₹'+(r.rate||0));
+  lines.push('Amount       : '+fmtINR(amt));
+  if(r.vehicle)lines.push('Vehicle      : '+r.vehicle);
+  if(r.driver)lines.push('Driver       : '+r.driver);
+  if(r.unloadedDate)lines.push('Unloaded     : '+r.unloadedDate);
+  lines.push('Due Date     : '+dueStr);
+  lines.push('Status       : '+stat);
+  lines.push('Paid         : '+fmtINR(paid));
+  if(bal>0)lines.push('Balance      : '+fmtINR(bal));
+  if(r.notes)lines.push('Notes        : '+r.notes);
+  lines.push('━━━━━━━━━━━━━━━━━━━━');
+  return lines.join('\n');
+}
+async function exportEntry(id){
+  const r=APP.records.find(e=>e.id===id);if(!r){toast('Entry nahi mili','e');return;}
+  const text=buildEntryShareText(r);
+  const title=(r.type==='inward'?'Inward':'Outward')+' — '+(r.gp||'')+' — '+(r.party||'');
+  /* 1. Native share sheet (mobile / modern desktops) — opens WhatsApp, Email, Bluetooth, etc. */
+  if(navigator.share){
+    try{await navigator.share({title:title,text:text});return;}
+    catch(e){if(e&&e.name==='AbortError')return;/* user cancelled */ /* fall through to clipboard */}
+  }
+  /* 2. Clipboard copy fallback */
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    try{await navigator.clipboard.writeText(text);toast('Entry copy ho gayi — WhatsApp/Email mein paste karo','s');return;}
+    catch(e){/* fall through to download */}
+  }
+  /* 3. Download as .txt — last-ditch fallback for very old browsers */
+  const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=(r.gp||'entry')+'.txt';document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  toast('Entry download ho gayi','s');
 }
 
 function viewPaymentDetails(id){
