@@ -555,7 +555,7 @@
 
 <!-- USERS (Admin) -->
 <div id="p-users" class="hidden">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <div style="display:flex;align-items:center;gap:10px">
       <h3 style="font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;color:var(--blue)">👥 Users Management</h3>
       <span style="background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue);padding:2px 9px;border-radius:20px;font-weight:600;font-size:11px" id="users-count">0</span>
@@ -563,6 +563,41 @@
     <button class="btn btn-green" onclick="openUserModal()">＋ Add User</button>
   </div>
   <div class="users-grid" id="users-grid"></div>
+
+  <!-- Admin Tools — Backup / Restore / Settings -->
+  <div style="margin-top:24px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);">
+    <h3 style="font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;color:var(--blue);margin-bottom:14px;border-bottom:2px solid var(--bluebg);padding-bottom:6px">⚙️ Admin Tools</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:14px">
+      <button class="btn btn-blue" onclick="downloadFullBackup()" style="justify-content:center">📦 Download Full Backup</button>
+      <button class="btn btn-purple" onclick="document.getElementById('restore-file-input').click()" style="justify-content:center">📂 Restore from Backup</button>
+      <button class="btn btn-green" onclick="runMigrationStatusCheck()" style="justify-content:center">🔍 Check Storage Status</button>
+      <input type="file" id="restore-file-input" accept=".json,application/json" style="display:none" onchange="handleRestoreFile(this)">
+    </div>
+    <div id="migration-status" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6"></div>
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5">
+      <strong style="color:var(--blue)">📦 Backup:</strong> Sab firms ka data ek JSON file mein download hoga (records, journal, requests, users, settings).<br>
+      <strong style="color:var(--purple)">📂 Restore:</strong> Backup file load karke wapas restore karo. Existing data overwrite ho jayega — confirm prompt aayega.
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)">
+      <label style="font-size:13px;font-weight:600;color:var(--text2)">⏰ Idle Auto-Logout:</label>
+      <select class="fs" onchange="setIdleTimeoutMin(this.value)" id="idle-timeout-sel" style="width:auto;min-width:130px">
+        <option value="5">5 minutes</option>
+        <option value="10">10 minutes</option>
+        <option value="15">15 minutes</option>
+        <option value="30">30 minutes</option>
+        <option value="60">1 hour</option>
+        <option value="120">2 hours</option>
+        <option value="240">4 hours</option>
+      </select>
+      <span style="font-size:11px;color:var(--text3)">Inactive rehne par auto-logout</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:12px;margin-top:12px;border-top:1px solid var(--border)">
+      <label style="font-size:13px;font-weight:600;color:var(--text2)">📈 Overdue Interest Rate (current firm):</label>
+      <input type="number" class="finp" id="interest-rate-input" min="0" max="100" step="0.5" placeholder="e.g. 18" style="width:90px" onchange="onInterestRateChange(this.value)">
+      <span style="font-size:13px;color:var(--text2);font-weight:600">% per annum</span>
+      <span style="font-size:11px;color:var(--text3)">0 = no interest. Lagega due-date ke baad bakaya amount par.</span>
+    </div>
+  </div>
 </div>
 
 <!-- REQUESTS -->
@@ -730,19 +765,26 @@
       </div>
       <div class="div"></div>
 
-      <!-- Photo Attachment -->
-      <div class="sec-title">📷 Photo (Optional)</div>
+      <!-- Photo Attachments (multi) -->
+      <div class="sec-title">📷 Photos (Optional — up to 5)</div>
       <div class="photo-section">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <input type="file" id="fi-photo" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
+        <input type="file" id="fi-photo" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+          <select class="fs" id="fi-photo-label" style="width:auto;min-width:140px">
+            <option value="Loading">📦 Loading</option>
+            <option value="Weighbridge">⚖️ Weighbridge Slip</option>
+            <option value="Unload">📤 Unloaded</option>
+            <option value="Signature">✍️ Party Signature</option>
+            <option value="Other">📎 Other</option>
+          </select>
           <button type="button" class="btn btn-blue" onclick="pickPhoto('camera')">📷 Take Photo</button>
-          <button type="button" class="btn btn-teal" onclick="pickPhoto('gallery')">🖼️ Upload from Gallery</button>
-          <button type="button" class="btn btn-red" onclick="removePhoto()" id="btn-remove-photo" style="display:none">✕ Remove</button>
+          <button type="button" class="btn btn-teal" onclick="pickPhoto('gallery')">🖼️ Gallery</button>
           <span id="photo-status" style="font-size:12px;color:var(--text3);flex:1;min-width:140px"></span>
         </div>
-        <div id="photo-preview-wrap" style="display:none;margin-top:10px;">
-          <img id="photo-preview" src="" style="max-width:200px;max-height:200px;border-radius:8px;border:2px solid var(--border);cursor:pointer;display:block" onclick="zoomPhoto()" title="Click to zoom">
-        </div>
+        <div id="photo-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+        <!-- Hidden legacy elements for backward compat with single-photo helpers -->
+        <div id="photo-preview-wrap" style="display:none"><img id="photo-preview" src=""></div>
+        <button type="button" id="btn-remove-photo" onclick="removePhoto()" style="display:none">✕</button>
       </div>
       <div class="div"></div>
 
@@ -940,9 +982,13 @@ const COMPANIES={aggarwal:{name:'Aggarwal Agro Foods',icon:'🌾'},krishna:{name
 
 /* ===== PHOTO UPLOAD — Google Apps Script (saves to Ankit's Drive) ===== */
 const PHOTO_UPLOAD_URL='https://script.google.com/macros/s/AKfycbxTFoX6TGvEco-fL-w9dAjTcfX51D6acL2HNQh4KugWlxZLYZaNwSqRVXkrIMQRpULv4A/exec';
-let PENDING_PHOTO=null;/* {base64, fileName, dataUrl} — new photo selected in entry modal */
+let PENDING_PHOTO=null;/* {base64, fileName, dataUrl} — legacy single-photo state, kept for compat */
 let EXISTING_PHOTO_URL=null;/* URL of photo already attached to entry being edited */
 let PHOTO_REMOVED=false;/* Flag — user clicked Remove on existing photo */
+/* Multi-photo state — replaces the single-photo flow.
+   ENTRY_PHOTOS items: {url?, photoId?, label, dataUrl?, base64?, fileName?, isNew} */
+let ENTRY_PHOTOS=[];
+const MAX_ENTRY_PHOTOS=5;
 let APP={user:null,company:null,records:[],parties:[],payments:[],users:[],requests:[],page:{rec:1,inward:1,outward:1,payment:1},editingUserId:null};
 const DAYSPERPAGE=15;
 
@@ -1055,21 +1101,11 @@ function broadcastRegistrationRequest(req){
   if(!DB)return;
   Object.keys(COMPANIES).forEach(cId=>{
     const key='requests-'+cId;
-    /* Load existing requests for this company */
-    DB.collection('app_data').doc('requests_'+cId).get().then(doc=>{
-      let reqs=[];
-      if(doc.exists&&doc.data().list)reqs=doc.data().list;
-      /* Don't duplicate */
-      if(reqs.find(r=>r.id===req.id))return;
-      reqs.push(req);
-      DB.collection('app_data').doc('requests_'+cId).set({
-        list:cleanUndefined(reqs),
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-        updatedBy:req.email||'new-user'
-      });
-      /* Also save to localStorage for immediate display */
-      localStorage.setItem(key,JSON.stringify(reqs));
-    }).catch(e=>console.error('Broadcast reg request err:',e));
+    /* Write to new sub-collection — one doc per request, no 1MB cap */
+    fsReqCol(cId).doc(String(req.id)).set(cleanUndefined(req),{merge:true}).catch(e=>console.error('Broadcast reg request err for '+cId+':',e));
+    /* Mirror to localStorage for immediate display */
+    let list=[];try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){list=[];}
+    if(!list.find(r=>r.id===req.id)){list.push(req);localStorage.setItem(key,JSON.stringify(list));}
   });
 }
 
@@ -1136,6 +1172,7 @@ function checkSession(){
       showCompanyOrApp();
       setSt('ok');
       toast('Welcome '+currentUser.name+'!','s');
+      initIdleTracker();
     }else{
       currentUser=null;
       showLoginUI();
@@ -1188,7 +1225,30 @@ async function pendingLogout(){
   hideApprovalPending();showLoginUI();
 }
 
+/* ===== AUTO-LOGOUT — idle session timeout =====
+   Default: 30 min idle → logout. Resets on any user activity. Warning shown 1 min before. */
+let _idleTimer=null,_idleWarnTimer=null;
+function getIdleTimeoutMin(){return Math.max(2,parseInt(localStorage.getItem('app-idle-timeout-min')||'30'));}
+function setIdleTimeoutMin(m){const n=Math.max(2,parseInt(m)||30);localStorage.setItem('app-idle-timeout-min',String(n));resetIdleTimer();return n;}
+function resetIdleTimer(){
+  if(_idleTimer){clearTimeout(_idleTimer);_idleTimer=null;}
+  if(_idleWarnTimer){clearTimeout(_idleWarnTimer);_idleWarnTimer=null;}
+  if(!currentUser)return;
+  const totalMs=getIdleTimeoutMin()*60*1000;
+  if(totalMs>60000){_idleWarnTimer=setTimeout(()=>{toast('⏰ 1 min baad auto-logout hoga — touch karo to cancel','i');},totalMs-60000);}
+  _idleTimer=setTimeout(()=>{toast('Inactivity — auto logout','i');logout();},totalMs);
+}
+function initIdleTracker(){
+  if(window._idleTrackerOn)return;window._idleTrackerOn=true;
+  ['mousemove','keydown','click','touchstart','scroll'].forEach(ev=>{
+    document.addEventListener(ev,resetIdleTimer,{passive:true,capture:true});
+  });
+  resetIdleTimer();
+}
+
 async function logout(){
+  if(_idleTimer){clearTimeout(_idleTimer);_idleTimer=null;}
+  if(_idleWarnTimer){clearTimeout(_idleWarnTimer);_idleWarnTimer=null;}
   if(AUTH){try{await AUTH.signOut();}catch(e){console.log('Signout err:',e);}}
   /* If the current firm was accessible ONLY via session grant (not permanent), clear it
      so a different user (or same user without permanent access) doesn't inherit it on next login */
@@ -1320,13 +1380,13 @@ function broadcastFirmRequest(req,mode){
     else if(idx>=0){list[idx]=req;}
     else{list.push(req);}
     localStorage.setItem(key,JSON.stringify(list));
-    /* Push to Firestore under that company's doc */
+    /* Push to Firestore — write one doc per request in the sub-collection */
     if(DB){
-      DB.collection('app_data').doc('requests_'+cId).set({
-        list:cleanUndefined(list),
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-        updatedBy:currentUser?currentUser.email:'unknown'
-      }).catch(e=>console.error('Firm req broadcast err for '+cId+':',e));
+      if(mode==='remove'){
+        fsReqCol(cId).doc(String(req.id)).delete().catch(e=>console.error('Firm req remove err for '+cId+':',e));
+      }else{
+        fsReqCol(cId).doc(String(req.id)).set(cleanUndefined(req),{merge:true}).catch(e=>console.error('Firm req broadcast err for '+cId+':',e));
+      }
     }
   });
 }
@@ -1498,8 +1558,148 @@ function deleteUser(id){
   saveUsers();renderUsers();toast('User delete ho gaya','i');
 }
 
+/* ===== FULL BACKUP / RESTORE =====
+   Bundles every firm's records + journal + requests + users + admin settings into ONE
+   JSON file. Restore reverses the process and pushes everything back to Firestore. */
+function downloadFullBackup(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  const backup={
+    appName:'Inward Outward Tracker Pro',
+    version:'2.0',
+    exportedAt:new Date().toISOString(),
+    exportedBy:currentUser?currentUser.email:'unknown',
+    companies:Object.keys(COMPANIES),
+    data:{},
+    users:JSON.parse(localStorage.getItem('app-users')||'[]'),
+    settings:{
+      idleTimeoutMin:getIdleTimeoutMin(),
+      defaultInterestRate:parseFloat(localStorage.getItem('app-default-interest')||'0')
+    }
+  };
+  Object.keys(COMPANIES).forEach(c=>{
+    backup.data[c]={
+      records:JSON.parse(localStorage.getItem('data-'+c)||'[]'),
+      journal:JSON.parse(localStorage.getItem('journal-'+c)||'[]'),
+      requests:JSON.parse(localStorage.getItem('requests-'+c)||'[]'),
+      interestRate:parseFloat(localStorage.getItem('interest-rate-'+c)||'0')
+    };
+  });
+  let totalRecords=0;Object.values(backup.data).forEach(d=>totalRecords+=(d.records||[]).length);
+  const json=JSON.stringify(backup,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const ts=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  const a=document.createElement('a');
+  a.href=url;a.download='IOTrackerPro-backup-'+ts+'.json';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  toast('✓ Backup downloaded — '+totalRecords+' records','s');
+}
+function handleRestoreFile(input){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');input.value='';return;}
+  const file=input.files&&input.files[0];if(!file){return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let backup;try{backup=JSON.parse(e.target.result);}
+    catch(err){toast('Invalid JSON file','e');input.value='';return;}
+    if(!backup||!backup.data||typeof backup.data!=='object'){toast('Backup format galat hai','e');input.value='';return;}
+    const firms=Object.keys(backup.data);
+    let totalRec=0;firms.forEach(c=>totalRec+=(backup.data[c].records||[]).length);
+    const msg='⚠️ RESTORE WARNING\n\n'+
+      'Backup ka summary:\n'+
+      '  • Firms: '+firms.length+'\n'+
+      '  • Records: '+totalRec+'\n'+
+      '  • Users: '+(backup.users?backup.users.length:0)+'\n'+
+      '  • Exported: '+(backup.exportedAt||'unknown')+'\n\n'+
+      'Yeh aapka existing data OVERWRITE kar dega.\n'+
+      'Continue?';
+    if(!confirm(msg)){input.value='';return;}
+    /* Apply */
+    try{
+      firms.forEach(c=>{
+        const d=backup.data[c]||{};
+        if(d.records)localStorage.setItem('data-'+c,JSON.stringify(d.records));
+        if(d.journal)localStorage.setItem('journal-'+c,JSON.stringify(d.journal));
+        if(d.requests)localStorage.setItem('requests-'+c,JSON.stringify(d.requests));
+        if(typeof d.interestRate==='number')localStorage.setItem('interest-rate-'+c,String(d.interestRate));
+      });
+      if(backup.users)localStorage.setItem('app-users',JSON.stringify(backup.users));
+      if(backup.settings){
+        if(backup.settings.idleTimeoutMin)setIdleTimeoutMin(backup.settings.idleTimeoutMin);
+        if(typeof backup.settings.defaultInterestRate==='number')localStorage.setItem('app-default-interest',String(backup.settings.defaultInterestRate));
+      }
+      /* Reload current company's data into APP and push to Firestore */
+      if(APP.company){
+        APP.records=JSON.parse(localStorage.getItem('data-'+APP.company)||'[]');
+        APP.journal=JSON.parse(localStorage.getItem('journal-'+APP.company)||'[]');
+        APP.requests=JSON.parse(localStorage.getItem('requests-'+APP.company)||'[]');
+        applyOverdueCheck();
+      }
+      /* Push EVERY firm's data to Firestore so other devices get it */
+      const origCompany=APP.company;
+      firms.forEach(c=>{APP.company=c;APP.records=JSON.parse(localStorage.getItem('data-'+c)||'[]');APP.journal=JSON.parse(localStorage.getItem('journal-'+c)||'[]');APP.requests=JSON.parse(localStorage.getItem('requests-'+c)||'[]');_resetSyncSnapshots();syncToFirestore();});
+      APP.company=origCompany;
+      if(origCompany){
+        APP.records=JSON.parse(localStorage.getItem('data-'+origCompany)||'[]');
+        APP.journal=JSON.parse(localStorage.getItem('journal-'+origCompany)||'[]');
+        APP.requests=JSON.parse(localStorage.getItem('requests-'+origCompany)||'[]');
+      }
+      loadUsers();renderUsers();refreshAllViews();
+      toast('✓ Restore complete — '+totalRec+' records','s');
+    }catch(err){toast('Restore failed: '+err.message,'e');console.error(err);}
+    input.value='';
+  };
+  reader.onerror=function(){toast('File read failed','e');input.value='';};
+  reader.readAsText(file);
+}
+
+function onInterestRateChange(v){
+  const r=setCompanyInterestRate(v);
+  toast('Interest rate set to '+r+'% per annum','s');
+  refreshAllViews();
+}
+
+/* === STORAGE STATUS CHECK ===
+   Tells admin which firms are migrated to the new schema and counts records.
+   Useful for verifying after migration that everything copied correctly. */
+async function runMigrationStatusCheck(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  if(!DB){toast('Firestore not available','e');return;}
+  const box=document.getElementById('migration-status');
+  if(!box)return;
+  box.style.display='block';
+  box.innerHTML='<div style="text-align:center;color:var(--blue)">⏳ Checking...</div>';
+  const lines=[];
+  for(const cId of Object.keys(COMPANIES)){
+    const name=COMPANIES[cId].name||cId;
+    try{
+      const meta=await fsMetaDoc(cId).get();
+      const recsSnap=await fsRecCol(cId).get();
+      const jrnSnap=await fsJrnCol(cId).get();
+      const reqsSnap=await fsReqCol(cId).get();
+      const localCount=JSON.parse(localStorage.getItem('data-'+cId)||'[]').length;
+      const sub=recsSnap.size;
+      const migOK=meta.exists&&meta.data().migratedAt;
+      const migAt=migOK?new Date(meta.data().migratedAt).toLocaleDateString('en-IN'):'❌ Not migrated';
+      const status=migOK?'✅':'⚠️';
+      const matchOK=localCount===sub?'✅':'⚠️ ('+localCount+' local vs '+sub+' cloud)';
+      lines.push(`<div style="margin-bottom:8px;padding:8px;background:var(--surface);border-radius:6px;border-left:3px solid ${migOK?'var(--green)':'var(--orange)'}">
+        <strong>${status} ${name}</strong><br>
+        Records: <strong>${sub}</strong> in cloud, ${localCount} local — ${matchOK}<br>
+        Journal: ${jrnSnap.size} entries · Requests: ${reqsSnap.size}<br>
+        <span style="font-size:11px;color:var(--text3)">Migrated: ${migAt}</span>
+      </div>`);
+    }catch(e){
+      lines.push('<div style="color:var(--red);padding:8px">❌ '+name+': '+(e.message||e)+'</div>');
+    }
+  }
+  box.innerHTML=lines.join('')+'<div style="font-size:11px;color:var(--text3);margin-top:6px">Cloud count = records in new sub-collection. Local count = localStorage on this device.</div>';
+}
 function renderUsers(){
   const grid=document.getElementById('users-grid');if(!grid)return;
+  /* Sync the idle-timeout dropdown each time admin opens the tab */
+  const sel=document.getElementById('idle-timeout-sel');if(sel)sel.value=String(getIdleTimeoutMin());
+  const irEl=document.getElementById('interest-rate-input');if(irEl)irEl.value=String(getCompanyInterestRate());
   if(!users.length){grid.innerHTML='<div class="empty"><div class="ei">👥</div><h3>Koi user nahi</h3></div>';return;}
   const rc={admin:'#e8f0fd',manager:'#e8f5ed',viewer:'#fef3e2',data_entry:'#f3e8ff',custom:'#f0f4fc'};
   const rco={admin:'#1a5fc8',manager:'#1a7a3c',viewer:'#b45309',data_entry:'#7c3aed',custom:'#4a5568'};
@@ -1627,32 +1827,111 @@ function refreshAllViews(){
 }
 
 function cleanUndefined(obj){if(!obj||typeof obj!=='object')return obj;if(Array.isArray(obj))return obj.map(cleanUndefined);const c={};Object.keys(obj).forEach(k=>{if(obj[k]!==undefined)c[k]=cleanUndefined(obj[k]);});return c;}
+
+/* ========================================================================
+   FIRESTORE V2 — PER-RECORD SUB-COLLECTIONS
+   ========================================================================
+   OLD schema (single doc, 1MB cap, ~1000 records max):
+     app_data/records_<firm>     { list: [r1, r2, ...] }
+     app_data/journal_<firm>     { list: [j1, j2, ...] }
+     app_data/requests_<firm>    { list: [q1, q2, ...] }
+
+   NEW schema (sub-collections, no record cap, faster writes):
+     firms/<firm>/records/<recId>       — one doc per record
+     firms/<firm>/journal/<jId>         — one doc per journal entry
+     firms/<firm>/requests/<reqId>      — one doc per request
+     firms/<firm>/meta/info             — {migratedAt, migratedBy, ...}
+
+   Migration is one-shot, idempotent. Old documents are kept as backup. */
+
+function fsRecCol(c){return DB.collection('firms').doc(c).collection('records');}
+function fsJrnCol(c){return DB.collection('firms').doc(c).collection('journal');}
+function fsReqCol(c){return DB.collection('firms').doc(c).collection('requests');}
+function fsMetaDoc(c){return DB.collection('firms').doc(c).collection('meta').doc('info');}
+
+/* "lastSync" snapshots — { id: fingerprint } per firm — let us compute the diff
+   between in-memory state and what's already on the server, so syncToFirestore()
+   only writes actually-changed items instead of rewriting everything. */
+const _lastSync={records:{},journal:{},requests:{}};
+function _fp(item){return (item&&(item.lastUpdated||item.updatedAt||item.createdAt))||'';}
+function _resetSyncSnapshots(){_lastSync.records={};_lastSync.journal={};_lastSync.requests={};}
+
+/* === MIGRATION — runs once per firm, copies old single-doc → sub-collection === */
+async function migrateFirmIfNeeded(c){
+  if(!DB||!c)return false;
+  /* Already migrated? */
+  try{
+    const meta=await fsMetaDoc(c).get();
+    if(meta.exists&&meta.data()&&meta.data().migratedAt){return false;}
+  }catch(e){console.warn('Migration check failed for',c,e);return false;}
+  /* Read old single-docs */
+  let oldRecs=[],oldJrn=[],oldReqs=[];
+  try{
+    const [rd,jd,qd]=await Promise.all([
+      DB.collection('app_data').doc('records_'+c).get(),
+      DB.collection('app_data').doc('journal_'+c).get(),
+      DB.collection('app_data').doc('requests_'+c).get()
+    ]);
+    if(rd.exists&&rd.data().list)oldRecs=rd.data().list;
+    if(jd.exists&&jd.data().list)oldJrn=jd.data().list;
+    if(qd.exists&&qd.data().list)oldReqs=qd.data().list;
+  }catch(e){console.error('Old data read failed for',c,e);}
+  /* Empty firm — just mark as migrated, no copy needed */
+  if(!oldRecs.length&&!oldJrn.length&&!oldReqs.length){
+    await fsMetaDoc(c).set({migratedAt:new Date().toISOString(),migratedBy:currentUser?currentUser.email:'system',recordCount:0,journalCount:0,requestCount:0,fresh:true}).catch(e=>console.error(e));
+    return true;
+  }
+  /* Show progress to user */
+  showLoader('Migrating '+(COMPANIES[c]?COMPANIES[c].name:c)+'...','Records: '+oldRecs.length+' · Journal: '+oldJrn.length+' · Requests: '+oldReqs.length);
+  try{
+    /* Batch write — Firestore caps at 500 ops/batch, use 400 for safety */
+    async function writeBatched(items,colFn){
+      const B=400;
+      for(let i=0;i<items.length;i+=B){
+        const batch=DB.batch();
+        items.slice(i,i+B).forEach(it=>{if(it&&it.id)batch.set(colFn().doc(String(it.id)),cleanUndefined(it),{merge:true});});
+        await batch.commit();
+      }
+    }
+    await writeBatched(oldRecs,()=>fsRecCol(c));
+    await writeBatched(oldJrn,()=>fsJrnCol(c));
+    await writeBatched(oldReqs,()=>fsReqCol(c));
+    await fsMetaDoc(c).set({migratedAt:new Date().toISOString(),migratedBy:currentUser?currentUser.email:'unknown',recordCount:oldRecs.length,journalCount:oldJrn.length,requestCount:oldReqs.length});
+    hideLoader();
+    toast('✓ '+(COMPANIES[c]?COMPANIES[c].name:c)+' migrated — '+oldRecs.length+' entries safe','s');
+    return true;
+  }catch(e){
+    hideLoader();
+    console.error('Migration failed for',c,e);
+    toast('Migration error: '+(e.message||e),'e');
+    return false;
+  }
+}
+
+/* === DIFF-BASED SYNC — only writes changed items =========================
+   Compares current APP.records / APP.journal / APP.requests against the
+   _lastSync fingerprint snapshot. Writes only added/modified items, deletes
+   only removed ones. After collection listener delivers initial state, the
+   snapshot matches the server, so the very next syncToFirestore() call only
+   pushes what the user actually changed. */
 function syncToFirestore(){
   if(!DB||!APP.company)return;
-  /* Save records - clean undefined values that Firestore rejects */
-  DB.collection('app_data').doc('records_'+APP.company).set({
-    list: cleanUndefined(APP.records),
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-    updatedBy: currentUser ? currentUser.email : 'unknown'
-  }).then(()=>{
-    /* Save journal */
-    return DB.collection('app_data').doc('journal_'+APP.company).set({
-      list: cleanUndefined(APP.journal || []),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedBy: currentUser ? currentUser.email : 'unknown'
+  const c=APP.company;
+  function diffWrite(arr,colFn,snap){
+    const cur={};(arr||[]).forEach(it=>{if(it&&it.id)cur[String(it.id)]=_fp(it);});
+    const writes=[],deletes=[];
+    Object.keys(cur).forEach(id=>{if(snap[id]!==cur[id])writes.push(id);});
+    Object.keys(snap).forEach(id=>{if(!(id in cur))deletes.push(id);});
+    writes.forEach(id=>{
+      const it=(arr||[]).find(x=>String(x.id)===id);
+      if(it)colFn().doc(id).set(cleanUndefined(it),{merge:true}).catch(e=>{console.error('Write fail',id,e);setSt('err');});
     });
-  }).then(()=>{
-    return DB.collection('app_data').doc('requests_'+APP.company).set({
-      list: cleanUndefined(APP.requests || []),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      updatedBy: currentUser ? currentUser.email : 'unknown'
-    });
-  }).then(()=>{
-    console.log('Firestore sync done');
-  }).catch(e=>{
-    console.error('Firestore sync error:', e);
-    setSt('err');
-  });
+    deletes.forEach(id=>{colFn().doc(id).delete().catch(e=>console.error('Delete fail',id,e));});
+    return cur;
+  }
+  _lastSync.records=diffWrite(APP.records,()=>fsRecCol(c),_lastSync.records);
+  _lastSync.journal=diffWrite(APP.journal,()=>fsJrnCol(c),_lastSync.journal);
+  _lastSync.requests=diffWrite(APP.requests,()=>fsReqCol(c),_lastSync.requests);
 }
 
 /* === SYNC PERFORMANCE HELPERS ===
@@ -1683,107 +1962,102 @@ function queueSave(key,value){
   },120);
 }
 
-function startRealtimeSync(){
+/* === COLLECTION-BASED REALTIME SYNC ===
+   Listens to firms/<c>/records, /journal, /requests sub-collections. Initial
+   load populates _lastSync so the first user-edit only writes the changed item.
+   docChanges() lets us patch APP.records incrementally instead of full replace. */
+async function startRealtimeSync(){
   if(!DB||!APP.company)return;
+  const c=APP.company;
+
+  /* Step 1: Run migration if this firm hasn't been migrated yet (one-shot, idempotent) */
+  await migrateFirmIfNeeded(c);
+
   /* Unsubscribe previous listeners if any */
-  if(window._unsubRecords) window._unsubRecords();
-  if(window._unsubJournal) window._unsubJournal();
+  if(window._unsubRecords)try{window._unsubRecords();}catch(e){}
+  if(window._unsubJournal)try{window._unsubJournal();}catch(e){}
+  if(window._unsubRequests)try{window._unsubRequests();}catch(e){}
 
   setSt('load');
-  /* Cache fingerprints so we skip work when our own writes echo back from Firestore */
-  window._fpRecords=listFingerprint(APP.records);
-  window._fpJournal=listFingerprint(APP.journal);
-  window._fpRequests=listFingerprint(APP.requests);
+  /* Reset diff-sync snapshots — they'll be repopulated by the listener's initial delivery */
+  _resetSyncSnapshots();
 
-  /* Listen to records */
-  window._unsubRecords = DB.collection('app_data').doc('records_'+APP.company)
-    .onSnapshot(doc=>{
-      if(doc.exists && doc.data().list){
-        const serverRecords = doc.data().list;
-        const fp=listFingerprint(serverRecords);
-        if(fp!==window._fpRecords){
-          window._fpRecords=fp;
-          APP.records = serverRecords;
-          queueSave(`data-${APP.company}`, APP.records);
-          applyOverdueCheck();
-          debouncedRefresh();
-          console.log('Live sync: records updated from server');
-        }
-      }else if(!doc.exists && APP.records.length > 0){
-        /* Firestore empty but localStorage has data — upload it */
-        syncToFirestore();
+  function applyDocChanges(snap,localArr,storageKey,stype,onAfter){
+    let changed=false;
+    snap.docChanges().forEach(ch=>{
+      const d=ch.doc.data();const id=String(d.id||ch.doc.id);
+      if(ch.type==='removed'){
+        const i=localArr.findIndex(x=>String(x.id)===id);
+        if(i>=0){localArr.splice(i,1);changed=true;}
+        delete _lastSync[stype][id];
+      }else{
+        const i=localArr.findIndex(x=>String(x.id)===id);
+        if(i>=0)localArr[i]=d;else localArr.push(d);
+        _lastSync[stype][id]=_fp(d);/* track only IDs server knows */
+        changed=true;
       }
-      setSt('ok');
-      hideLoader();/* Data loaded — hide loading overlay */
-    }, err=>{
-      console.error('Records listener error:', err);
-      setSt('err');
-      hideLoader();/* Hide loader even on error so user isn't stuck */
     });
+    if(changed){queueSave(storageKey,localArr);onAfter&&onAfter();}
+    /* Auto-push localStorage extras (offline-added items not yet on server) */
+    if(snap.metadata&&!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites){
+      const extras=localArr.filter(it=>it&&it.id&&!(String(it.id) in _lastSync[stype]));
+      if(extras.length>0){console.log('Pushing',extras.length,'offline-added',stype);syncToFirestore();}
+    }
+  }
 
-  /* Listen to journal  */
-  window._unsubJournal = DB.collection('app_data').doc('journal_'+APP.company)
-    .onSnapshot(doc=>{
-      if(doc.exists && doc.data().list){
-        const serverJournal = doc.data().list;
-        const fp=listFingerprint(serverJournal);
-        if(fp!==window._fpJournal){
-          window._fpJournal=fp;
-          APP.journal = serverJournal;
-          queueSave(`journal-${APP.company}`, APP.journal);
-          debouncedRefresh();
-          console.log('Live sync: journal updated from server');
-        }
-      }
-    }, err=>{
-      console.error('Journal listener error:', err);
+  /* Listen to records sub-collection */
+  window._unsubRecords=fsRecCol(c).onSnapshot(snap=>{
+    applyDocChanges(snap,APP.records,'data-'+c,'records',()=>{applyOverdueCheck();debouncedRefresh();});
+    setSt('ok');hideLoader();
+  },err=>{console.error('Records listener error:',err);setSt('err');hideLoader();});
+
+  /* Listen to journal sub-collection */
+  window._unsubJournal=fsJrnCol(c).onSnapshot(snap=>{
+    applyDocChanges(snap,APP.journal,'journal-'+c,'journal',()=>{debouncedRefresh();});
+  },err=>{console.error('Journal listener error:',err);});
+
+  /* Listen to requests sub-collection */
+  window._unsubRequests=fsReqCol(c).onSnapshot(snap=>{
+    applyDocChanges(snap,APP.requests,'requests-'+c,'requests',()=>{
+      updateReqBadge();
+      const reqTab=document.getElementById('tab-reqs');
+      if(reqTab&&reqTab.classList.contains('active'))renderRequests();
     });
+  },err=>{console.error('Requests listener error:',err);});
 
-  /* Listen to requests */
-  if(window._unsubRequests) window._unsubRequests();
-  window._unsubRequests = DB.collection('app_data').doc('requests_'+APP.company)
-    .onSnapshot(doc=>{
-      if(doc.exists && doc.data().list){
-        const serverReqs = doc.data().list;
-        const fp=listFingerprint(serverReqs);
-        if(fp!==window._fpRequests){
-          window._fpRequests=fp;
-          APP.requests = serverReqs;
-          queueSave(`requests-${APP.company}`, APP.requests);
-          updateReqBadge();
-          /* Re-render requests tab if active */
-          const reqTab=document.getElementById('tab-reqs');
-          if(reqTab&&reqTab.classList.contains('active'))renderRequests();
-        }
-      }
-    }, err=>{
-      console.error('Requests listener error:', err);
-    });
-
-  /* ALSO listen to OTHER companies' requests docs — catches firm-access requests
-     submitted while viewing a different firm. We mirror them into localStorage so
-     renderRequests/updateReqBadge's merge step picks them up. */
+  /* ALSO listen to OTHER firms' requests sub-collections — catches firm-access
+     requests submitted while viewing a different firm. */
   if(window._unsubOtherReqs)window._unsubOtherReqs.forEach(fn=>{try{fn();}catch(e){}});
   window._unsubOtherReqs=[];
-  Object.keys(COMPANIES).forEach(cId=>{
-    if(cId===APP.company)return;
-    const unsub=DB.collection('app_data').doc('requests_'+cId).onSnapshot(doc=>{
-      if(doc.exists&&doc.data().list){
-        localStorage.setItem('requests-'+cId,JSON.stringify(doc.data().list));
+  for(const cId of Object.keys(COMPANIES)){
+    if(cId===c)continue;
+    /* Migrate other firms too (silently) so their listeners pick up new data */
+    migrateFirmIfNeeded(cId).catch(()=>{});
+    const unsub=fsReqCol(cId).onSnapshot(snap=>{
+      const arr=JSON.parse(localStorage.getItem('requests-'+cId)||'[]');
+      let changed=false;
+      snap.docChanges().forEach(ch=>{
+        const d=ch.doc.data();const id=String(d.id||ch.doc.id);
+        if(ch.type==='removed'){const i=arr.findIndex(x=>String(x.id)===id);if(i>=0){arr.splice(i,1);changed=true;}}
+        else{const i=arr.findIndex(x=>String(x.id)===id);if(i>=0)arr[i]=d;else arr.push(d);changed=true;}
+      });
+      if(changed){
+        localStorage.setItem('requests-'+cId,JSON.stringify(arr));
         updateReqBadge();
         const reqTab=document.getElementById('tab-reqs');
         if(reqTab&&reqTab.classList.contains('active'))renderRequests();
       }
     },err=>console.error('Other req listener err '+cId+':',err));
     window._unsubOtherReqs.push(unsub);
-  });
+  }
 
-  /* Initial upload if Firestore is empty */
-  DB.collection('app_data').doc('records_'+APP.company).get().then(doc=>{
-    if(!doc.exists && APP.records && APP.records.length > 0){
-      syncToFirestore(); /* Push localStorage data to Firestore */
+  /* If sub-collections are empty but localStorage has data — push it up */
+  fsRecCol(c).limit(1).get().then(snap=>{
+    if(snap.empty&&APP.records&&APP.records.length>0){
+      console.log('Sub-collection empty — uploading localStorage data');
+      _resetSyncSnapshots();syncToFirestore();
     }
-  });
+  }).catch(e=>console.warn('Initial check failed:',e));
 }
 
 function SAMPLEDATA(){
@@ -1808,6 +2082,33 @@ function SAMPLEDATA(){
 
 function getEntryAmt(r){return r.amount||((r.partyWt||0)*r.rate)||0;}
 function getDueDate(r){const d=new Date(r.date);d.setDate(d.getDate()+(parseInt(r.dueNotes)||30));return d;}
+/* ===== INTEREST ON OVERDUE — per-company default rate, per-entry override =====
+   Stored as % per annum. Computed only on unpaid balance × overdue days. */
+function getCompanyInterestRate(){
+  if(!APP.company)return parseFloat(localStorage.getItem('app-default-interest')||'0')||0;
+  const c=parseFloat(localStorage.getItem('interest-rate-'+APP.company)||'NaN');
+  if(!isNaN(c))return c;
+  return parseFloat(localStorage.getItem('app-default-interest')||'0')||0;
+}
+function setCompanyInterestRate(rate){
+  const r=Math.max(0,parseFloat(rate)||0);
+  if(APP.company)localStorage.setItem('interest-rate-'+APP.company,String(r));
+  return r;
+}
+function getEntryInterest(r){
+  /* Returns {rate, days, amount} for any entry that's overdue with a balance */
+  if(!r)return{rate:0,days:0,amount:0};
+  const due=getEntryAmt(r);const paid=r.paid||0;const bal=due-paid;
+  if(bal<=1)return{rate:0,days:0,amount:0};
+  const dd=getDueDate(r);if(!dd||isNaN(dd.getTime()))return{rate:0,days:0,amount:0};
+  const today=new Date();today.setHours(0,0,0,0);dd.setHours(0,0,0,0);
+  if(dd>=today)return{rate:0,days:0,amount:0};
+  const days=Math.floor((today-dd)/86400000);
+  const rate=(typeof r.interestRate==='number'&&r.interestRate>0)?r.interestRate:getCompanyInterestRate();
+  if(rate<=0)return{rate:0,days:days,amount:0};
+  const amount=bal*(rate/100)*(days/365);
+  return{rate:rate,days:days,amount:Math.round(amount)};
+}
 function fmtINR(v){return '₹'+Math.abs(v).toLocaleString('en-IN',{maximumFractionDigits:0});}
 /* Local-date string YYYY-MM-DD — avoids UTC drift that made "Today's" boxes show yesterday's entries */
 function localDateStr(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -3278,6 +3579,7 @@ function viewEntry(id){
       <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Unloaded Date</td><td style="padding:6px 10px;">${r.unloadedDate||'-'}</td></tr>
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Due Date</td><td style="padding:6px 10px;">${dueDate.toISOString().split('T')[0]}</td></tr>
       <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Payment</td><td style="padding:6px 10px;">Paid: ${fmtINR(r.paid||0)} / ${fmtINR(amt)}</td></tr>
+      ${(()=>{const i=getEntryInterest(r);return i.amount>0?`<tr style="background:#fef3e2;"><td style="padding:6px 10px;font-weight:600;color:#b45309;">⚠ Overdue Interest</td><td style="padding:6px 10px;color:#b45309;font-weight:700;">${fmtINR(i.amount)} <span style="font-weight:400;font-size:.85em">(${i.days} din × ${i.rate}% pa)</span></td></tr>`:'';})()}
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Notes</td><td style="padding:6px 10px;">${r.notes||'-'}</td></tr>
     </table>
     ${r.photoUrl?`
