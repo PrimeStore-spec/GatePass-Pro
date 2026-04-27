@@ -1501,6 +1501,8 @@ function setSt(s){
 }
 
 function openUserModal(id){
+  /* Always reset approve-mode state — opening regular modal must clear any leftover approve flow */
+  resetApproveModalState();
   editUserId=id||null;
   document.getElementById('um-title').textContent=id?'Edit':'Naya User';
   const PALL=['view','add','edit','delete','payment','export','import','users'];
@@ -1529,6 +1531,9 @@ function openUserModal(id){
 }
 
 function saveUser(){
+  /* If admin opened this modal via Approve button, route to special flow that
+     also updates Firestore user_profiles + marks the registration request approved */
+  if(APPROVE_REQ_ID){return saveApprovedUser();}
   const name=document.getElementById('u-name').value.trim();
   const username=document.getElementById('u-user').value.trim().toLowerCase();
   const password=document.getElementById('u-pass').value.trim();
@@ -4781,27 +4786,101 @@ function approvePermanentFirm(reqId){
 }
 
 /* === Registration Approve/Reject === */
-async function approveRegistration(reqId){
-  const rq=findRequestAnywhere(reqId);if(!rq||rq.type!=='registration')return;
-  if(!confirm('User "'+rq.name+'" ('+rq.email+') ko approve karna hai?\n\nApprove hone ke baad woh login kar payega.'))return;
-  /* Update user_profiles status to approved */
-  if(DB&&rq.uid){
-    await DB.collection('user_profiles').doc(rq.uid).update({status:'approved'}).catch(e=>console.error('Profile update err:',e));
+/* === APPROVE WITH PERMISSIONS — opens the user modal pre-filled, lets admin
+   set role/permissions/firms in one step instead of approve-then-edit two-step. */
+let APPROVE_REQ_ID=null;
+function approveRegistration(reqId){openApproveUserModal(reqId);}
+function openApproveUserModal(reqId){
+  const rq=findRequestAnywhere(reqId);
+  if(!rq||rq.type!=='registration'){toast('Request nahi mili','e');return;}
+  APPROVE_REQ_ID=reqId;
+  editUserId=null;
+  /* Title + helper banner */
+  document.getElementById('um-title').textContent='✅ Approve: '+(rq.name||rq.email);
+  /* Pre-fill from request (read-only — admin can't change someone's signup info) */
+  document.getElementById('u-name').value=rq.name||'';
+  document.getElementById('u-user').value=rq.email||'';
+  document.getElementById('u-name').readOnly=true;
+  document.getElementById('u-user').readOnly=true;
+  /* Hide password row — Firebase Auth already has it from signup */
+  const passEl=document.getElementById('u-pass');
+  if(passEl){passEl.value='';if(passEl.parentElement)passEl.parentElement.style.display='none';}
+  /* Default to viewer + view permission. Admin sets the rest. */
+  setPreset('viewer');
+  /* No firm by default — admin must explicitly grant */
+  document.getElementById('uc-aggarwal').checked=false;
+  document.getElementById('uc-krishna').checked=false;
+  /* Change save button label */
+  const btn=document.getElementById('um-save-btn');
+  if(btn)btn.textContent='✓ Approve & Set Permissions';
+  /* Show approve-mode helper banner */
+  let banner=document.getElementById('approve-banner');
+  if(!banner){
+    banner=document.createElement('div');
+    banner.id='approve-banner';
+    banner.style.cssText='background:#dcfce7;border:1px solid #86efac;color:#166534;padding:10px 12px;border-radius:6px;margin-bottom:12px;font-size:12px;line-height:1.5';
+    const mb=document.querySelector('#user-modal .mb');
+    if(mb)mb.insertBefore(banner,mb.firstChild);
   }
-  /* Also add user to users list with basic viewer permissions if not already there */
+  banner.innerHTML='<strong>📥 Pending registration request</strong><br>'+
+    'Email: <strong>'+(rq.email||'')+'</strong><br>'+
+    'Time: '+new Date(rq.createdAt).toLocaleString('en-IN')+'<br>'+
+    '<em style="color:#15803d">Approve karte hi user login kar payega with selected permissions + firms.</em>';
+  banner.style.display='block';
+  document.getElementById('user-modal').classList.add('open');
+}
+function resetApproveModalState(){
+  APPROVE_REQ_ID=null;
+  /* Restore name/username editability */
+  const n=document.getElementById('u-name');if(n)n.readOnly=false;
+  const u=document.getElementById('u-user');if(u)u.readOnly=false;
+  /* Restore password row visibility */
+  const passEl=document.getElementById('u-pass');
+  if(passEl&&passEl.parentElement)passEl.parentElement.style.display='';
+  /* Restore button label */
+  const btn=document.getElementById('um-save-btn');
+  if(btn)btn.textContent='✓ Add User';
+  /* Hide approve banner */
+  const banner=document.getElementById('approve-banner');
+  if(banner)banner.style.display='none';
+}
+async function saveApprovedUser(){
+  const reqId=APPROVE_REQ_ID;
+  const rq=findRequestAnywhere(reqId);
+  if(!rq){toast('Request nahi mili','e');return;}
+  const role=document.getElementById('u-role').value;
+  const PALL=['view','add','edit','delete','payment','export','import','users'];
+  const permissions=PALL.filter(p=>{const el=document.getElementById('up-'+p);return el&&el.checked;});
+  const allowedCompanies=[];
+  if(document.getElementById('uc-aggarwal').checked)allowedCompanies.push('aggarwal');
+  if(document.getElementById('uc-krishna').checked)allowedCompanies.push('krishna');
+  if(role==='admin'&&!allowedCompanies.length)allowedCompanies.push('aggarwal','krishna');
+  if(!permissions.length){toast('Kam se kam ek permission to do!','e');return;}
+  /* 1. Update Firestore user_profiles → status approved + role + permissions */
+  if(DB&&rq.uid){
+    await DB.collection('user_profiles').doc(rq.uid).update({
+      status:'approved',role:role,permissions:permissions
+    }).catch(e=>console.error('Profile update err:',e));
+  }
+  /* 2. Add or update entry in users list (config/users_<firm>) */
   const email=(rq.email||'').toLowerCase();
   const existing=users.find(u=>{const ue=(u.username||u.email||'').toLowerCase();return ue===email;});
-  if(!existing){
-    users.push({id:rq.uid||('USR'+Date.now()),name:rq.name,username:rq.email,role:'viewer',permissions:['view'],allowedCompanies:[]});
-    saveUsers();
+  if(existing){
+    existing.name=rq.name;existing.role=role;existing.permissions=permissions;existing.allowedCompanies=allowedCompanies;
+  }else{
+    users.push({id:rq.uid||('USR'+Date.now()),name:rq.name,username:rq.email,password:'',role:role,permissions:permissions,allowedCompanies:allowedCompanies});
   }
-  /* Update request status */
+  saveUsers();
+  /* 3. Mark registration request as approved */
   rq.status='approved';
-  rq.adminNote='User approved by admin';
-  rq.actionBy=currentUser.email;
+  rq.adminNote='Approved — role: '+role+', firms: '+(allowedCompanies.length?allowedCompanies.join(', '):'none')+', perms: '+permissions.length;
+  rq.actionBy=currentUser?currentUser.email:'admin';
   rq.updatedAt=new Date().toISOString();
   persistRequestUpdate(rq);
-  toast('User "'+rq.name+'" approved! Ab woh login kar sakta hai.','s');
+  /* 4. Close modal + reset state + refresh */
+  closeM('user-modal');
+  resetApproveModalState();
+  toast('✓ '+rq.name+' approved — '+permissions.length+' permissions, '+allowedCompanies.length+' firms','s');
   updateReqBadge();renderRequests();
 }
 async function rejectRegistration(reqId){
