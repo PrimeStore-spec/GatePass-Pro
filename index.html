@@ -1146,8 +1146,10 @@ function checkSession(){
         }catch(e){console.log('Profile load err:',e);}
       }
       if(!profile){
-        const isFirst=!users||users.length===0||users.every(u=>u.id==='1');
-        profile={id:fbUser.uid,name:fbUser.displayName||fbUser.email.split('@')[0],email:fbUser.email,role:isFirst?'admin':'viewer',status:isFirst?'approved':'pending',createdAt:new Date().toISOString()};
+        /* SECURITY: Never auto-grant admin role here — this fallback runs in race conditions
+           and could let any signup-during-init become admin. Always default to viewer/pending.
+           First admin must be set manually in Firebase Console (Firestore → user_profiles → role:"admin" + status:"approved"). */
+        profile={id:fbUser.uid,name:fbUser.displayName||fbUser.email.split('@')[0],email:fbUser.email,role:'viewer',status:'pending',createdAt:new Date().toISOString()};
         if(DB){DB.collection('user_profiles').doc(fbUser.uid).set(profile).catch(e=>console.log(e));}
       }
       /* === CHECK APPROVAL STATUS === */
@@ -4481,7 +4483,7 @@ function exportJournalCSV(){
 
 function closeM(id){document.getElementById(id).classList.remove('open');}
 function closeOut(e,id){if(e.target.id===id){document.getElementById(id).classList.remove('open');}}
-function updateHeader(){document.getElementById('ss').textContent='⟳ Connected';}
+function updateHeader(){/* No-op — status indicator (#ss) is owned by setSt() which preserves color/style. */}
 function showErr(t,m){document.getElementById('login-err').textContent=m;document.getElementById('login-err').classList.add('show');setTimeout(()=>document.getElementById('login-err').classList.remove('show'),3000);}
 function toast(m,t='i'){const html=`<div class="toast ${t}"><span>${t==='s'?'✓':t==='e'?'✕':'ℹ'}</span>${m}</div>`;const tc=document.getElementById('toast-container');tc.innerHTML+=html;setTimeout(()=>{if(tc.children.length)tc.children[0].remove();},3000);}
 
