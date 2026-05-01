@@ -283,7 +283,7 @@
     <div style="display:flex;gap:10px">
       <div style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="inward-total-bags">0</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Bags</div></div>
       <div style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="inward-total-wt">0 kg</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Weight</div></div>
-      <div style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="inward-total-amt">₹0</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Amount</div></div>
+      <div class="fc" style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="inward-total-amt">₹0</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Amount</div></div>
     </div>
   </div>
   <div class="fbox">
@@ -319,7 +319,7 @@
     <div style="display:flex;gap:10px">
       <div style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="outward-total-bags">0</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Bags</div></div>
       <div style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="outward-total-wt">0 kg</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Weight</div></div>
-      <div style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="outward-total-amt">₹0</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Amount</div></div>
+      <div class="fc" style="text-align:center;background:rgba(255,255,255,0.15);padding:8px 16px;border-radius:8px"><div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#fff" id="outward-total-amt">₹0</div><div style="font-size:9px;color:rgba(255,255,255,0.7);text-transform:uppercase">Total Amount</div></div>
     </div>
   </div>
   <div class="fbox">
@@ -534,8 +534,8 @@
     <div class="sc" style="--cc:var(--teal);padding:10px 12px"><div class="sl">Total Bags</div><div class="sv" style="font-size:18px" id="rep-s-bags">0</div></div>
     <div class="sc" style="--cc:var(--yellow);padding:10px 12px"><div class="sl">Total Weight</div><div class="sv" style="font-size:18px" id="rep-s-wt">0</div></div>
     <div class="sc" style="--cc:var(--purple);padding:10px 12px"><div class="sl">Party Weight</div><div class="sv" style="font-size:18px" id="rep-s-pwt">0</div></div>
-    <div class="sc" style="--cc:var(--green);padding:10px 12px"><div class="sl">Total Amount</div><div class="sv" style="font-size:18px" id="rep-s-amt">₹0</div></div>
-    <div class="sc" style="--cc:var(--orange);padding:10px 12px"><div class="sl">Paid</div><div class="sv" style="font-size:18px" id="rep-s-paid">₹0</div></div>
+    <div class="sc fc" style="--cc:var(--green);padding:10px 12px"><div class="sl">Total Amount</div><div class="sv" style="font-size:18px" id="rep-s-amt">₹0</div></div>
+    <div class="sc fc" style="--cc:var(--orange);padding:10px 12px"><div class="sl">Paid</div><div class="sv" style="font-size:18px" id="rep-s-paid">₹0</div></div>
   </div>
 
   <!-- Report Output Container -->
@@ -1478,11 +1478,18 @@ function applyPermissions(){
   document.querySelectorAll('[onclick*="exportCurrentReport"],[onclick*="exportTabAsPDF"]').forEach(b=>b.style.display=hasPerm('export')?'':'none');
   const reqsTab=document.getElementById('tab-reqs');if(reqsTab)reqsTab.style.display=currentUser?'':'none';
   document.querySelectorAll('[onclick*="openUserModal()"]').forEach(b=>b.style.display=hasPerm('users')?'':'none');
-  /* Hide financial data for restricted users */
-  if(!isFullAccess()){
+  /* Hide financial data for users without payment permission.
+     Admin/payment users see amounts; others see plain ledger view. */
+  if(!hasPerm('payment')){
     document.body.classList.add('hide-finance');
   }else{
     document.body.classList.remove('hide-finance');
+  }
+  /* Tab label changes based on permission — payment users see Party Ledger,
+     others see "Create Ledger" (a simplified party/item picker for new entries). */
+  const partyTab=document.getElementById('tab-party');
+  if(partyTab){
+    partyTab.innerHTML = hasPerm('payment') ? '👨‍🌾 Party Name' : '📒 Create Ledger';
   }
   updateReqBadge();
   refreshFirmUI();
@@ -2720,8 +2727,12 @@ function renderRecords(page){
 }
 function filterRecords(){renderRecords(1);}
 
-/* ===== PARTY TAB ===== */
+/* ===== PARTY TAB =====
+   For users with payment permission: full Tally-style ledger with balances + amounts.
+   For users without payment permission: simplified "Create Ledger" view — list of
+   parties + items, click to start a new entry. No balances/amounts shown. */
 function renderPartyGrid(){
+  if(!hasPerm('payment')){return renderCreateLedger();}
   const visRecs=getVisibleRecords();
   const search=(document.getElementById('party-search').value||'').toLowerCase();
   const itemF=(document.getElementById('pty-item')||{}).value||'';
@@ -2750,6 +2761,117 @@ function renderPartyGrid(){
 }
 function filterParties(){renderPartyGrid();}
 function viewPartyDetail(party){goTab('rec');document.getElementById('rec-search').value=party;filterRecords();}
+
+/* ===== CREATE LEDGER VIEW =====
+   Shown to users WITHOUT payment permission. Lists parties + items so user can
+   click any of them to start a new entry pre-filled. No balance/amount info leaks. */
+function renderCreateLedger(){
+  const visRecs=getVisibleRecords();
+  const searchEl=document.getElementById('party-search');
+  const search=(searchEl&&searchEl.value||'').toLowerCase();
+  /* Hide the type/item dropdowns — they don't apply here */
+  const itemDD=document.getElementById('pty-item');if(itemDD&&itemDD.parentElement)itemDD.parentElement.style.display='none';
+  const typeDD=document.getElementById('pty-type');if(typeDD&&typeDD.parentElement)typeDD.parentElement.style.display='none';
+
+  const partySet=new Set(visRecs.map(r=>r.party).filter(Boolean));
+  let parties=Array.from(partySet).sort();
+  if(search)parties=parties.filter(p=>p.toLowerCase().includes(search));
+
+  const itemSet=new Set(visRecs.map(r=>r.item).filter(Boolean));
+  let items=Array.from(itemSet).sort();
+  if(search)items=items.filter(i=>i.toLowerCase().includes(search));
+
+  let html='';
+  /* Top action bar */
+  if(hasPerm('add')){
+    html+='<div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-green" onclick="openEntryModal()">＋ New Entry</button></div>';
+  }
+  /* Info banner */
+  html+='<div style="background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue2);padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;line-height:1.5">'+
+    'ℹ️ <strong>Yeh menu existing parties aur items dikhata hai.</strong> Kisi party ya item par click karke seedhe nayi entry banao. '+
+    'Naya party/item add karna ho? Bas New Entry mein nayi name type karo — automatic save ho jayegi.'+
+    '</div>';
+
+  /* Parties section */
+  html+='<div style="margin-bottom:18px"><div style="font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;color:var(--blue2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--bluebg)">🧑 Parties ('+parties.length+')</div>';
+  if(!parties.length){
+    html+='<div class="empty" style="padding:24px"><div class="ei">👨‍🌾</div><h3>Koi party nahi mili</h3><p style="font-size:12px;color:var(--text3)">New Entry banao — party automatic add ho jayegi</p></div>';
+  }else{
+    html+='<div class="jgrid">';
+    parties.forEach(p=>{
+      const pe=p.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const partyRecs=visRecs.filter(r=>r.party===p);
+      const inCount=partyRecs.filter(r=>r.type==='inward').length;
+      const outCount=partyRecs.filter(r=>r.type==='outward').length;
+      const mob=(partyRecs.find(r=>r.mobile)||{}).mobile||'';
+      const editBtn=hasPerm('edit')?`<button class="ledger-btn" onclick="event.stopPropagation();openEditPartyHelper('${pe}')" title="Edit existing entry of this party" style="background:var(--orange);font-size:10px;padding:3px 8px">✏️ Edit</button>`:`<button class="ledger-btn" onclick="event.stopPropagation();openSendPartyEditRequest('${pe}')" title="Edit ke liye admin se request bhejo" style="background:var(--text3);font-size:10px;padding:3px 8px">📩 Edit Request</button>`;
+      html+=`<div class="jcard" onclick="openEntryWithParty('${pe}')" style="cursor:pointer">
+        <div class="jh"><div class="jav" style="background:var(--bluebg);color:var(--blue)">${p[0]||'?'}</div>
+        <div><div class="jn">${p}</div><div class="jm">${mob?'📱 '+mob+' · ':''}${partyRecs.length} entries</div></div></div>
+        <div class="jstats"><div class="jst"><div class="jsv">${inCount}</div><div class="jsl">Inward</div></div>
+        <div class="jst"><div class="jsv">${outCount}</div><div class="jsl">Outward</div></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px"><span style="font-size:11px;color:var(--blue);font-weight:600">＋ Click for new entry</span>${editBtn}</div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+
+  /* Items section */
+  html+='<div><div style="font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;color:var(--blue2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--bluebg)">📦 Items ('+items.length+')</div>';
+  if(!items.length){
+    html+='<div class="empty" style="padding:24px"><div class="ei">📦</div><h3>Koi item nahi mila</h3><p style="font-size:12px;color:var(--text3)">New Entry banao — item automatic add ho jayega</p></div>';
+  }else{
+    html+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+    items.forEach(it=>{
+      const ie=it.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const itemRecs=visRecs.filter(r=>r.item===it);
+      html+=`<div onclick="openEntryWithItem('${ie}')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 14px;display:flex;align-items:center;gap:8px;transition:all 0.15s" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--bluebg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+        <span style="font-weight:600;font-size:13px">${it}</span>
+        <span style="background:var(--bluebg);color:var(--blue);padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">${itemRecs.length}</span>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  html+='</div>';
+
+  document.getElementById('party-grid').innerHTML=html;
+  const cEl=document.getElementById('pty-count');if(cEl)cEl.textContent=parties.length+' parties · '+items.length+' items';
+}
+
+function openEntryWithParty(party){
+  if(!hasPerm('add')){toast('Add permission chahiye nayi entry ke liye','e');return;}
+  openEntryModal();
+  /* Pre-fill party field after modal opens */
+  setTimeout(()=>{
+    const el=document.getElementById('fi-party');
+    if(el){el.value=party;el.dispatchEvent(new Event('input'));}
+    /* Also try to fill mobile from previous entries of this party */
+    const prev=APP.records.find(r=>r.party===party&&r.mobile);
+    if(prev){const mb=document.getElementById('fi-mobile');if(mb)mb.value=prev.mobile;}
+  },120);
+}
+function openEntryWithItem(item){
+  if(!hasPerm('add')){toast('Add permission chahiye nayi entry ke liye','e');return;}
+  openEntryModal();
+  setTimeout(()=>{
+    const el=document.getElementById('fi-item');
+    if(el){el.value=item;el.dispatchEvent(new Event('input'));}
+  },120);
+}
+function openEditPartyHelper(party){
+  /* For users with 'edit' permission — go to records filtered by this party
+     so they can pick which specific entry to edit. */
+  goTab('rec');
+  const s=document.getElementById('rec-search');if(s){s.value=party;filterRecords();}
+  toast('Records filter set to '+party+' — pick entry to edit','i');
+}
+function openSendPartyEditRequest(party){
+  /* For users without edit permission — explain they must request from admin. */
+  alert('Party edit karne ke liye admin se permission lena padega.\n\nAap kya kar sakte ho:\n• Records tab mein jao\n• "'+party+'" wali entry dhoondh ke 📩 Edit Request bhejo\n• Admin approve karega tab edit kar paoge.');
+  goTab('rec');
+  const s=document.getElementById('rec-search');if(s){s.value=party;filterRecords();}
+}
 
 /* ===== TALLY PRIME STYLE PARTY LEDGER ===== */
 function getPartyLedgerLines(name){
@@ -3310,7 +3432,7 @@ function renderOverdueReport(){
   /* Grand total */
   if(recs.length){
     const totBal=recs.reduce((s,r)=>s+(getEntryAmt(r)-(r.paid||0)),0);
-    html+='<div style="background:var(--rbg);border:2px solid var(--rb);border-radius:8px;padding:14px 18px;font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;color:var(--red);display:flex;justify-content:space-between;align-items:center"><span>Total Overdue: '+recs.length+' entries</span><span>Outstanding: '+fmtINR(totBal)+'</span></div>';
+    html+='<div class="fc" style="background:var(--rbg);border:2px solid var(--rb);border-radius:8px;padding:14px 18px;font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;color:var(--red);display:flex;justify-content:space-between;align-items:center"><span>Total Overdue: '+recs.length+' entries</span><span>Outstanding: '+fmtINR(totBal)+'</span></div>';
   }
   document.getElementById('rep-output').innerHTML=html||'<div class="empty"><div class="ei">✅</div><h3>Koi overdue nahi hai — sab clear!</h3></div>';
   updateRepStats(recs);
@@ -3338,7 +3460,7 @@ function renderOutstandingReport(){
   });
   if(recs.length){
     const totBal=recs.reduce((s,r)=>s+(getEntryAmt(r)-(r.paid||0)),0);
-    html+='<div style="background:var(--obg);border:2px solid var(--ob);border-radius:8px;padding:14px 18px;font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;color:var(--orange);display:flex;justify-content:space-between;align-items:center"><span>Total Outstanding: '+recs.length+' entries</span><span>'+fmtINR(totBal)+' pending recovery</span></div>';
+    html+='<div class="fc" style="background:var(--obg);border:2px solid var(--ob);border-radius:8px;padding:14px 18px;font-family:Rajdhani,sans-serif;font-size:16px;font-weight:700;color:var(--orange);display:flex;justify-content:space-between;align-items:center"><span>Total Outstanding: '+recs.length+' entries</span><span>'+fmtINR(totBal)+' pending recovery</span></div>';
   }
   document.getElementById('rep-output').innerHTML=html||'<div class="empty"><div class="ei">✅</div><h3>Sab payments complete — outstanding nahi!</h3></div>';
   updateRepStats(recs);
@@ -3579,14 +3701,14 @@ function viewEntry(id){
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Weight</td><td style="padding:6px 10px;">${r.weight||0} kg</td></tr>
       <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Party Weight</td><td style="padding:6px 10px;">${r.partyWt||0} kg</td></tr>
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Difference</td><td style="padding:6px 10px;color:${parseFloat(diff)>=0?'var(--green)':'var(--red)'};">${diff} kg</td></tr>
-      <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Rate</td><td style="padding:6px 10px;">₹${r.rate||0}</td></tr>
-      <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Amount</td><td style="padding:6px 10px;font-weight:700;color:var(--blue);">${fmtINR(amt)}</td></tr>
+      <tr class="fc"><td style="padding:6px 10px;font-weight:600;color:#555;">Rate</td><td style="padding:6px 10px;">₹${r.rate||0}</td></tr>
+      <tr class="fc" style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Amount</td><td style="padding:6px 10px;font-weight:700;color:var(--blue);">${fmtINR(amt)}</td></tr>
       <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Vehicle</td><td style="padding:6px 10px;">${r.vehicle||'-'}</td></tr>
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Driver</td><td style="padding:6px 10px;">${r.driver||'-'}</td></tr>
       <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Unloaded Date</td><td style="padding:6px 10px;">${r.unloadedDate||'-'}</td></tr>
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Due Date</td><td style="padding:6px 10px;">${dueDate.toISOString().split('T')[0]}</td></tr>
-      <tr><td style="padding:6px 10px;font-weight:600;color:#555;">Payment</td><td style="padding:6px 10px;">Paid: ${fmtINR(r.paid||0)} / ${fmtINR(amt)}</td></tr>
-      ${(()=>{const i=getEntryInterest(r);return i.amount>0?`<tr style="background:#fef3e2;"><td style="padding:6px 10px;font-weight:600;color:#b45309;">⚠ Overdue Interest</td><td style="padding:6px 10px;color:#b45309;font-weight:700;">${fmtINR(i.amount)} <span style="font-weight:400;font-size:.85em">(${i.days} din × ${i.rate}% pa)</span></td></tr>`:'';})()}
+      <tr class="fc"><td style="padding:6px 10px;font-weight:600;color:#555;">Payment</td><td style="padding:6px 10px;">Paid: ${fmtINR(r.paid||0)} / ${fmtINR(amt)}</td></tr>
+      ${(()=>{const i=getEntryInterest(r);return i.amount>0?`<tr class="fc" style="background:#fef3e2;"><td style="padding:6px 10px;font-weight:600;color:#b45309;">⚠ Overdue Interest</td><td style="padding:6px 10px;color:#b45309;font-weight:700;">${fmtINR(i.amount)} <span style="font-weight:400;font-size:.85em">(${i.days} din × ${i.rate}% pa)</span></td></tr>`:'';})()}
       <tr style="background:#f8f9fa;"><td style="padding:6px 10px;font-weight:600;color:#555;">Notes</td><td style="padding:6px 10px;">${r.notes||'-'}</td></tr>
     </table>
     ${r.photoUrl?`
@@ -3623,6 +3745,8 @@ function buildEntryShareText(r){
   const compName=COMPANIES[APP.company]?COMPANIES[APP.company].name:(APP.company||'');
   const stat=statusLabel(r.paymentStatus);
   const paid=r.paid||0;const bal=Math.max(0,amt-paid);
+  /* Hide financial info from non-payment users — they can share entry without revealing amounts */
+  const showFin=hasPerm('payment');
   const lines=[];
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   lines.push((r.type==='inward'?'📥 INWARD ENTRY':'📤 OUTWARD ENTRY'));
@@ -3642,15 +3766,19 @@ function buildEntryShareText(r){
   lines.push('Weight       : '+(r.weight||0)+' kg');
   lines.push('Party Wt     : '+(r.partyWt||0)+' kg');
   lines.push('Difference   : '+diff+' kg');
-  lines.push('Rate         : ₹'+(r.rate||0));
-  lines.push('Amount       : '+fmtINR(amt));
+  if(showFin){
+    lines.push('Rate         : ₹'+(r.rate||0));
+    lines.push('Amount       : '+fmtINR(amt));
+  }
   if(r.vehicle)lines.push('Vehicle      : '+r.vehicle);
   if(r.driver)lines.push('Driver       : '+r.driver);
   if(r.unloadedDate)lines.push('Unloaded     : '+r.unloadedDate);
   lines.push('Due Date     : '+dueStr);
   lines.push('Status       : '+stat);
-  lines.push('Paid         : '+fmtINR(paid));
-  if(bal>0)lines.push('Balance      : '+fmtINR(bal));
+  if(showFin){
+    lines.push('Paid         : '+fmtINR(paid));
+    if(bal>0)lines.push('Balance      : '+fmtINR(bal));
+  }
   if(r.notes)lines.push('Notes        : '+r.notes);
   lines.push('━━━━━━━━━━━━━━━━━━━━');
   return lines.join('\n');
