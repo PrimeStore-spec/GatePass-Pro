@@ -14,7 +14,10 @@
   <title>Inward Outward Pro - Tracking & Management System</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Rajdhani:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-:root{--bg:#f0f2f5;--surface:#fff;--s2:#f7f8fa;--s3:#eef0f4;--border:#dde1e9;--border2:#c5cad6;--text:#1a2332;--text2:#4a5568;--text3:#8a95a8;--blue:#1a5fc8;--blue2:#1450a8;--bluebg:#e8f0fd;--green:#1a7a3c;--gbg:#e8f5ed;--gb:#c8ecd4;--yellow:#b45309;--ybg:#fef3e2;--yb:#fde8b4;--orange:#c2410c;--obg:#fff0eb;--ob:#fdd5c0;--red:#b91c1c;--rbg:#fef0f0;--rb:#fcc8c8;--purple:#7c3aed;--pbg:#f3e8ff;--pb:#ddd6fe;--teal:#0f766e;--tbg:#f0fdfa;--tb:#99f6e4;--ok:#16a34a;--danger:#dc2626;--sh:0 2px 10px rgba(0,0,0,0.07);--r:8px;}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Noto Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:0 2px 12px rgba(26,63,140,0.3);flex-wrap:wrap;gap:6px;}.logo{display:flex;align-items:center;gap:10px;}.logo-icon{width:34px;height:34px;background:rgba(255,255,255,0.2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;}.logo-text{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;color:#fff;line-height:1;}.logo-sub{font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;}.hdr-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;justify-content:flex-end;}.hdr-stat{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;text-align:center;}.hdr-stat .v{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#fff;}.hdr-stat .l{font-size:8px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;}.btn-w{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:12px;transition:all 0.2s;}.btn-w:hover{background:rgba(255,255,255,0.28);}.btn-add{background:#fff;color:var(--blue2);border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:700;transition:all 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.15);}.btn-add:hover{background:#f0f4ff;transform:translateY(-1px);}main{max-width:1600px;margin:0 auto;padding:16px 18px;}.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:3px;width:100%;margin-bottom:16px;box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}.tab{white-space:nowrap;flex-shrink:0;padding:6px 15px;border:none;background:transparent;color:var(--text3);border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;display:flex;align-items:center;gap:4px;}.tab:hover{color:var(--blue);background:var(--bluebg);}.tab.active{background:var(--blue);color:#fff;}.tab.inward-tab.active{background:var(--teal);}.tab.outward-tab.active{background:var(--purple);}.tab.pay-tab.active{background:#15803d;color:#fff;}.btn{padding:7px 13px;border:none;border-radius:6px;cursor:pointer;font-family:'Noto Sans',sans-serif;font-size:12px;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue2);}.btn-green{background:#16a34a;color:#fff;}.btn-green:hover{background:#15803d;}.btn-ghost{background:var(--s2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{background:var(--s3);}.btn-red{background:var(--rbg);color:var(--red);border:1px solid var(--rb);}.btn-teal{background:var(--teal);color:#fff;}.btn-purple{background:var(--purple);color:#fff;}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px;}.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:var(--sh);}.sc:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,0,0,0.1);}.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,var(--blue));border-radius:8px 8px 0 0;}.si{font-size:19px;margin-bottom:5px;display:block;}.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;}.sv{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1;}.ss2{font-size:11px;color:var(--text3);margin-top:2px;}.charts{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px;}.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh);}.ct{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue2);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--border);}.br{display:flex;align-items:center;gap:7px;margin-bottom:7px;}.bl{width:100px;font-size:11px;color:var(--text2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.bt{flex:1;height:15px;background:var(--s3);border-radius:3px;overflow:hidden;}.bf{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;transition:width 1s ease;}.bv{font-size:10px;color:#fff;font-weight:700;font-family:'JetBrains Mono',monospace;}.fbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 15px;margin-bottom:13px;box-shadow:var(--sh);}.ftitle{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;}.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:7px;align-items:end;}.fi,.fs{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:6px 9px;font-size:12px;font-family:'Noto Sans',sans-serif;outline:none;width:100%;transition:all 0.2s;}.fi:focus,.fs:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}.th2{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:2px solid var(--border);background:var(--s2);}.ttl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;}.rcnt{font-size:11px;background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue);padding:2px 9px;border-radius:20px;font-weight:600;}.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch;}table{width:100%;border-collapse:collapse;font-size:12px;}thead tr{background:#f0f4fc;}th{padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;white-space:nowrap;}tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}tbody tr:nth-child(even){background:#fafbfc;}tbody tr:hover{background:var(--bluebg)!important;}td{padding:8px 11px;white-space:nowrap;color:var(--text);}td a{color:var(--blue);cursor:pointer;text-decoration:none;}td a:hover{text-decoration:underline;}.fc2{display:flex;align-items:center;gap:7px;}.fa{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;flex-shrink:0;}.amt{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--green);}.mono{font-family:'JetBrains Mono',monospace;font-size:11px;}.pag{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-top:1px solid var(--border);background:var(--s2);}.pi{font-size:11px;color:var(--text3);}.pbs{display:flex;gap:3px;}.pb2{width:25px;height:25px;border:1px solid var(--border);background:var(--surface);color:var(--text2);border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}.pb2:hover{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}.pb2.on{background:var(--blue);color:#fff;border-color:var(--blue);}.ov{display:none;position:fixed;inset:0;background:rgba(26,35,50,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}.ov.open{display:flex;}.modal{background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:min(900px,96vw);max-height:93vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:su 0.25s cubic-bezier(0.34,1.56,0.64,1);}@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.mh{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;border-radius:10px 10px 0 0;z-index:10;}.mt{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px;}.mx{width:27px;height:27px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.8);border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}.mx:hover{background:rgba(255,255,255,0.2);}.mb{padding:18px;background:#fff;}.mf{padding:11px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-radius:0 0 10px 10px;position:sticky;bottom:0;}.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue);margin-bottom:9px;padding-bottom:6px;border-bottom:2px solid var(--bluebg);display:flex;align-items:center;gap:6px;}.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.full{grid-column:1/-1;}.fg2{display:flex;flex-direction:column;gap:4px;}.flbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}.finp{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:8px 10px;font-size:13px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;width:100%;}.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.finp::placeholder{color:var(--text3);}.finp:read-only{background:#f0f4fc;color:var(--blue);font-weight:700;}.div{height:1px;background:var(--border);margin:14px 0;}.summary-box{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);border-radius:10px;padding:16px 18px;margin-top:4px;}.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}.sum-item{text-align:center;}.sum-v{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.sum-l{font-size:9px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}.store-header{background:linear-gradient(135deg,#0f766e,#14b8a6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.own-header{background:linear-gradient(135deg,#6d28d9,#8b5cf6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.dash-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.dash-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;}.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;}.jcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all 0.2s;box-shadow:var(--sh);}.jcard:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 4px 18px rgba(26,95,200,0.12);}.jh{display:flex;align-items:center;gap:9px;margin-bottom:11px;}.jav{width:40px;height:40px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;flex-shrink:0;}.jn{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}.jm{font-size:10px;color:var(--text3);}.jstats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}.jst{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:7px 9px;}.jsv{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;}.jsl{font-size:10px;color:var(--text3);}.tc{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px;}.toast{background:#fff;border:1px solid var(--border2);border-radius:7px;padding:9px 13px;display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,0.1);animation:ti 0.3s cubic-bezier(0.34,1.56,0.64,1);max-width:280px;color:var(--text);}@keyframes ti{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}.toast.s{border-left:3px solid var(--ok);}.toast.e{border-left:3px solid var(--danger);}.toast.i{border-left:3px solid var(--blue);}.hidden{display:none!important;}.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:none;align-items:center;justify-content:center;z-index:9999;}.login-wrap.show-login{display:flex;}.login-box{background:#fff;border-radius:12px;padding:36px 32px;width:min(380px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.3);}.login-logo{text-align:center;margin-bottom:24px;}.login-logo .icon{font-size:40px;display:block;margin-bottom:8px;}.login-logo h2{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#1a3a6b;}.login-logo p{font-size:12px;color:#8a95a8;margin-top:3px;}.login-field{margin-bottom:14px;}.login-field label{display:block;font-size:11px;font-weight:600;color:#8a95a8;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}.login-field input{width:100%;background:#f7f8fa;border:1px solid #dde1e9;color:#1a2332;border-radius:7px;padding:10px 13px;font-size:14px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;}.login-field input:focus{border-color:#1a5fc8;box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.login-btn{width:100%;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);color:#fff;border:none;border-radius:7px;padding:11px;font-size:15px;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;transition:all 0.2s;margin-top:4px;}.login-btn:hover{opacity:0.9;transform:translateY(-1px);}.login-err{background:#fef0f0;border:1px solid #fcc8c8;color:#b91c1c;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none;}.login-err.show{display:block;}.stl{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:7px;}.stl span{color:var(--blue);}.bliv{background:rgba(22,163,74,0.1);color:var(--ok);border:1px solid rgba(22,163,74,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}.empty{text-align:center;padding:40px 20px;color:var(--text3);}.ei{font-size:36px;margin-bottom:9px;opacity:0.4;}.empty h3{font-family:'Rajdhani',sans-serif;font-size:16px;margin-bottom:6px;color:var(--text2);}.pay-badge{background:#e8f5ed;color:#1a7a3c;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;}.pay-total{background:var(--gbg);border:1px solid var(--gb);border-radius:7px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px;}.pmb{padding:6px 4px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--s2);color:var(--text2);transition:all 0.15s;}.pmb.active{background:#1a5fc8;color:#fff;border-color:#1a5fc8;}.ps-paid{background:#dcfce7;color:#166534;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-partial{background:#fef9c3;color:#854d0e;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-pending{background:#fee2e2;color:#991b1b;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-overdue{background:#7f1d1d;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-awaiting-wt{background:#fff0eb;color:#c2410c;border:1px solid #fdd5c0;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.act-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;border:none;font-size:14px;transition:all 0.15s;margin:0 1px;vertical-align:middle;}.act-view{background:#e8f5ed;color:#16a34a;border:1px solid #c8ecd4;}.act-view:hover{background:#dcfce7;transform:scale(1.1);}.act-edit{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.act-edit:hover{background:#dbeafe;transform:scale(1.1);}.act-del{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}.act-del:hover{background:#fecaca;transform:scale(1.1);}.type-in{background:#e8f5ed;color:#15803d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.type-out{background:#f3e8ff;color:#7c3aed;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.company-sel{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;font-size:11px;color:#fff;cursor:pointer;font-family:'Noto Sans',sans-serif;outline:none;}.company-sel option{color:#1a2332;background:#fff;}.user-badge-wrap{position:relative;flex-shrink:0;}.req-badge{position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}.req-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);transition:all 0.2s;}.req-card:hover{border-color:var(--blue);}.req-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px;display:inline-block;}.req-type.edit-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.req-type.delete-req{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}.req-type.review-req{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;}.req-type.firm-req{background:#f3e8ff;color:#6d28d9;border:1px solid #ddd6fe;}.act-photo{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.loader-spinner{width:52px;height:52px;border:4px solid rgba(255,255,255,0.2);border-top:4px solid #fff;border-radius:50%;animation:spin-loader 0.8s linear infinite;}@keyframes spin-loader{to{transform:rotate(360deg);}}.loader-bar{height:100%;width:30%;background:linear-gradient(90deg,rgba(255,255,255,0.3),#fff,rgba(255,255,255,0.3));border-radius:4px;animation:loader-slide 1.5s ease-in-out infinite;}@keyframes loader-slide{0%{width:10%;margin-left:0;}50%{width:50%;margin-left:25%;}100%{width:10%;margin-left:90%;}}@keyframes pulse-install{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.4);}50%{box-shadow:0 0 0 8px rgba(255,255,255,0);}}.act-photo:hover{background:#fde68a;transform:scale(1.1);}.photo-section{background:var(--s2);border:1px dashed var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}.user-card{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}.role-badge.admin{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.role-badge.manager{background:#e8f5ed;color:#1a7a3c;border:1px solid #c8ecd4;}.role-badge.viewer{background:#fef3e2;color:#b45309;border:1px solid #fde8b4;}.perm-lbl{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;background:#f0f4fc;transition:all 0.15s;}.perm-lbl:hover{background:#e8f0fd;border-color:#1a5fc8;}.perm-lbl input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#1a5fc8;flex-shrink:0;}.perm-lbl.chk{background:#e8f0fd;border-color:#1a5fc8;color:#1a3a6b;font-weight:600;}.company-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:24px;}.company-screen h2{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;}.company-screen p{font-size:13px;color:rgba(255,255,255,0.7);text-align:center;margin-top:-16px;}.company-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}.company-card{background:#fff;border-radius:12px;padding:30px 36px;width:280px;text-align:center;cursor:pointer;transition:all 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.2);}.company-card:hover{transform:translateY(-6px);box-shadow:0 16px 50px rgba(0,0,0,0.3);}.company-card .cicon{font-size:42px;margin-bottom:12px;display:block;}.company-card .cname{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#1a3a6b;margin-bottom:4px;}.company-card .cloc{font-size:12px;color:#8a95a8;}.sort-bar{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap;}.sb{padding:3px 9px;background:var(--s2);border:1px solid var(--border);color:var(--text3);border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.2s;}.sb:hover,.sb.on{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}mark{background:rgba(26,95,200,0.1);color:var(--blue2);border-radius:2px;padding:0 2px;font-weight:600;}@media(max-width:900px){.fg{grid-template-columns:1fr 1fr;}.charts{grid-template-columns:1fr;}.fgrid3,.fgrid4{grid-template-columns:1fr 1fr;}.sum-grid{grid-template-columns:1fr 1fr;}}.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sc{overflow:hidden;}.dash-stats-grid .sv{word-break:break-all;}@media(max-width:900px){.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sv{font-size:17px;}}@media(max-width:600px){.dash-stats-grid{grid-template-columns:1fr 1fr!important;}.dash-stats-grid .sv{font-size:20px;}.tsc table{min-width:700px;}.modal{width:99vw!important;max-height:96vh!important;}.fgrid3,.fgrid2,.fgrid,.fgrid4{grid-template-columns:1fr!important;}.stats-grid{grid-template-columns:1fr 1fr;}main{padding:6px;}header{padding:5px 8px;}.hdr-stat{display:none;}.tab{padding:6px 10px;font-size:12px;white-space:nowrap;}.btn{padding:6px 10px;font-size:12px;}.sum-grid{grid-template-columns:1fr 1fr!important;}.fg{grid-template-columns:1fr!important;}.pay-total{flex-direction:column;gap:5px;}.hdr-r{gap:4px;}}::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--s3);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+:root{--bg:#f0f2f5;--surface:#fff;--s2:#f7f8fa;--s3:#eef0f4;--border:#dde1e9;--border2:#c5cad6;--text:#1a2332;--text2:#4a5568;--text3:#8a95a8;--blue:#1a5fc8;--blue2:#1450a8;--bluebg:#e8f0fd;--green:#1a7a3c;--gbg:#e8f5ed;--gb:#c8ecd4;--yellow:#b45309;--ybg:#fef3e2;--yb:#fde8b4;--orange:#c2410c;--obg:#fff0eb;--ob:#fdd5c0;--red:#b91c1c;--rbg:#fef0f0;--rb:#fcc8c8;--purple:#7c3aed;--pbg:#f3e8ff;--pb:#ddd6fe;--teal:#0f766e;--tbg:#f0fdfa;--tb:#99f6e4;--ok:#16a34a;--danger:#dc2626;--sh:0 2px 10px rgba(0,0,0,0.07);--r:8px;}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Noto Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:0 2px 12px rgba(26,63,140,0.3);flex-wrap:wrap;gap:6px;}.logo{display:flex;align-items:center;gap:10px;}.logo-icon{width:34px;height:34px;background:rgba(255,255,255,0.2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;}.logo-text{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;color:#fff;line-height:1;}.logo-sub{font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;}.hdr-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;justify-content:flex-end;}.hdr-stat{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;text-align:center;}.hdr-stat .v{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#fff;}.hdr-stat .l{font-size:8px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;}.btn-w{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:12px;transition:all 0.2s;}.btn-w:hover{background:rgba(255,255,255,0.28);}.btn-add{background:#fff;color:var(--blue2);border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:700;transition:all 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.15);}.btn-add:hover{background:#f0f4ff;transform:translateY(-1px);}main{max-width:1600px;margin:0 auto;padding:16px 18px;}.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:3px;width:100%;margin-bottom:16px;box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}.tab{white-space:nowrap;flex-shrink:0;padding:6px 15px;border:none;background:transparent;color:var(--text3);border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;display:flex;align-items:center;gap:4px;}.tab:hover{color:var(--blue);background:var(--bluebg);}.tab.active{background:var(--blue);color:#fff;}.tab.inward-tab.active{background:var(--teal);}.tab.outward-tab.active{background:var(--purple);}.tab.pay-tab.active{background:#15803d;color:#fff;}.btn{padding:7px 13px;border:none;border-radius:6px;cursor:pointer;font-family:'Noto Sans',sans-serif;font-size:12px;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue2);}.btn-green{background:#16a34a;color:#fff;}.btn-green:hover{background:#15803d;}.btn-ghost{background:var(--s2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{background:var(--s3);}.btn-red{background:var(--rbg);color:var(--red);border:1px solid var(--rb);}.btn-teal{background:var(--teal);color:#fff;}.btn-purple{background:var(--purple);color:#fff;}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px;}.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:var(--sh);}.sc:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,0,0,0.1);}.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,var(--blue));border-radius:8px 8px 0 0;}.si{font-size:19px;margin-bottom:5px;display:block;}.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;}.sv{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1;}.ss2{font-size:11px;color:var(--text3);margin-top:2px;}.charts{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px;}.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh);}.ct{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue2);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--border);}.br{display:flex;align-items:center;gap:7px;margin-bottom:7px;}.bl{width:100px;font-size:11px;color:var(--text2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.bt{flex:1;height:15px;background:var(--s3);border-radius:3px;overflow:hidden;}.bf{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;transition:width 1s ease;}.bv{font-size:10px;color:#fff;font-weight:700;font-family:'JetBrains Mono',monospace;}.fbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 15px;margin-bottom:13px;box-shadow:var(--sh);}.ftitle{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;}.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:7px;align-items:end;}.fi,.fs{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:6px 9px;font-size:12px;font-family:'Noto Sans',sans-serif;outline:none;width:100%;transition:all 0.2s;}.fi:focus,.fs:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}.th2{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:2px solid var(--border);background:var(--s2);}.ttl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;}.rcnt{font-size:11px;background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue);padding:2px 9px;border-radius:20px;font-weight:600;}.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch;}table{width:100%;border-collapse:collapse;font-size:12px;}thead tr{background:#f0f4fc;}th{padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;white-space:nowrap;}tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}tbody tr:nth-child(even){background:#fafbfc;}tbody tr:hover{background:var(--bluebg)!important;}td{padding:8px 11px;white-space:nowrap;color:var(--text);}td a{color:var(--blue);cursor:pointer;text-decoration:none;}td a:hover{text-decoration:underline;}.fc2{display:flex;align-items:center;gap:7px;}.fa{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;flex-shrink:0;}.amt{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--green);}.mono{font-family:'JetBrains Mono',monospace;font-size:11px;}.pag{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-top:1px solid var(--border);background:var(--s2);}.pi{font-size:11px;color:var(--text3);}.pbs{display:flex;gap:3px;}.pb2{width:25px;height:25px;border:1px solid var(--border);background:var(--surface);color:var(--text2);border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}.pb2:hover{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}.pb2.on{background:var(--blue);color:#fff;border-color:var(--blue);}.ov{display:none;position:fixed;inset:0;background:rgba(26,35,50,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}.ov.open{display:flex;}.modal{background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:min(900px,96vw);max-height:93vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:su 0.25s cubic-bezier(0.34,1.56,0.64,1);}@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.mh{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;border-radius:10px 10px 0 0;z-index:10;}.mt{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px;}.mx{width:27px;height:27px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.8);border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}.mx:hover{background:rgba(255,255,255,0.2);}.mb{padding:18px;background:#fff;}.mf{padding:11px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-radius:0 0 10px 10px;position:sticky;bottom:0;}.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue);margin-bottom:9px;padding-bottom:6px;border-bottom:2px solid var(--bluebg);display:flex;align-items:center;gap:6px;}.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.full{grid-column:1/-1;}.fg2{display:flex;flex-direction:column;gap:4px;}.flbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}.finp{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:8px 10px;font-size:13px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;width:100%;}.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.finp::placeholder{color:var(--text3);}.finp:read-only{background:#f0f4fc;color:var(--blue);font-weight:700;}.div{height:1px;background:var(--border);margin:14px 0;}.summary-box{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);border-radius:10px;padding:16px 18px;margin-top:4px;}.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}.sum-item{text-align:center;}.sum-v{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.sum-l{font-size:9px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}.store-header{background:linear-gradient(135deg,#0f766e,#14b8a6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.own-header{background:linear-gradient(135deg,#6d28d9,#8b5cf6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.dash-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.dash-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;}.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;}.jcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all 0.2s;box-shadow:var(--sh);}.jcard:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 4px 18px rgba(26,95,200,0.12);}.jh{display:flex;align-items:center;gap:9px;margin-bottom:11px;}.jav{width:40px;height:40px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;flex-shrink:0;}.jn{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}.jm{font-size:10px;color:var(--text3);}.jstats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}.jst{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:7px 9px;}.jsv{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;}.jsl{font-size:10px;color:var(--text3);}.tc{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px;}.toast{background:#fff;border:1px solid var(--border2);border-radius:7px;padding:9px 13px;display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,0.1);animation:ti 0.3s cubic-bezier(0.34,1.56,0.64,1);max-width:280px;color:var(--text);}@keyframes ti{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}.toast.s{border-left:3px solid var(--ok);}.toast.e{border-left:3px solid var(--danger);}.toast.i{border-left:3px solid var(--blue);}.hidden{display:none!important;}.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:none;align-items:center;justify-content:center;z-index:9999;}.login-wrap.show-login{display:flex;}.login-box{background:#fff;border-radius:12px;padding:36px 32px;width:min(380px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.3);}.login-logo{text-align:center;margin-bottom:24px;}.login-logo .icon{font-size:40px;display:block;margin-bottom:8px;}.login-logo h2{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#1a3a6b;}.login-logo p{font-size:12px;color:#8a95a8;margin-top:3px;}.login-field{margin-bottom:14px;}.login-field label{display:block;font-size:11px;font-weight:600;color:#8a95a8;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}.login-field input{width:100%;background:#f7f8fa;border:1px solid #dde1e9;color:#1a2332;border-radius:7px;padding:10px 13px;font-size:14px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;}.login-field input:focus{border-color:#1a5fc8;box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.login-btn{width:100%;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);color:#fff;border:none;border-radius:7px;padding:11px;font-size:15px;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;transition:all 0.2s;margin-top:4px;}.login-btn:hover{opacity:0.9;transform:translateY(-1px);}.login-err{background:#fef0f0;border:1px solid #fcc8c8;color:#b91c1c;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none;}.login-err.show{display:block;}.stl{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:7px;}.stl span{color:var(--blue);}.bliv{background:rgba(22,163,74,0.1);color:var(--ok);border:1px solid rgba(22,163,74,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}.empty{text-align:center;padding:40px 20px;color:var(--text3);}.ei{font-size:36px;margin-bottom:9px;opacity:0.4;}.empty h3{font-family:'Rajdhani',sans-serif;font-size:16px;margin-bottom:6px;color:var(--text2);}.pay-badge{background:#e8f5ed;color:#1a7a3c;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;}.pay-total{background:var(--gbg);border:1px solid var(--gb);border-radius:7px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px;}.pmb{padding:6px 4px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--s2);color:var(--text2);transition:all 0.15s;}.pmb.active{background:#1a5fc8;color:#fff;border-color:#1a5fc8;}.ps-paid{background:#dcfce7;color:#166534;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-partial{background:#fef9c3;color:#854d0e;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-pending{background:#fee2e2;color:#991b1b;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-overdue{background:#7f1d1d;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-awaiting-wt{background:#fff0eb;color:#c2410c;border:1px solid #fdd5c0;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.act-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;border:none;font-size:14px;transition:all 0.15s;margin:0 1px;vertical-align:middle;}.act-view{background:#e8f5ed;color:#16a34a;border:1px solid #c8ecd4;}.act-view:hover{background:#dcfce7;transform:scale(1.1);}.act-edit{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.act-edit:hover{background:#dbeafe;transform:scale(1.1);}.act-del{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}.act-del:hover{background:#fecaca;transform:scale(1.1);}.type-in{background:#e8f5ed;color:#15803d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.type-out{background:#f3e8ff;color:#7c3aed;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.company-sel{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;font-size:11px;color:#fff;cursor:pointer;font-family:'Noto Sans',sans-serif;outline:none;}.company-sel option{color:#1a2332;background:#fff;}.user-badge-wrap{position:relative;flex-shrink:0;}.req-badge{position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}.req-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);transition:all 0.2s;}.req-card:hover{border-color:var(--blue);}.req-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px;display:inline-block;}.req-type.edit-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.req-type.delete-req{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}.req-type.review-req{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;}.req-type.firm-req{background:#f3e8ff;color:#6d28d9;border:1px solid #ddd6fe;}.act-photo{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.loader-spinner{width:52px;height:52px;border:4px solid rgba(255,255,255,0.2);border-top:4px solid #fff;border-radius:50%;animation:spin-loader 0.8s linear infinite;}@keyframes spin-loader{to{transform:rotate(360deg);}}.loader-bar{height:100%;width:30%;background:linear-gradient(90deg,rgba(255,255,255,0.3),#fff,rgba(255,255,255,0.3));border-radius:4px;animation:loader-slide 1.5s ease-in-out infinite;}@keyframes loader-slide{0%{width:10%;margin-left:0;}50%{width:50%;margin-left:25%;}100%{width:10%;margin-left:90%;}}@keyframes pulse-install{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.4);}50%{box-shadow:0 0 0 8px rgba(255,255,255,0);}}.act-photo:hover{background:#fde68a;transform:scale(1.1);}.photo-section{background:var(--s2);border:1px dashed var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}.user-card{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}.role-badge.admin{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.role-badge.manager{background:#e8f5ed;color:#1a7a3c;border:1px solid #c8ecd4;}.role-badge.viewer{background:#fef3e2;color:#b45309;border:1px solid #fde8b4;}.perm-lbl{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;background:#f0f4fc;transition:all 0.15s;}.perm-lbl:hover{background:#e8f0fd;border-color:#1a5fc8;}.perm-lbl input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#1a5fc8;flex-shrink:0;}.perm-lbl.chk{background:#e8f0fd;border-color:#1a5fc8;color:#1a3a6b;font-weight:600;}.company-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:24px;}.company-screen h2{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;}.company-screen p{font-size:13px;color:rgba(255,255,255,0.7);text-align:center;margin-top:-16px;}.company-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}.company-card{background:#fff;border-radius:12px;padding:30px 36px;width:280px;text-align:center;cursor:pointer;transition:all 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.2);}.company-card:hover{transform:translateY(-6px);box-shadow:0 16px 50px rgba(0,0,0,0.3);}.company-card .cicon{font-size:42px;margin-bottom:12px;display:block;}.company-card .cname{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#1a3a6b;margin-bottom:4px;}.company-card .cloc{font-size:12px;color:#8a95a8;}.sort-bar{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap;}.sb{padding:3px 9px;background:var(--s2);border:1px solid var(--border);color:var(--text3);border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.2s;}.sb:hover,.sb.on{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}mark{background:rgba(26,95,200,0.1);color:var(--blue2);border-radius:2px;padding:0 2px;font-weight:600;}@media(max-width:900px){.fg{grid-template-columns:1fr 1fr;}.charts{grid-template-columns:1fr;}.fgrid3,.fgrid4{grid-template-columns:1fr 1fr;}.sum-grid{grid-template-columns:1fr 1fr;}}.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sc{overflow:hidden;}.dash-stats-grid .sv{word-break:break-all;}@media(max-width:900px){.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sv{font-size:17px;}}
+.rep-stats-grid .sv{font-size:16px;word-break:break-all;line-height:1.1;}
+@media(max-width:900px){.rep-stats-grid{grid-template-columns:repeat(3,1fr)!important;}.rep-stats-grid .sv{font-size:15px;}}
+@media(max-width:600px){.rep-stats-grid{grid-template-columns:repeat(2,1fr)!important;}.rep-stats-grid .sv{font-size:18px;}}@media(max-width:600px){.dash-stats-grid{grid-template-columns:1fr 1fr!important;}.dash-stats-grid .sv{font-size:20px;}.tsc table{min-width:700px;}.modal{width:99vw!important;max-height:96vh!important;}.fgrid3,.fgrid2,.fgrid,.fgrid4{grid-template-columns:1fr!important;}.stats-grid{grid-template-columns:1fr 1fr;}main{padding:6px;}header{padding:5px 8px;}.hdr-stat{display:none;}.tab{padding:6px 10px;font-size:12px;white-space:nowrap;}.btn{padding:6px 10px;font-size:12px;}.sum-grid{grid-template-columns:1fr 1fr!important;}.fg{grid-template-columns:1fr!important;}.pay-total{flex-direction:column;gap:5px;}.hdr-r{gap:4px;}}::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--s3);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .ledger-print-layer{position:fixed;inset:0;z-index:10050;background:#fff;overflow:auto;padding:18px 20px 24px;display:none;font-family:'Noto Sans',Arial,sans-serif;color:#111;font-size:12px;box-shadow:0 0 0 1px #e5e7eb;}
 .ledger-print-layer.is-on{display:block;}
 @media print{body *{visibility:hidden!important;}.ledger-print-layer,.ledger-print-layer *{visibility:visible!important;}.ledger-print-layer{position:absolute;inset:0;display:block!important;background:#fff;box-shadow:none;padding:10mm;}.ledger-print-noprint{display:none!important;}}
@@ -529,13 +532,13 @@
   </div>
 
   <!-- Summary Stats -->
-  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px" id="rep-summary">
-    <div class="sc" style="--cc:var(--blue);padding:10px 12px"><div class="sl">Entries</div><div class="sv" style="font-size:18px" id="rep-s-count">0</div></div>
-    <div class="sc" style="--cc:var(--teal);padding:10px 12px"><div class="sl">Total Bags</div><div class="sv" style="font-size:18px" id="rep-s-bags">0</div></div>
-    <div class="sc" style="--cc:var(--yellow);padding:10px 12px"><div class="sl">Total Weight</div><div class="sv" style="font-size:18px" id="rep-s-wt">0</div></div>
-    <div class="sc" style="--cc:var(--purple);padding:10px 12px"><div class="sl">Party Weight</div><div class="sv" style="font-size:18px" id="rep-s-pwt">0</div></div>
-    <div class="sc fc" style="--cc:var(--green);padding:10px 12px"><div class="sl">Total Amount</div><div class="sv" style="font-size:18px" id="rep-s-amt">₹0</div></div>
-    <div class="sc fc" style="--cc:var(--orange);padding:10px 12px"><div class="sl">Paid</div><div class="sv" style="font-size:18px" id="rep-s-paid">₹0</div></div>
+  <div class="rep-stats-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:12px" id="rep-summary">
+    <div class="sc" style="--cc:var(--blue);padding:10px 12px;overflow:hidden"><div class="sl">Entries</div><div class="sv" id="rep-s-count">0</div></div>
+    <div class="sc" style="--cc:var(--teal);padding:10px 12px;overflow:hidden"><div class="sl">Total Bags</div><div class="sv" id="rep-s-bags">0</div></div>
+    <div class="sc" style="--cc:var(--yellow);padding:10px 12px;overflow:hidden"><div class="sl">Total Weight</div><div class="sv" id="rep-s-wt">0</div></div>
+    <div class="sc" style="--cc:var(--purple);padding:10px 12px;overflow:hidden"><div class="sl">Party Weight</div><div class="sv" id="rep-s-pwt">0</div></div>
+    <div class="sc fc" style="--cc:var(--green);padding:10px 12px;overflow:hidden"><div class="sl">Total Amount</div><div class="sv" id="rep-s-amt">₹0</div></div>
+    <div class="sc fc" style="--cc:var(--orange);padding:10px 12px;overflow:hidden"><div class="sl">Paid</div><div class="sv" id="rep-s-paid">₹0</div></div>
   </div>
 
   <!-- Report Output Container -->
@@ -971,6 +974,23 @@
     <div class="mf">
       <div></div>
       <div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="closeM('user-modal')">Cancel</button><button class="btn btn-green" id="um-save-btn" onclick="saveUser()">✓ Add User</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Party Master Modal — for Create Ledger -->
+<div class="ov" id="party-modal" onclick="closeOut(event,'party-modal')">
+  <div class="modal" style="max-width:520px">
+    <div class="mh"><div class="mt" id="pm-modal-title">🧑 Naya Party</div><button class="mx" onclick="closeM('party-modal')">✕</button></div>
+    <div class="mb">
+      <div class="fg2" style="margin-bottom:12px"><label class="flbl">Party Name *</label><input class="finp" id="party-fld-name" placeholder="Party / firm ka naam"></div>
+      <div class="fg2" style="margin-bottom:12px"><label class="flbl">Phone Number</label><input class="finp" id="party-fld-mobile" placeholder="98xxxxxxxx" inputmode="numeric"></div>
+      <div class="fg2" style="margin-bottom:12px"><label class="flbl">Address</label><textarea class="finp" id="party-fld-address" placeholder="Party ka address" rows="2" style="resize:vertical"></textarea></div>
+      <div class="fg2"><label class="flbl">Notes</label><textarea class="finp" id="party-fld-notes" placeholder="Koi note ya remark (optional)" rows="2" style="resize:vertical"></textarea></div>
+    </div>
+    <div class="mf">
+      <div></div>
+      <div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="closeM('party-modal')">Cancel</button><button class="btn btn-green" id="party-save-btn" onclick="savePartyFromModal()">✓ Save</button></div>
     </div>
   </div>
 </div>
@@ -1485,12 +1505,9 @@ function applyPermissions(){
   }else{
     document.body.classList.remove('hide-finance');
   }
-  /* Tab label changes based on permission — payment users see Party Ledger,
-     others see "Create Ledger" (a simplified party/item picker for new entries). */
+  /* Universal tab label — Create Ledger is the simplified party master for everyone */
   const partyTab=document.getElementById('tab-party');
-  if(partyTab){
-    partyTab.innerHTML = hasPerm('payment') ? '👨‍🌾 Party Name' : '📒 Create Ledger';
-  }
+  if(partyTab){partyTab.innerHTML='📒 Create Ledger';}
   updateReqBadge();
   refreshFirmUI();
   /* If current company is not accessible, force company selection */
@@ -1808,6 +1825,7 @@ function loadData(){
   if(saved){APP.records=JSON.parse(saved);}else{APP.records=[];}
   APP.journal=JSON.parse(localStorage.getItem(`journal-${APP.company}`)||'[]');
   APP.requests=JSON.parse(localStorage.getItem(`requests-${APP.company}`))||[];
+  APP.parties=JSON.parse(localStorage.getItem(`parties-${APP.company}`)||'[]');
   applyOverdueCheck();
   refreshAllViews();
   /* Step 2: Start real-time listeners (handles Firestore loading + live sync) */
@@ -1861,14 +1879,15 @@ function cleanUndefined(obj){if(!obj||typeof obj!=='object')return obj;if(Array.
 function fsRecCol(c){return DB.collection('firms').doc(c).collection('records');}
 function fsJrnCol(c){return DB.collection('firms').doc(c).collection('journal');}
 function fsReqCol(c){return DB.collection('firms').doc(c).collection('requests');}
+function fsPartiesCol(c){return DB.collection('firms').doc(c).collection('parties');}
 function fsMetaDoc(c){return DB.collection('firms').doc(c).collection('meta').doc('info');}
 
 /* "lastSync" snapshots — { id: fingerprint } per firm — let us compute the diff
    between in-memory state and what's already on the server, so syncToFirestore()
    only writes actually-changed items instead of rewriting everything. */
-const _lastSync={records:{},journal:{},requests:{}};
+const _lastSync={records:{},journal:{},requests:{},parties:{}};
 function _fp(item){return (item&&(item.lastUpdated||item.updatedAt||item.createdAt))||'';}
-function _resetSyncSnapshots(){_lastSync.records={};_lastSync.journal={};_lastSync.requests={};}
+function _resetSyncSnapshots(){_lastSync.records={};_lastSync.journal={};_lastSync.requests={};_lastSync.parties={};}
 
 /* === MIGRATION — runs once per firm, copies old single-doc → sub-collection === */
 async function migrateFirmIfNeeded(c){
@@ -1946,6 +1965,7 @@ function syncToFirestore(){
   _lastSync.records=diffWrite(APP.records,()=>fsRecCol(c),_lastSync.records);
   _lastSync.journal=diffWrite(APP.journal,()=>fsJrnCol(c),_lastSync.journal);
   _lastSync.requests=diffWrite(APP.requests,()=>fsReqCol(c),_lastSync.requests);
+  _lastSync.parties=diffWrite(APP.parties,()=>fsPartiesCol(c),_lastSync.parties);
 }
 
 /* === SYNC PERFORMANCE HELPERS ===
@@ -2038,6 +2058,16 @@ async function startRealtimeSync(){
       if(reqTab&&reqTab.classList.contains('active'))renderRequests();
     });
   },err=>{console.error('Requests listener error:',err);});
+
+  /* Listen to parties sub-collection — party master list */
+  if(window._unsubParties)try{window._unsubParties();}catch(e){}
+  window._unsubParties=fsPartiesCol(c).onSnapshot(snap=>{
+    applyDocChanges(snap,APP.parties,'parties-'+c,'parties',()=>{
+      /* Re-render party tab if active */
+      const partyTab=document.getElementById('tab-party');
+      if(partyTab&&partyTab.classList.contains('active'))renderPartyGrid();
+    });
+  },err=>{console.error('Parties listener error:',err);});
 
   /* ALSO listen to OTHER firms' requests sub-collections — catches firm-access
      requests submitted while viewing a different firm. */
@@ -2727,150 +2757,249 @@ function renderRecords(page){
 }
 function filterRecords(){renderRecords(1);}
 
-/* ===== PARTY TAB =====
-   For users with payment permission: full Tally-style ledger with balances + amounts.
-   For users without payment permission: simplified "Create Ledger" view — list of
-   parties + items, click to start a new entry. No balances/amounts shown. */
-function renderPartyGrid(){
-  if(!hasPerm('payment')){return renderCreateLedger();}
-  const visRecs=getVisibleRecords();
-  const search=(document.getElementById('party-search').value||'').toLowerCase();
-  const itemF=(document.getElementById('pty-item')||{}).value||'';
-  const typeF=(document.getElementById('pty-type')||{}).value||'';
-  /* Populate item dropdown */
-  const iEl=document.getElementById('pty-item');if(iEl){let h='<option value="">All Items</option>';Array.from(new Set(visRecs.map(r=>r.item).filter(Boolean))).sort().forEach(i=>{h+=`<option value="${i}">${i}</option>`;});iEl.innerHTML=h;if(itemF)iEl.value=itemF;}
-  const parties=Array.from(new Set(visRecs.map(r=>r.party))).filter(p=>{
-    if(search&&!p.toLowerCase().includes(search))return false;
-    const precs=visRecs.filter(r=>r.party===p);
-    if(typeF&&!precs.some(r=>r.type===typeF))return false;
-    if(itemF&&!precs.some(r=>r.item===itemF))return false;
-    return true;
-  });
-  let html='';parties.forEach(p=>{
-    const party_recs=visRecs.filter(r=>r.party===p);const inCount=party_recs.filter(r=>r.type==='inward').length;const outCount=party_recs.filter(r=>r.type==='outward').length;const total=party_recs.reduce((s,r)=>s+getEntryAmt(r),0);const mob=party_recs.find(r=>r.mobile)?.mobile||'';
-    const pe=p.replace(/'/g,"\\'");
-    const bal=getPartyBalance(p);
-    const balLabel=bal===0?'Settled':fmtINR(Math.abs(bal))+' '+(bal>0?'Dr':'Cr');
-    const balColor=bal===0?'var(--teal)':bal>0?'#166534':'#dc2626';
-    const balBg=bal===0?'var(--tbg)':bal>0?'var(--gbg)':'var(--rbg)';
-    const balHint=bal>0?'Lena hai (Party owes)':bal<0?'Dena hai (We owe)':'No pending';
-    html+=`<div class="jcard"><div class="jh" onclick="viewPartyDetail('${pe}')" style="cursor:pointer"><div class="jav" style="background:var(--bluebg);color:var(--blue)">${p[0]}</div><div><div class="jn">${p}</div><div class="jm">${mob?'📱 '+mob:''} · ${party_recs.length} transactions</div></div></div><div class="jstats"><div class="jst"><div class="jsv">${inCount}</div><div class="jsl">Inward</div></div><div class="jst"><div class="jsv">${outCount}</div><div class="jsl">Outward</div></div></div><div style="background:${balBg};border:1px solid ${balColor}22;border-radius:6px;padding:8px 12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600">Balance</div><div style="font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;color:${balColor}">${balLabel}</div></div><div style="font-size:10px;color:${balColor};font-weight:500">${balHint}</div></div><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:11px;color:var(--text3)">${fmtINR(total)} total</div><div style="display:flex;gap:4px"><button class="ledger-btn" onclick="event.stopPropagation();printPartyLedger('${pe}')" title="View Ledger">📒 Ledger</button><button class="ledger-btn" onclick="event.stopPropagation();exportPartyLedgerCSV('${pe}')" title="Download CSV" style="background:var(--teal)">📥 CSV</button><button class="ledger-btn" onclick="event.stopPropagation();showPartyLedgerInReports('${pe}')" title="View in Reports" style="background:var(--purple)">📈 Report</button></div></div></div>`;
-  });
-  document.getElementById('party-grid').innerHTML=html||'<div class="empty"><div class="ei">👨‍🌾</div><h3>No parties yet</h3></div>';
-  const cEl=document.getElementById('pty-count');if(cEl)cEl.textContent=parties.length+' parties';
-}
+/* ===== PARTY TAB → CREATE LEDGER =====
+   Universal simplified party master view for everyone.
+   Admin sees Edit/Delete direct; non-admin sees Edit Request / Delete Request.
+   Admin gets an extra "📒 Ledger" button to view Tally-style party ledger. */
+function renderPartyGrid(){return renderCreateLedger();}
 function filterParties(){renderPartyGrid();}
 function viewPartyDetail(party){goTab('rec');document.getElementById('rec-search').value=party;filterRecords();}
 
-/* ===== CREATE LEDGER VIEW =====
-   Shown to users WITHOUT payment permission. Lists parties + items so user can
-   click any of them to start a new entry pre-filled. No balance/amount info leaks. */
+/* ===== CREATE LEDGER VIEW — proper Party Master =====
+   Shows party list with Name / Mobile / Address / Notes — clean CRUD interface.
+   Admin can edit/delete directly. Non-admin must request via admin. */
+
+/* On first load, auto-import unique parties from APP.records into APP.parties.
+   This way existing data isn't lost — admin sees their old parties as a starting list. */
+function autoImportPartiesFromRecords(){
+  if(!APP.parties)APP.parties=[];
+  if(APP.parties.length>0)return;/* Already populated */
+  const seen=new Set(APP.parties.map(p=>(p.name||'').toLowerCase()));
+  const fresh=[];
+  (APP.records||[]).forEach(r=>{
+    if(!r.party)return;
+    const key=r.party.toLowerCase();
+    if(seen.has(key))return;
+    seen.add(key);
+    fresh.push({
+      id:'PTY'+Date.now()+'_'+Math.random().toString(36).substr(2,5),
+      name:r.party,
+      mobile:r.mobile||'',
+      address:r.consigneeAddr||'',
+      notes:'',
+      createdAt:new Date().toISOString(),
+      createdBy:currentUser?currentUser.email:'auto-import',
+      lastUpdated:new Date().toISOString()
+    });
+  });
+  if(fresh.length){
+    APP.parties=APP.parties.concat(fresh);
+    localStorage.setItem('parties-'+APP.company,JSON.stringify(APP.parties));
+    syncToFirestore();
+    console.log('Auto-imported '+fresh.length+' parties from records');
+  }
+}
+
 function renderCreateLedger(){
-  const visRecs=getVisibleRecords();
+  if(!APP.parties)APP.parties=[];
+  /* First-time only: bring across parties from existing records */
+  if(APP.parties.length===0&&(APP.records||[]).length>0&&hasPerm('add')){
+    autoImportPartiesFromRecords();
+  }
   const searchEl=document.getElementById('party-search');
   const search=(searchEl&&searchEl.value||'').toLowerCase();
   /* Hide the type/item dropdowns — they don't apply here */
   const itemDD=document.getElementById('pty-item');if(itemDD&&itemDD.parentElement)itemDD.parentElement.style.display='none';
   const typeDD=document.getElementById('pty-type');if(typeDD&&typeDD.parentElement)typeDD.parentElement.style.display='none';
 
-  const partySet=new Set(visRecs.map(r=>r.party).filter(Boolean));
-  let parties=Array.from(partySet).sort();
-  if(search)parties=parties.filter(p=>p.toLowerCase().includes(search));
+  let parties=APP.parties.slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  if(search){
+    parties=parties.filter(p=>{
+      return (p.name||'').toLowerCase().includes(search)||
+             (p.mobile||'').toLowerCase().includes(search)||
+             (p.address||'').toLowerCase().includes(search)||
+             (p.notes||'').toLowerCase().includes(search);
+    });
+  }
 
-  const itemSet=new Set(visRecs.map(r=>r.item).filter(Boolean));
-  let items=Array.from(itemSet).sort();
-  if(search)items=items.filter(i=>i.toLowerCase().includes(search));
+  const isAdmin=hasPerm('payment')||hasPerm('users');
+  const canEdit=hasPerm('edit')||isAdmin;
+  const canDelete=hasPerm('delete')||isAdmin;
 
   let html='';
-  /* Top action bar */
-  if(hasPerm('add')){
-    html+='<div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-green" onclick="openEntryModal()">＋ New Entry</button></div>';
-  }
+  /* Top action bar — Add Party button + New Entry shortcut */
+  html+='<div style="margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap">';
+  html+='<button class="btn btn-green" onclick="openPartyModal()">＋ Add New Party</button>';
+  if(hasPerm('add')){html+='<button class="btn btn-blue" onclick="openEntryModal()">📦 New Entry</button>';}
+  html+='</div>';
   /* Info banner */
   html+='<div style="background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue2);padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;line-height:1.5">'+
-    'ℹ️ <strong>Yeh menu existing parties aur items dikhata hai.</strong> Kisi party ya item par click karke seedhe nayi entry banao. '+
-    'Naya party/item add karna ho? Bas New Entry mein nayi name type karo — automatic save ho jayegi.'+
+    'ℹ️ <strong>Party Master:</strong> Yahan saari parties ka name, phone, address, notes save hote hain. '+
+    'Kisi party par click karke seedhe nayi entry banao. '+
+    (canEdit?'Edit/Delete ke buttons har row ke saath hain.':'<strong>Edit/Delete</strong> ke liye admin ko request bhejo.')+
     '</div>';
 
-  /* Parties section */
-  html+='<div style="margin-bottom:18px"><div style="font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;color:var(--blue2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--bluebg)">🧑 Parties ('+parties.length+')</div>';
+  /* Parties list */
+  html+='<div class="tw"><div class="tsc"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr style="background:#f0f4fc"><th style="padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8">Party Name</th><th style="padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8">Phone</th><th style="padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8">Address</th><th style="padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8">Notes</th><th style="padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;white-space:nowrap">Action</th></tr></thead>';
+  html+='<tbody>';
   if(!parties.length){
-    html+='<div class="empty" style="padding:24px"><div class="ei">👨‍🌾</div><h3>Koi party nahi mili</h3><p style="font-size:12px;color:var(--text3)">New Entry banao — party automatic add ho jayegi</p></div>';
+    html+='<tr><td colspan="5" style="padding:30px;text-align:center;color:var(--text3)">Koi party nahi hai. <strong>＋ Add New Party</strong> click karo.</td></tr>';
   }else{
-    html+='<div class="jgrid">';
     parties.forEach(p=>{
-      const pe=p.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      const partyRecs=visRecs.filter(r=>r.party===p);
-      const inCount=partyRecs.filter(r=>r.type==='inward').length;
-      const outCount=partyRecs.filter(r=>r.type==='outward').length;
-      const mob=(partyRecs.find(r=>r.mobile)||{}).mobile||'';
-      const editBtn=hasPerm('edit')?`<button class="ledger-btn" onclick="event.stopPropagation();openEditPartyHelper('${pe}')" title="Edit existing entry of this party" style="background:var(--orange);font-size:10px;padding:3px 8px">✏️ Edit</button>`:`<button class="ledger-btn" onclick="event.stopPropagation();openSendPartyEditRequest('${pe}')" title="Edit ke liye admin se request bhejo" style="background:var(--text3);font-size:10px;padding:3px 8px">📩 Edit Request</button>`;
-      html+=`<div class="jcard" onclick="openEntryWithParty('${pe}')" style="cursor:pointer">
-        <div class="jh"><div class="jav" style="background:var(--bluebg);color:var(--blue)">${p[0]||'?'}</div>
-        <div><div class="jn">${p}</div><div class="jm">${mob?'📱 '+mob+' · ':''}${partyRecs.length} entries</div></div></div>
-        <div class="jstats"><div class="jst"><div class="jsv">${inCount}</div><div class="jsl">Inward</div></div>
-        <div class="jst"><div class="jsv">${outCount}</div><div class="jsl">Outward</div></div></div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px"><span style="font-size:11px;color:var(--blue);font-weight:600">＋ Click for new entry</span>${editBtn}</div>
-      </div>`;
+      const pid=p.id;
+      const pname=(p.name||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      const editAct=canEdit?
+        '<button class="act-btn act-edit" onclick="openPartyModal(\''+pid+'\')" title="Edit party">✏️</button>':
+        '<button class="act-btn act-req" onclick="requestPartyAction(\''+pid+'\',\'edit\')" title="Edit request">📩</button>';
+      const delAct=canDelete?
+        '<button class="act-btn act-del" onclick="deletePartyDirect(\''+pid+'\')" title="Delete party">🗑️</button>':
+        '<button class="act-btn act-req" onclick="requestPartyAction(\''+pid+'\',\'delete\')" title="Delete request">📩</button>';
+      const newEntryBtn='<button class="act-btn act-view" onclick="openEntryWithPartyId(\''+pid+'\')" title="Naya entry banao">📦</button>';
+      /* Admin-only: full Tally-style party ledger view button (shows balances) */
+      const ledgerBtn=hasPerm('payment')?
+        '<button class="act-btn" onclick="printPartyLedger(\''+pname+'\')" title="View Ledger" style="background:var(--bluebg);color:var(--blue);border:1px solid #c5d8f8">📒</button>':'';
+      html+='<tr style="border-bottom:1px solid var(--border);transition:background 0.15s" onmouseover="this.style.background=\'var(--bluebg)\'" onmouseout="this.style.background=\'\'">'+
+        '<td style="padding:10px 11px;font-weight:600">'+escapeHtml(p.name||'')+'</td>'+
+        '<td style="padding:10px 11px">'+(p.mobile?'📱 '+escapeHtml(p.mobile):'<span style="color:var(--text3)">—</span>')+'</td>'+
+        '<td style="padding:10px 11px;color:var(--text2);max-width:200px">'+(p.address?escapeHtml(p.address):'<span style="color:var(--text3)">—</span>')+'</td>'+
+        '<td style="padding:10px 11px;color:var(--text2);max-width:160px">'+(p.notes?escapeHtml(p.notes):'<span style="color:var(--text3)">—</span>')+'</td>'+
+        '<td style="padding:10px 11px;white-space:nowrap">'+newEntryBtn+' '+ledgerBtn+' '+editAct+' '+delAct+'</td>'+
+        '</tr>';
     });
-    html+='</div>';
   }
-  html+='</div>';
-
-  /* Items section */
-  html+='<div><div style="font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;color:var(--blue2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--bluebg)">📦 Items ('+items.length+')</div>';
-  if(!items.length){
-    html+='<div class="empty" style="padding:24px"><div class="ei">📦</div><h3>Koi item nahi mila</h3><p style="font-size:12px;color:var(--text3)">New Entry banao — item automatic add ho jayega</p></div>';
-  }else{
-    html+='<div style="display:flex;flex-wrap:wrap;gap:8px">';
-    items.forEach(it=>{
-      const ie=it.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-      const itemRecs=visRecs.filter(r=>r.item===it);
-      html+=`<div onclick="openEntryWithItem('${ie}')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 14px;display:flex;align-items:center;gap:8px;transition:all 0.15s" onmouseover="this.style.borderColor='var(--blue)';this.style.background='var(--bluebg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
-        <span style="font-weight:600;font-size:13px">${it}</span>
-        <span style="background:var(--bluebg);color:var(--blue);padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600">${itemRecs.length}</span>
-      </div>`;
-    });
-    html+='</div>';
-  }
-  html+='</div>';
+  html+='</tbody></table></div></div>';
 
   document.getElementById('party-grid').innerHTML=html;
-  const cEl=document.getElementById('pty-count');if(cEl)cEl.textContent=parties.length+' parties · '+items.length+' items';
+  const cEl=document.getElementById('pty-count');if(cEl)cEl.textContent=parties.length+' parties';
 }
 
-function openEntryWithParty(party){
-  if(!hasPerm('add')){toast('Add permission chahiye nayi entry ke liye','e');return;}
+/* Tiny HTML-escape helper to keep party names safe in markup */
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+let EDITING_PARTY_ID=null;
+function openPartyModal(id){
+  EDITING_PARTY_ID=id||null;
+  const isEdit=!!id;
+  document.getElementById('pm-modal-title').textContent=isEdit?'✏️ Edit Party':'🧑 Naya Party';
+  document.getElementById('party-save-btn').textContent=isEdit?'✓ Update':'✓ Save';
+  if(isEdit){
+    const p=APP.parties.find(x=>x.id===id);
+    if(!p){toast('Party nahi mili','e');return;}
+    document.getElementById('party-fld-name').value=p.name||'';
+    document.getElementById('party-fld-mobile').value=p.mobile||'';
+    document.getElementById('party-fld-address').value=p.address||'';
+    document.getElementById('party-fld-notes').value=p.notes||'';
+  }else{
+    document.getElementById('party-fld-name').value='';
+    document.getElementById('party-fld-mobile').value='';
+    document.getElementById('party-fld-address').value='';
+    document.getElementById('party-fld-notes').value='';
+  }
+  document.getElementById('party-modal').classList.add('open');
+}
+
+function savePartyFromModal(){
+  const name=(document.getElementById('party-fld-name').value||'').trim();
+  const mobile=(document.getElementById('party-fld-mobile').value||'').trim();
+  const address=(document.getElementById('party-fld-address').value||'').trim();
+  const notes=(document.getElementById('party-fld-notes').value||'').trim();
+  if(!name){toast('Party name to do!','e');return;}
+  /* Duplicate name check (case-insensitive) — but allow same name when editing same record */
+  const lc=name.toLowerCase();
+  const dup=APP.parties.find(p=>(p.name||'').toLowerCase()===lc&&p.id!==EDITING_PARTY_ID);
+  if(dup){toast('Iss naam ki party pehle se hai','e');return;}
+
+  if(EDITING_PARTY_ID){
+    const idx=APP.parties.findIndex(p=>p.id===EDITING_PARTY_ID);
+    if(idx>=0){
+      APP.parties[idx]={...APP.parties[idx],name,mobile,address,notes,lastUpdated:new Date().toISOString(),updatedBy:currentUser?currentUser.email:'unknown'};
+      toast('Party updated','s');
+    }
+  }else{
+    APP.parties.push({
+      id:'PTY'+Date.now()+'_'+Math.random().toString(36).substr(2,5),
+      name,mobile,address,notes,
+      createdAt:new Date().toISOString(),
+      createdBy:currentUser?currentUser.email:'unknown',
+      lastUpdated:new Date().toISOString()
+    });
+    toast('Party added','s');
+  }
+  localStorage.setItem('parties-'+APP.company,JSON.stringify(APP.parties));
+  syncToFirestore();
+  closeM('party-modal');
+  EDITING_PARTY_ID=null;
+  renderPartyGrid();
+}
+
+function deletePartyDirect(id){
+  const p=APP.parties.find(x=>x.id===id);
+  if(!p){toast('Party nahi mili','e');return;}
+  if(!confirm('Delete karna chahte ho?\n\n"'+p.name+'"\n\nNote: yeh sirf master list se hatega — iss party ki existing entries records mein safe rahengi.'))return;
+  APP.parties=APP.parties.filter(x=>x.id!==id);
+  localStorage.setItem('parties-'+APP.company,JSON.stringify(APP.parties));
+  /* Also delete from Firestore directly (skip the diff machinery) */
+  if(DB&&APP.company){fsPartiesCol(APP.company).doc(id).delete().catch(e=>console.error(e));}
+  toast('Party "'+p.name+'" deleted','i');
+  renderPartyGrid();
+}
+
+function requestPartyAction(partyId,action){
+  /* Non-admin user requests edit/delete of a party — uses existing requests system */
+  const p=APP.parties.find(x=>x.id===partyId);
+  if(!p){toast('Party nahi mili','e');return;}
+  const note=prompt((action==='edit'?'Edit':'Delete')+' party "'+p.name+'"\n\nReason ya note (optional):');
+  if(note===null)return;
+  if(!APP.requests)APP.requests=[];
+  const req={
+    id:'req_'+Date.now()+'_'+Math.random().toString(36).substr(2,5),
+    type:'party-'+action,/* party-edit or party-delete */
+    partyId:partyId,
+    partyName:p.name,
+    entryId:null,
+    requestedBy:currentUser?currentUser.email:'unknown',
+    requestedByName:currentUser?(currentUser.name||currentUser.email):'Unknown',
+    note:(action==='edit'?'✏️ Party edit request':'🗑️ Party delete request')+' — '+p.name+(note?': '+note:''),
+    status:'pending',
+    adminNote:'',
+    actionBy:'',
+    createdAt:new Date().toISOString(),
+    updatedAt:new Date().toISOString()
+  };
+  APP.requests.push(req);
+  localStorage.setItem('requests-'+APP.company,JSON.stringify(APP.requests));
+  syncToFirestore();
+  toast('Request admin ko bhej di gayi','s');
+  updateReqBadge();
+}
+
+function openEntryWithPartyId(pid){
+  if(!hasPerm('add')){toast('Add permission chahiye','e');return;}
+  const p=APP.parties.find(x=>x.id===pid);
+  if(!p){toast('Party nahi mili','e');return;}
   openEntryModal();
-  /* Pre-fill party field after modal opens */
   setTimeout(()=>{
-    const el=document.getElementById('fi-party');
-    if(el){el.value=party;el.dispatchEvent(new Event('input'));}
-    /* Also try to fill mobile from previous entries of this party */
-    const prev=APP.records.find(r=>r.party===party&&r.mobile);
+    const el=document.getElementById('fi-party');if(el){el.value=p.name;el.dispatchEvent(new Event('input'));}
+    if(p.mobile){const mb=document.getElementById('fi-mobile');if(mb)mb.value=p.mobile;}
+    if(p.address){const ad=document.getElementById('fi-con-addr');if(ad)ad.value=p.address;}
+  },120);
+}
+
+/* Legacy compat — earlier rendered ledger had these functions; keep as no-op-ish redirects */
+function openEntryWithParty(name){
+  if(!hasPerm('add')){toast('Add permission chahiye','e');return;}
+  openEntryModal();
+  setTimeout(()=>{
+    const el=document.getElementById('fi-party');if(el){el.value=name;el.dispatchEvent(new Event('input'));}
+    const prev=APP.records.find(r=>r.party===name&&r.mobile);
     if(prev){const mb=document.getElementById('fi-mobile');if(mb)mb.value=prev.mobile;}
   },120);
 }
 function openEntryWithItem(item){
-  if(!hasPerm('add')){toast('Add permission chahiye nayi entry ke liye','e');return;}
+  if(!hasPerm('add')){toast('Add permission chahiye','e');return;}
   openEntryModal();
-  setTimeout(()=>{
-    const el=document.getElementById('fi-item');
-    if(el){el.value=item;el.dispatchEvent(new Event('input'));}
-  },120);
-}
-function openEditPartyHelper(party){
-  /* For users with 'edit' permission — go to records filtered by this party
-     so they can pick which specific entry to edit. */
-  goTab('rec');
-  const s=document.getElementById('rec-search');if(s){s.value=party;filterRecords();}
-  toast('Records filter set to '+party+' — pick entry to edit','i');
-}
-function openSendPartyEditRequest(party){
-  /* For users without edit permission — explain they must request from admin. */
-  alert('Party edit karne ke liye admin se permission lena padega.\n\nAap kya kar sakte ho:\n• Records tab mein jao\n• "'+party+'" wali entry dhoondh ke 📩 Edit Request bhejo\n• Admin approve karega tab edit kar paoge.');
-  goTab('rec');
-  const s=document.getElementById('rec-search');if(s){s.value=party;filterRecords();}
+  setTimeout(()=>{const el=document.getElementById('fi-item');if(el){el.value=item;el.dispatchEvent(new Event('input'));}},120);
 }
 
 /* ===== TALLY PRIME STYLE PARTY LEDGER ===== */
