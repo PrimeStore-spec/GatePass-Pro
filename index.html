@@ -153,6 +153,7 @@
       <div style="font-size:9px;color:rgba(255,255,255,0.75)" id="user-info-role">-</div>
     </div>
     <div id="ss" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,0.8)">⟳ Checking...</div>
+    <button class="btn-w" id="wa-summary-btn" onclick="openDailySummaryModal()" style="display:none" title="Today's due payments — send to your WhatsApp">📲 Daily Summary</button>
     <button class="btn-w" onclick="loadData()">🔄 Refresh</button>
     <button class="btn-add" onclick="openEntryModal()">＋ Naya Entry</button>
   </div>
@@ -615,6 +616,81 @@
       <span style="font-size:13px;color:var(--text2);font-weight:600">% per annum</span>
       <span style="font-size:11px;color:var(--text3)">0 = no interest. Lagega due-date ke baad bakaya amount par.</span>
     </div>
+
+    <!-- WhatsApp Daily Summary Settings -->
+    <div id="wa-settings-section" style="margin-top:18px;padding-top:14px;border-top:2px solid var(--bluebg);border-radius:6px;transition:outline 0.3s">
+      <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--blue);margin-bottom:12px">📲 WhatsApp Daily Summary</h4>
+
+      <div class="fgrid3" style="margin-bottom:10px">
+        <div class="fg2">
+          <label class="flbl">My WhatsApp Number (apna number, +91 ke bina)</label>
+          <input type="tel" class="finp" id="wa-fld-number" placeholder="9876543210" oninput="waSetMyNumber(this.value)">
+        </div>
+        <div class="fg2">
+          <label class="flbl">Format</label>
+          <select class="finp" id="wa-fld-format" onchange="waSetFormat(this.value);refreshWASummary()">
+            <option value="detailed">Detailed (multi-line per party)</option>
+            <option value="compact">Compact (1 line per party)</option>
+            <option value="custom">Custom (apna template)</option>
+          </select>
+        </div>
+        <div class="fg2">
+          <label class="flbl">Sort by</label>
+          <select class="finp" id="wa-fld-sort" onchange="waSetSortBy(this.value);refreshWASummary()">
+            <option value="overdue-first">Most overdue first</option>
+            <option value="highest-bal">Highest balance first</option>
+            <option value="alpha">Alphabetical (A-Z)</option>
+            <option value="due-date">Due date order</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fgrid3" style="margin-bottom:10px">
+        <div class="fg2">
+          <label class="flbl">Send method preference</label>
+          <select class="finp" id="wa-fld-method" onchange="waSetMethod(this.value);refreshWASummary()">
+            <option value="both">Both buttons (recommended)</option>
+            <option value="self-link">Direct WhatsApp link only</option>
+            <option value="clipboard">Clipboard copy only</option>
+          </select>
+        </div>
+        <div class="fg2">
+          <label class="flbl">Include due-today entries</label>
+          <select class="finp" id="wa-fld-today" onchange="waSetIncludeToday(this.value==='true');refreshWASummary()">
+            <option value="true">Yes (include)</option>
+            <option value="false">No (only overdue)</option>
+          </select>
+        </div>
+        <div class="fg2">
+          <label class="flbl">Advance warning (next N days)</label>
+          <input type="number" class="finp" id="wa-fld-future" min="0" max="30" placeholder="0" onchange="waSetFutureDays(this.value);refreshWASummary()">
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label class="flbl">Auto-popup summary when admin opens app daily?</label>
+        <div style="display:flex;gap:14px;margin-top:4px">
+          <label style="font-size:12px;cursor:pointer"><input type="radio" name="wa-auto" value="true" onchange="waSetAutoPopup(true)"> ON — pop up daily</label>
+          <label style="font-size:12px;cursor:pointer"><input type="radio" name="wa-auto" value="false" onchange="waSetAutoPopup(false)"> OFF — only manual</label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label class="flbl">Fields to include in message <span style="font-weight:400;color:var(--text3)">(Balance always shown)</span></label>
+        <div id="wa-fld-fields" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:6px"></div>
+      </div>
+
+      <div id="wa-custom-tmpl-wrap" style="margin-bottom:10px;display:none">
+        <label class="flbl">Custom Template <span style="font-weight:400;color:var(--text3)">(placeholders: [DATE] [COMPANY] [COUNT] [TOTAL] [ENTRIES])</span></label>
+        <textarea class="finp" id="wa-fld-template" rows="4" placeholder="📋 [DATE] — [COMPANY]&#10;Total: [TOTAL] · [COUNT] parties&#10;&#10;[ENTRIES]" style="font-family:'JetBrains Mono',monospace;font-size:11px" oninput="waSetCustomTemplate(this.value)"></textarea>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:8px">
+        <button class="btn btn-green" onclick="openDailySummaryModal()">📲 Open Today's Summary</button>
+        <button class="btn btn-ghost" onclick="loadWASettingsUI()">🔄 Reload Settings</button>
+        <span id="wa-settings-status" style="font-size:11px;color:var(--text3);margin-left:auto"></span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -984,6 +1060,57 @@
     <div class="mf">
       <div></div>
       <div style="display:flex;gap:6px"><button class="btn btn-ghost" onclick="closeM('party-modal')">Cancel</button><button class="btn btn-green" id="party-save-btn" onclick="savePartyFromModal()">✓ Save</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- WhatsApp Daily Summary Modal — admin's daily reminder for self -->
+<div class="ov" id="wa-summary-modal" onclick="closeOut(event,'wa-summary-modal')">
+  <div class="modal" style="max-width:720px">
+    <div class="mh"><div class="mt">📲 Daily Summary — WhatsApp pe bhejo</div><button class="mx" onclick="closeM('wa-summary-modal')">✕</button></div>
+    <div class="mb">
+
+      <!-- Quick number setup (visible if not set yet) -->
+      <div id="wa-quick-num-setup" style="display:none;background:#fff7e0;border:1px solid #fde68a;border-radius:7px;padding:10px 12px;margin-bottom:10px">
+        <div style="font-weight:600;color:#92400e;margin-bottom:6px;font-size:13px">⚠ Apna WhatsApp number set karo (one-time)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;color:var(--text2);font-weight:600">+91</span>
+          <input type="tel" class="finp" id="wa-quick-num-input" placeholder="9876543210" style="flex:1;max-width:200px" maxlength="10">
+          <button class="btn btn-green" onclick="saveQuickNumber()" style="padding:6px 14px">Save</button>
+        </div>
+      </div>
+
+      <!-- Quick filters: Overdue / Today / Future + counts -->
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📊 Kya include karna hai?</div>
+        <div id="wa-quick-filters" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+
+      <!-- Format toggle -->
+      <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:10px;font-size:12px">
+        <span style="font-weight:600;color:var(--text2)">Format:</span>
+        <label style="cursor:pointer"><input type="radio" name="wa-quick-format" value="detailed" onchange="quickSetFormat(this.value)"> Detailed (multi-line)</label>
+        <label style="cursor:pointer"><input type="radio" name="wa-quick-format" value="compact" onchange="quickSetFormat(this.value)"> Compact (1-line)</label>
+        <span style="color:var(--text3)">·</span>
+        <a href="javascript:void(0)" onclick="closeM('wa-summary-modal');openWASettings()" style="color:var(--blue);font-size:11px">⚙️ Advanced settings →</a>
+      </div>
+
+      <!-- Summary header -->
+      <div id="wa-summary-meta" style="background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue2);padding:10px 12px;border-radius:6px;margin-bottom:10px;font-size:13px"></div>
+
+      <label class="flbl" style="margin-bottom:4px;display:block">Preview <span style="font-weight:400;color:var(--text3)">(edit karke personal note jod sakte ho)</span>:</label>
+      <textarea id="wa-summary-text" class="finp" rows="11" style="font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.5;white-space:pre;resize:vertical;background:var(--s2)"></textarea>
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+        <button class="btn btn-ghost" onclick="refreshWASummary()" title="Re-generate from latest data" style="padding:5px 10px;font-size:11px">🔄 Refresh</button>
+      </div>
+    </div>
+    <div class="mf">
+      <div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="closeM('wa-summary-modal')">Cancel</button>
+        <button class="btn btn-blue" id="wa-btn-copy" onclick="copyDailySummary()" title="Clipboard mein copy → WhatsApp Web 'Message Yourself' mein paste">📋 Copy</button>
+        <button class="btn btn-green" id="wa-btn-send" onclick="sendDailySummaryToWhatsApp()" title="WhatsApp khol ke 'Message Yourself' mein bhejo">📲 Send to WhatsApp</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1501,6 +1628,9 @@ function applyPermissions(){
   /* Universal tab label — Create Ledger is the simplified party master for everyone */
   const partyTab=document.getElementById('tab-party');
   if(partyTab){partyTab.innerHTML='📒 Create Ledger';}
+  /* WhatsApp Daily Summary button — only for admin/payment users */
+  const waBtn=document.getElementById('wa-summary-btn');
+  if(waBtn)waBtn.style.display=hasPerm('payment')?'':'none';
   updateReqBadge();
   refreshFirmUI();
   /* If current company is not accessible, force company selection */
@@ -1683,6 +1813,48 @@ function onInterestRateChange(v){
   refreshAllViews();
 }
 
+/* Populate the WhatsApp settings UI from localStorage values */
+function loadWASettingsUI(){
+  const num=document.getElementById('wa-fld-number');if(num)num.value=waGetMyNumber();
+  const fmt=document.getElementById('wa-fld-format');if(fmt)fmt.value=waGetFormat();
+  const sort=document.getElementById('wa-fld-sort');if(sort)sort.value=waGetSortBy();
+  const method=document.getElementById('wa-fld-method');if(method)method.value=waGetMethod();
+  const today=document.getElementById('wa-fld-today');if(today)today.value=waGetIncludeToday()?'true':'false';
+  const future=document.getElementById('wa-fld-future');if(future)future.value=String(waGetFutureDays());
+  const tmpl=document.getElementById('wa-fld-template');if(tmpl)tmpl.value=waGetCustomTemplate();
+  document.querySelectorAll('input[name="wa-auto"]').forEach(r=>{r.checked=(r.value==='true')===waGetAutoPopup();});
+  /* Fields checkboxes — built from WA_FIELD_DEFS so easy to extend */
+  const fldsBox=document.getElementById('wa-fld-fields');
+  if(fldsBox){
+    const enabled=new Set(waGetEnabledFields());
+    fldsBox.innerHTML=WA_FIELD_DEFS.map(f=>{
+      const checked=f.mandatory||enabled.has(f.id);
+      const dis=f.mandatory?'disabled':'';
+      return '<label class="perm-lbl" style="font-size:11px;cursor:pointer">'+
+        '<input type="checkbox" '+(checked?'checked':'')+' '+dis+' onchange="toggleWAField(\''+f.id+'\',this.checked)"> '+f.label+
+        (f.mandatory?' <span style="color:var(--text3);font-size:10px">(req)</span>':'')+
+        '</label>';
+    }).join('');
+  }
+  /* Show/hide custom template area */
+  const tmplWrap=document.getElementById('wa-custom-tmpl-wrap');
+  if(tmplWrap)tmplWrap.style.display=waGetFormat()==='custom'?'block':'none';
+  /* Switch listener for format change to also toggle template wrap */
+  if(fmt){fmt.addEventListener('change',()=>{tmplWrap.style.display=fmt.value==='custom'?'block':'none';},{once:true});}
+  /* Status line */
+  const status=document.getElementById('wa-settings-status');
+  if(status){
+    const num2=waGetMyNumber();
+    if(!num2){status.textContent='⚠ Number set karo to begin';status.style.color='var(--orange)';}
+    else{status.textContent='✓ Configured: +91 '+num2;status.style.color='var(--green)';}
+  }
+}
+function toggleWAField(id,on){
+  const cur=new Set(waGetEnabledFields());
+  if(on)cur.add(id);else cur.delete(id);
+  waSetEnabledFields(Array.from(cur));
+}
+
 /* === STORAGE STATUS CHECK ===
    Tells admin which firms are migrated to the new schema and counts records.
    Useful for verifying after migration that everything copied correctly. */
@@ -1724,6 +1896,8 @@ function renderUsers(){
   /* Sync the idle-timeout dropdown each time admin opens the tab */
   const sel=document.getElementById('idle-timeout-sel');if(sel)sel.value=String(getIdleTimeoutMin());
   const irEl=document.getElementById('interest-rate-input');if(irEl)irEl.value=String(getCompanyInterestRate());
+  /* Populate WhatsApp settings UI on each Users tab visit */
+  try{loadWASettingsUI();}catch(e){console.warn('WA settings load:',e);}
   if(!users.length){grid.innerHTML='<div class="empty"><div class="ei">👥</div><h3>Koi user nahi</h3></div>';return;}
   const rc={admin:'#e8f0fd',manager:'#e8f5ed',viewer:'#fef3e2',data_entry:'#f3e8ff',custom:'#f0f4fc'};
   const rco={admin:'#1a5fc8',manager:'#1a7a3c',viewer:'#b45309',data_entry:'#7c3aed',custom:'#4a5568'};
@@ -1823,6 +1997,8 @@ function loadData(){
   refreshAllViews();
   /* Step 2: Start real-time listeners (handles Firestore loading + live sync) */
   startRealtimeSync();
+  /* Step 3: Daily summary auto-popup if enabled (fires once per day per admin) */
+  try{maybeAutoShowSummary();}catch(e){console.warn('Auto-popup error:',e);}
 }
 function applyOverdueCheck(){
   APP.records.forEach(r=>{
@@ -2147,6 +2323,372 @@ function getEntryInterest(r){
   return{rate:rate,days:days,amount:Math.round(amount)};
 }
 function fmtINR(v){return '₹'+Math.abs(v).toLocaleString('en-IN',{maximumFractionDigits:0});}
+
+/* ============================================================
+   📲 WHATSAPP DAILY SUMMARY — EXTENSIBLE ARCHITECTURE
+   ============================================================
+   Sends a daily reminder of due payments to admin's own WhatsApp.
+   FIELDS list is extensible — add a new entry to WA_FIELD_DEFS to
+   include a new field. Settings stored in localStorage prefixed 'wa-'.
+   ============================================================ */
+
+/* Each field has: id, label, default state (on/off), value extractor.
+   Add to this list to make a new field available in the summary. */
+const WA_FIELD_DEFS=[
+  {id:'gp',          label:'GP Number',     defaultOn:true,  extract:r=>r.gp||'-'},
+  {id:'item',        label:'Item + Bags',   defaultOn:true,  extract:r=>(r.item||'-')+' ('+(r.bags||0)+' bags)'},
+  {id:'entryDate',   label:'Entry Date',    defaultOn:true,  extract:r=>r.date||'-'},
+  {id:'mobile',      label:'Mobile',        defaultOn:true,  extract:r=>r.mobile?'📱 '+r.mobile:'—'},
+  {id:'total',       label:'Total Amount',  defaultOn:true,  extract:r=>fmtINR(getEntryAmt(r))},
+  {id:'paid',        label:'Paid Amount',   defaultOn:true,  extract:r=>fmtINR(r.paid||0)},
+  {id:'balance',     label:'Balance',       defaultOn:true,  extract:r=>fmtINR(getEntryAmt(r)-(r.paid||0)), mandatory:true},
+  {id:'dueDate',     label:'Due Date',      defaultOn:true,  extract:r=>{const d=getDueDate(r);return (d&&!isNaN(d.getTime()))?localDateStr(d):'-';}},
+  {id:'daysLate',    label:'Days late',     defaultOn:true,  extract:r=>{
+    const d=getDueDate(r);if(!d||isNaN(d.getTime()))return '';
+    const t=new Date();t.setHours(0,0,0,0);d.setHours(0,0,0,0);
+    const diff=Math.floor((t-d)/86400000);
+    if(diff===0)return '✅ Due TODAY';
+    if(diff>0)return '⚠ '+diff+' din late';
+    return Math.abs(diff)+' din baaki';
+  }},
+  {id:'interest',    label:'Interest',      defaultOn:true,  extract:r=>{const i=getEntryInterest(r);return i.amount>0?fmtINR(i.amount)+' ('+i.days+'d × '+i.rate+'% pa)':'';}},
+  {id:'notes',       label:'Notes',         defaultOn:false, extract:r=>r.notes||''},
+  {id:'vehicle',     label:'Vehicle',       defaultOn:false, extract:r=>r.vehicle||''},
+  {id:'driver',      label:'Driver',        defaultOn:false, extract:r=>r.driver||''},
+  {id:'broker',      label:'Broker',        defaultOn:false, extract:r=>r.broker||''},
+  {id:'address',     label:'Cnee Address',  defaultOn:false, extract:r=>r.consigneeAddr||''},
+  {id:'consignee',   label:'Consignee',     defaultOn:false, extract:r=>r.consignee||''}
+];
+
+/* Settings getters — all defaults if not configured */
+function waGetMyNumber(){return (localStorage.getItem('wa-my-number')||'').replace(/\D/g,'');}
+function waSetMyNumber(n){localStorage.setItem('wa-my-number',(n||'').replace(/\D/g,''));}
+function waGetFormat(){return localStorage.getItem('wa-format')||'detailed';}
+function waSetFormat(f){localStorage.setItem('wa-format',f||'detailed');}
+function waGetCustomTemplate(){return localStorage.getItem('wa-custom-template')||'';}
+function waSetCustomTemplate(t){localStorage.setItem('wa-custom-template',t||'');}
+function waGetSortBy(){return localStorage.getItem('wa-sort-by')||'overdue-first';}
+function waSetSortBy(s){localStorage.setItem('wa-sort-by',s||'overdue-first');}
+function waGetEnabledFields(){
+  const saved=localStorage.getItem('wa-fields');
+  if(saved){try{return JSON.parse(saved);}catch(e){}}
+  return WA_FIELD_DEFS.filter(f=>f.defaultOn).map(f=>f.id);
+}
+function waSetEnabledFields(arr){localStorage.setItem('wa-fields',JSON.stringify(arr||[]));}
+function waGetIncludeToday(){return localStorage.getItem('wa-include-today')!=='false';}/* default true */
+function waSetIncludeToday(b){localStorage.setItem('wa-include-today',b?'true':'false');}
+function waGetIncludeOverdue(){return localStorage.getItem('wa-include-overdue')!=='false';}/* default true */
+function waSetIncludeOverdue(b){localStorage.setItem('wa-include-overdue',b?'true':'false');}
+function waGetFutureDays(){return parseInt(localStorage.getItem('wa-future-days')||'0');}
+function waSetFutureDays(n){localStorage.setItem('wa-future-days',String(parseInt(n)||0));}
+function waGetMethod(){return localStorage.getItem('wa-method')||'both';}/* 'self-link' | 'clipboard' | 'both' */
+function waSetMethod(m){localStorage.setItem('wa-method',m||'both');}
+function waGetAutoPopup(){return localStorage.getItem('wa-auto-popup')==='true';}
+function waSetAutoPopup(b){localStorage.setItem('wa-auto-popup',b?'true':'false');}
+function waGetLastSentDate(){return localStorage.getItem('wa-last-sent-date')||'';}
+function waSetLastSentDate(){localStorage.setItem('wa-last-sent-date',localDateStr());localStorage.setItem('wa-last-sent-time',new Date().toISOString());}
+function waGetLastSentTime(){return localStorage.getItem('wa-last-sent-time')||'';}
+function waGetAutoShownDate(){return localStorage.getItem('wa-auto-shown-date')||'';}
+function waMarkAutoShown(){localStorage.setItem('wa-auto-shown-date',localDateStr());}
+
+/* Pull list of records that should appear in today's summary.
+   3 categories controlled independently: overdue + due-today + future N days */
+function getDailySummaryData(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const includeOverdue=waGetIncludeOverdue();
+  const includeToday=waGetIncludeToday();
+  const futureDays=waGetFutureDays();
+  const futureLimit=new Date(today);futureLimit.setDate(futureLimit.getDate()+futureDays);
+
+  const visRecs=getVisibleRecords();
+  const matched=visRecs.filter(r=>{
+    if((r.paymentStatus||'pending')==='paid')return false;
+    const bal=getEntryAmt(r)-(r.paid||0);
+    if(bal<=1)return false;
+    const dd=getDueDate(r);
+    if(!dd||isNaN(dd.getTime()))return false;
+    dd.setHours(0,0,0,0);
+    if(dd<today)return includeOverdue;/* overdue */
+    if(dd.getTime()===today.getTime())return includeToday;/* due today */
+    if(futureDays>0&&dd<=futureLimit)return true;/* upcoming within N days */
+    return false;
+  });
+
+  /* Sorting */
+  const sortBy=waGetSortBy();
+  matched.sort((a,b)=>{
+    if(sortBy==='overdue-first'){
+      return getDueDate(a)-getDueDate(b);/* oldest due first = most overdue */
+    }
+    if(sortBy==='highest-bal'){
+      return (getEntryAmt(b)-(b.paid||0)) - (getEntryAmt(a)-(a.paid||0));
+    }
+    if(sortBy==='alpha'){return (a.party||'').localeCompare(b.party||'');}
+    if(sortBy==='due-date'){return getDueDate(a)-getDueDate(b);}
+    return 0;
+  });
+  return matched;
+}
+
+/* Breakdown — how many records fall into each category (regardless of toggles).
+   Used to show "Overdue: 36 · Today: 1 · Upcoming: 0" in the modal. */
+function getDailySummaryBreakdown(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const futureDays=waGetFutureDays();
+  const futureLimit=new Date(today);futureLimit.setDate(futureLimit.getDate()+Math.max(futureDays,5));
+  const visRecs=getVisibleRecords();
+  let overdue=0,dueToday=0,upcoming=0,upBal=0,odBal=0,tdBal=0;
+  visRecs.forEach(r=>{
+    if((r.paymentStatus||'pending')==='paid')return;
+    const bal=getEntryAmt(r)-(r.paid||0);
+    if(bal<=1)return;
+    const dd=getDueDate(r);if(!dd||isNaN(dd.getTime()))return;
+    dd.setHours(0,0,0,0);
+    if(dd<today){overdue++;odBal+=bal;}
+    else if(dd.getTime()===today.getTime()){dueToday++;tdBal+=bal;}
+    else if(dd<=futureLimit){upcoming++;upBal+=bal;}
+  });
+  return{overdue,dueToday,upcoming,odBal,tdBal,upBal};
+}
+
+/* Status emoji based on how late */
+function _waStatusEmoji(r){
+  const dd=getDueDate(r);if(!dd||isNaN(dd.getTime()))return '⚪';
+  const t=new Date();t.setHours(0,0,0,0);dd.setHours(0,0,0,0);
+  const diff=Math.floor((t-dd)/86400000);
+  if(diff>=15)return '🔴';
+  if(diff>=7)return '🟠';
+  if(diff>0)return '🟡';
+  if(diff===0)return '✅';
+  return '⏳';
+}
+
+/* Build the WhatsApp text — switches between formats */
+function buildDailySummaryText(){
+  const data=getDailySummaryData();
+  const format=waGetFormat();
+  const enabled=waGetEnabledFields();
+  const compName=(COMPANIES[APP.company]&&COMPANIES[APP.company].name)||APP.company||'';
+  const today=localDateStr();
+  const totBal=data.reduce((s,r)=>s+(getEntryAmt(r)-(r.paid||0)),0);
+
+  /* Custom template — variable substitution */
+  if(format==='custom'){
+    let tmpl=waGetCustomTemplate()||'';
+    if(!tmpl)tmpl='📋 [DATE] — [COMPANY]\nTotal: [TOTAL] · [COUNT] parties\n\n[ENTRIES]';
+    /* For each entry, replace variables in the per-entry portion if any */
+    const entriesText=data.map((r,i)=>{
+      const repl={
+        '[INDEX]':String(i+1),
+        '[PARTY]':r.party||'-',
+        '[GP]':r.gp||'-',
+        '[ITEM]':r.item||'-',
+        '[BAGS]':String(r.bags||0),
+        '[MOBILE]':r.mobile||'-',
+        '[TOTAL]':fmtINR(getEntryAmt(r)),
+        '[PAID]':fmtINR(r.paid||0),
+        '[BALANCE]':fmtINR(getEntryAmt(r)-(r.paid||0)),
+        '[DUE_DATE]':localDateStr(getDueDate(r)),
+        '[DAYS_LATE]':String(Math.max(0,Math.floor((new Date().setHours(0,0,0,0)-getDueDate(r).setHours(0,0,0,0))/86400000)))
+      };
+      let s=i===0?'':'\n';
+      s+=(i+1)+'. '+(r.party||'-');
+      s+=' · '+fmtINR(getEntryAmt(r)-(r.paid||0));
+      const dl=Math.floor((new Date().setHours(0,0,0,0)-getDueDate(r).setHours(0,0,0,0))/86400000);
+      s+=' · '+(dl>0?dl+'d late':dl===0?'due today':'in '+Math.abs(dl)+'d');
+      if(r.mobile)s+=' · 📱 '+r.mobile;
+      return s;
+    }).join('\n');
+    return tmpl
+      .replace(/\[DATE\]/g,today)
+      .replace(/\[COMPANY\]/g,compName)
+      .replace(/\[COUNT\]/g,String(data.length))
+      .replace(/\[TOTAL\]/g,fmtINR(totBal))
+      .replace(/\[ENTRIES\]/g,entriesText);
+  }
+
+  /* Compact format — 1 line per party */
+  if(format==='compact'){
+    if(!data.length)return '📋 Today\'s Due — '+today+'\n'+compName+'\n\n✅ Aaj koi due payment nahi hai!';
+    let lines=['📋 Today\'s Due — '+today, compName, 'Total: '+fmtINR(totBal)+' · '+data.length+' parties','━━━━━━━━━━━━━━━━━━━━',''];
+    data.forEach((r,i)=>{
+      const bal=getEntryAmt(r)-(r.paid||0);
+      const dd=getDueDate(r);dd.setHours(0,0,0,0);
+      const t=new Date();t.setHours(0,0,0,0);
+      const diff=Math.floor((t-dd)/86400000);
+      const lateStr=diff>0?diff+'d late':diff===0?'DUE TODAY':Math.abs(diff)+'d to go';
+      lines.push((i+1)+'. '+(r.party||'-')+' · '+fmtINR(bal));
+      let sub='   '+(r.gp||'')+(r.gp?' · ':'')+lateStr;
+      if(enabled.indexOf('mobile')>=0&&r.mobile)sub+=' · 📱 '+r.mobile;
+      lines.push(sub);
+    });
+    lines.push('','━━━━━━━━━━━━━━━━━━━━','Total Outstanding: '+fmtINR(totBal));
+    return lines.join('\n');
+  }
+
+  /* Detailed format — multi-line per party with all enabled fields */
+  if(!data.length){
+    return '📋 Today\'s Due Payments\n━━━━━━━━━━━━━━━━━━━━━\n📅 Date: '+today+'\n🏢 Firm: '+compName+'\n\n✅ Aaj koi pending payment nahi hai — sab settled!';
+  }
+  let lines=[
+    '📋 Today\'s Due Payments',
+    '━━━━━━━━━━━━━━━━━━━━━',
+    '📅 Date: '+today,
+    '🏢 Firm: '+compName,
+    '👥 Parties: '+data.length,
+    '💰 Total Outstanding: '+fmtINR(totBal),
+    '━━━━━━━━━━━━━━━━━━━━━',
+    ''
+  ];
+  data.forEach((r,i)=>{
+    lines.push((i+1)+'. '+_waStatusEmoji(r)+' '+(r.party||'-'));
+    WA_FIELD_DEFS.forEach(f=>{
+      if(enabled.indexOf(f.id)<0&&!f.mandatory)return;
+      const val=f.extract(r);
+      if(val===''||val==null)return;
+      /* Pad label to 8 chars for alignment */
+      const lbl=(f.label+'        ').slice(0,8);
+      lines.push('   '+lbl+': '+val);
+    });
+    lines.push('');
+  });
+  lines.push('━━━━━━━━━━━━━━━━━━━━━','Generated: '+today+' '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),compName);
+  return lines.join('\n');
+}
+
+/* Build the wa.me URL for self-message */
+function _waSelfUrl(text){
+  const num=waGetMyNumber();
+  if(!num)return null;
+  /* Add country code 91 if appears to be 10-digit Indian number */
+  const formatted=num.startsWith('91')?num:('91'+num);
+  return 'https://wa.me/'+formatted+'?text='+encodeURIComponent(text);
+}
+
+/* Open WhatsApp with pre-filled summary to admin's own number */
+function sendDailySummaryToWhatsApp(){
+  if(!waGetMyNumber()){toast('Pehle apna WhatsApp number set karo (Admin Tools mein)','e');openWASettings();return;}
+  const text=buildDailySummaryText();
+  const url=_waSelfUrl(text);
+  if(!url){toast('Number set nahi hai','e');return;}
+  window.open(url,'_blank');
+  waSetLastSentDate();
+  refreshWASummary();
+  toast('WhatsApp khul gaya — Send button daba do','s');
+}
+
+/* Copy summary text to clipboard for paste-into-WhatsApp fallback */
+async function copyDailySummary(){
+  const text=buildDailySummaryText();
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      waSetLastSentDate();refreshWASummary();
+      toast('Summary copy ho gayi — WhatsApp Web "Message Yourself" mein paste karo','s');
+      return;
+    }
+  }catch(e){}
+  /* Fallback: show in a textarea so user can copy manually */
+  const ta=document.getElementById('wa-summary-text');
+  if(ta){ta.select();document.execCommand('copy');toast('Copied','s');}
+}
+
+/* Open the daily summary modal — main entry point */
+function openDailySummaryModal(){
+  const modal=document.getElementById('wa-summary-modal');
+  if(!modal){console.error('WA modal not found');return;}
+  refreshQuickFilters();
+  refreshWASummary();
+  /* Show number setup banner if not configured */
+  const setup=document.getElementById('wa-quick-num-setup');
+  if(setup)setup.style.display=waGetMyNumber()?'none':'block';
+  modal.classList.add('open');
+}
+
+/* Build the 3-toggle quick filter row with live counts */
+function refreshQuickFilters(){
+  const box=document.getElementById('wa-quick-filters');if(!box)return;
+  const bd=getDailySummaryBreakdown();
+  const odOn=waGetIncludeOverdue();
+  const tdOn=waGetIncludeToday();
+  const futureDays=waGetFutureDays();
+  const upOn=futureDays>0;
+  /* Pill-style toggles with counts */
+  const pill=(label,on,count,bal,onclick)=>
+    '<label class="wa-pill" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:2px solid '+(on?'var(--blue)':'var(--border)')+';background:'+(on?'var(--bluebg)':'var(--s2)')+';font-size:12px;transition:all 0.15s"><input type="checkbox" '+(on?'checked':'')+' '+onclick+' style="cursor:pointer"><strong>'+label+'</strong> <span style="background:'+(on?'var(--blue)':'var(--text3)')+';color:#fff;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700">'+count+'</span><span style="color:var(--text3);font-size:11px">'+(count?fmtINR(bal):'')+'</span></label>';
+  let html='';
+  html+=pill('🔴 Overdue (past due)',odOn,bd.overdue,bd.odBal,'onchange="quickSetOverdue(this.checked)"');
+  html+=pill('✅ Due Today',tdOn,bd.dueToday,bd.tdBal,'onchange="quickSetToday(this.checked)"');
+  html+=pill('⏳ Next 5 days',upOn,bd.upcoming,bd.upBal,'onchange="quickSetFuture(this.checked)"');
+  box.innerHTML=html;
+  /* Format radios */
+  document.querySelectorAll('input[name="wa-quick-format"]').forEach(r=>{r.checked=(r.value===waGetFormat());});
+}
+
+function quickSetOverdue(on){waSetIncludeOverdue(on);refreshQuickFilters();refreshWASummary();}
+function quickSetToday(on){waSetIncludeToday(on);refreshQuickFilters();refreshWASummary();}
+function quickSetFuture(on){waSetFutureDays(on?5:0);refreshQuickFilters();refreshWASummary();}
+function quickSetFormat(fmt){waSetFormat(fmt);refreshWASummary();}
+
+function saveQuickNumber(){
+  const input=document.getElementById('wa-quick-num-input');
+  if(!input)return;
+  const num=(input.value||'').replace(/\D/g,'');
+  if(num.length<10){toast('10-digit valid number do (without +91)','e');return;}
+  waSetMyNumber(num);
+  toast('Number saved: +91 '+num,'s');
+  /* Hide setup banner */
+  const setup=document.getElementById('wa-quick-num-setup');
+  if(setup)setup.style.display='none';
+  /* Refresh advanced settings UI if open */
+  try{loadWASettingsUI();}catch(e){}
+  refreshWASummary();
+}
+
+function refreshWASummary(){
+  const text=buildDailySummaryText();
+  const ta=document.getElementById('wa-summary-text');if(ta)ta.value=text;
+  const data=getDailySummaryData();
+  const totBal=data.reduce((s,r)=>s+(getEntryAmt(r)-(r.paid||0)),0);
+  const meta=document.getElementById('wa-summary-meta');
+  if(meta){
+    const lastSent=waGetLastSentDate();const today=localDateStr();
+    let sentInfo='';
+    if(lastSent===today){
+      const lt=waGetLastSentTime();const ltStr=lt?new Date(lt).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):'';
+      sentInfo='<span style="color:var(--green);font-weight:600">✓ Aaj '+ltStr+' ko send/copy ho chuka hai</span>';
+    }else if(lastSent){sentInfo='<span style="color:var(--text3)">Last sent: '+lastSent+'</span>';}
+    else{sentInfo='<span style="color:var(--text3)">Pehli baar bhej rahe ho</span>';}
+    meta.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><span><strong>📤 '+data.length+' entries</strong> · Total: <strong>'+fmtINR(totBal)+'</strong></span>'+sentInfo+'</div>';
+  }
+  /* Show/hide buttons based on method preference */
+  const method=waGetMethod();
+  const sendBtn=document.getElementById('wa-btn-send');if(sendBtn)sendBtn.style.display=(method==='self-link'||method==='both')?'':'none';
+  const copyBtn=document.getElementById('wa-btn-copy');if(copyBtn)copyBtn.style.display=(method==='clipboard'||method==='both')?'':'none';
+}
+
+/* Settings modal opener — switches Users tab into settings view */
+function openWASettings(){
+  /* Switch to Users tab where the settings live */
+  goTab('users');
+  setTimeout(()=>{
+    const sec=document.getElementById('wa-settings-section');
+    if(sec){sec.scrollIntoView({behavior:'smooth',block:'center'});sec.style.outline='2px solid var(--blue)';setTimeout(()=>sec.style.outline='',2000);}
+  },200);
+}
+
+/* Auto-popup on first daily app open — only if enabled and not yet shown today */
+function maybeAutoShowSummary(){
+  if(!waGetAutoPopup())return;
+  if(!hasPerm('payment'))return;/* admin only */
+  const today=localDateStr();
+  if(waGetAutoShownDate()===today)return;
+  /* Don't show if no due payments today */
+  const data=getDailySummaryData();
+  if(!data.length)return;
+  waMarkAutoShown();
+  setTimeout(()=>openDailySummaryModal(),1500);/* Wait for app to settle */
+}
 /* Local-date string YYYY-MM-DD — avoids UTC drift that made "Today's" boxes show yesterday's entries */
 function localDateStr(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 /* Status calc — entries with due=0 (party weight not yet entered) are 'awaiting-wt', NOT 'paid' */
