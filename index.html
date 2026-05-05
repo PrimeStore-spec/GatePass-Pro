@@ -607,6 +607,21 @@
       <div id="dup-preview-box" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px"></div>
     </div>
 
+    <!-- Legacy Backup Cleanup — old app_data/* documents from pre-migration -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--purple);margin-bottom:10px">🗄️ Legacy Backup Cleanup</h4>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px">
+        Migration ke time humne purane <code style="background:var(--s2);padding:1px 6px;border-radius:3px">app_data/records_*</code>, <code style="background:var(--s2);padding:1px 6px;border-radius:3px">journal_*</code>, <code style="background:var(--s2);padding:1px 6px;border-radius:3px">requests_*</code> documents ko **safety backup** ke roop mein chhod diya tha.<br>
+        Agar aap confident hain ki migration successful hai aur naya schema kaam kar raha hai, in legacy documents ko delete kar sakte ho.<br>
+        <strong style="color:var(--orange)">⚠ Ek baar delete hone ke baad, naya schema hi raha — wapas nahi aa sakte.</strong>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-ghost" onclick="checkLegacyBackups()">📊 Check Legacy Backups</button>
+        <button class="btn btn-purple" onclick="deleteLegacyBackups()">🗑️ Delete Legacy Backups</button>
+      </div>
+      <div id="legacy-cleanup-box" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px"></div>
+    </div>
+
     <!-- Force Sync Tool — Emergency: when local & Firestore are out of sync -->
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
       <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--red);margin-bottom:10px">🔥 Force Sync (Emergency)</h4>
@@ -1970,6 +1985,73 @@ function previewDuplicates(){
   if(dupSets.length>30)html+='<div style="font-size:11px;color:var(--text3);margin-top:6px">+ '+(dupSets.length-30)+' more sets (not shown)</div>';
   box.style.display='block';
   box.innerHTML=html;
+}
+
+/* === LEGACY BACKUP CLEANUP — remove pre-migration app_data/* documents ====
+   Migration kept these as safety backup. Once admin confirms new schema is
+   working, they can manually delete the legacy backups to clean Firestore. */
+
+async function checkLegacyBackups(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  if(!DB){toast('Firestore unavailable','e');return;}
+  const box=document.getElementById('legacy-cleanup-box');if(!box)return;
+  box.style.display='block';
+  box.innerHTML='<div style="color:var(--blue)">⏳ Legacy documents check ho rahe hain...</div>';
+  let html='<div style="font-size:12px"><strong>📊 Legacy Backup Status</strong></div>';
+  html+='<table style="width:100%;margin-top:8px;border-collapse:collapse;font-size:12px">';
+  html+='<thead><tr style="background:var(--surface)"><th style="padding:6px;text-align:left">Document Path</th><th style="padding:6px;text-align:right">Entries</th><th style="padding:6px;text-align:right">Status</th></tr></thead><tbody>';
+  let totalEntries=0,totalDocs=0;
+  for(const cId of Object.keys(COMPANIES)){
+    for(const kind of ['records','journal','requests']){
+      const path='app_data/'+kind+'_'+cId;
+      try{
+        const doc=await DB.collection('app_data').doc(kind+'_'+cId).get();
+        if(doc.exists){
+          const list=(doc.data().list)||[];
+          totalEntries+=list.length;totalDocs++;
+          html+='<tr><td style="padding:5px 6px;font-family:monospace;font-size:11px">'+path+'</td><td style="padding:5px 6px;text-align:right">'+list.length+'</td><td style="padding:5px 6px;text-align:right;color:var(--orange)">⚠ Exists</td></tr>';
+        }else{
+          html+='<tr><td style="padding:5px 6px;font-family:monospace;font-size:11px;color:var(--text3)">'+path+'</td><td style="padding:5px 6px;text-align:right">—</td><td style="padding:5px 6px;text-align:right;color:var(--green)">✓ Already cleaned</td></tr>';
+        }
+      }catch(e){
+        html+='<tr><td style="padding:5px 6px;color:var(--red)">'+path+'</td><td colspan="2" style="padding:5px 6px;color:var(--red)">Error: '+(e.message||e)+'</td></tr>';
+      }
+    }
+  }
+  html+='</tbody></table>';
+  if(totalDocs>0){
+    html+='<div style="margin-top:10px;padding:8px 10px;background:#fef3e2;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:12px">'+
+      '<strong>'+totalDocs+' legacy documents</strong> found · Total <strong>'+totalEntries+' entries</strong> in legacy backup<br>'+
+      '<em>Yeh documents ab app use nahi karti. Safe to delete.</em>'+
+      '</div>';
+  }else{
+    html+='<div style="margin-top:10px;padding:8px 10px;background:#dcfce7;border:1px solid #86efac;border-radius:6px;color:#166534;font-size:12px"><strong>✓ No legacy backups remaining.</strong> Already cleaned.</div>';
+  }
+  box.innerHTML=html;
+}
+
+async function deleteLegacyBackups(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  if(!DB){toast('Firestore unavailable','e');return;}
+  if(!confirm('⚠ DELETE LEGACY BACKUPS\n\n'+
+    'Yeh action sab purane app_data/records_*, app_data/journal_*, app_data/requests_* documents ko Firestore se delete kar dega.\n\n'+
+    'Naya schema (firms/<firm>/records/...) untouched rahega.\n\n'+
+    'Delete karne se PEHLE backup ka backup zaroor le lo (Download Full Backup button se).\n\n'+
+    'Yeh action UNDO nahi hoga!\n\nProceed?'))return;
+  let deleted=0,skipped=0,failed=0;
+  for(const cId of Object.keys(COMPANIES)){
+    for(const kind of ['records','journal','requests']){
+      try{
+        const ref=DB.collection('app_data').doc(kind+'_'+cId);
+        const doc=await ref.get();
+        if(!doc.exists){skipped++;continue;}
+        await ref.delete();
+        deleted++;
+      }catch(e){console.error('Legacy delete failed:',kind+'_'+cId,e);failed++;}
+    }
+  }
+  toast('✓ Legacy cleanup: '+deleted+' deleted, '+skipped+' already clean'+(failed?', '+failed+' failed':''),deleted?'s':'i');
+  setTimeout(checkLegacyBackups,500);
 }
 
 /* === FORCE SYNC TOOLS — emergency local↔Firestore reconciliation =====
