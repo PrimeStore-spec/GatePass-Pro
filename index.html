@@ -3916,8 +3916,17 @@ var REP_FILTERED_DATA=[];
 
 function switchReportType(type){
   REP_VIEW=type;
-  document.querySelectorAll('.rep-type-btn').forEach(b=>b.classList.remove('on'));
-  document.querySelector(`[data-type="${type}"]`).classList.add('on');
+  /* Reset all buttons to ghost (unselected) */
+  document.querySelectorAll('.rep-type-btn').forEach(b=>{
+    b.classList.remove('on','btn-blue');
+    b.classList.add('btn-ghost');
+  });
+  /* Highlight the active button — swap ghost → blue */
+  const active=document.querySelector(`[data-type="${type}"]`);
+  if(active){
+    active.classList.add('on','btn-blue');
+    active.classList.remove('btn-ghost');
+  }
   filterReport();
 }
 
@@ -5345,7 +5354,14 @@ function updateReqBadge(){
   if(isAdmin){
     count=all.filter(r=>r.status==='pending').length;
   }else{
-    count=all.filter(r=>r.requestedBy===(currentUser?currentUser.email:'')&&r.status==='approved').length;
+    /* Exclude 'registration' approved requests — user is already in the app, no further action needed.
+       Only count approved firm-access / edit / delete requests where user still has something to do. */
+    count=all.filter(r=>{
+      if(r.requestedBy!==(currentUser?currentUser.email:''))return false;
+      if(r.status!=='approved')return false;
+      if(r.type==='registration')return false;/* registration approval = already used, no badge */
+      return true;
+    }).length;
   }
   badge.textContent=count;
   badge.style.display=count>0?'flex':'none';
@@ -5866,7 +5882,7 @@ document.addEventListener('DOMContentLoaded',init);
     start_url:location.href.split('?')[0],
     scope:location.href.substring(0,location.href.lastIndexOf('/')+1),
     display:'standalone',
-    orientation:'any',
+    orientation:'portrait-primary',/* lock to portrait for PWA-installed app */
     background_color:'#1a3a6b',
     theme_color:'#1a3a6b',
     icons:[{src:iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]
@@ -5962,6 +5978,12 @@ document.addEventListener('DOMContentLoaded',init);
   /* Check if already installed as PWA */
   if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true){
     console.log('Running as installed PWA');
+    /* Try to lock orientation to portrait — works in installed PWA on most mobile browsers */
+    try{
+      if(screen.orientation&&screen.orientation.lock){
+        screen.orientation.lock('portrait-primary').catch(e=>console.log('Orientation lock not supported:',e.message));
+      }
+    }catch(e){console.log('Orientation API unavailable');}
   }
 })();
 </script>
