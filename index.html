@@ -739,8 +739,13 @@
 <!-- REQUESTS -->
 <div id="p-reqs" class="hidden">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-    <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">📩 Requests <span id="reqs-count" class="rcnt">0</span></div>
-    <button class="btn btn-blue" onclick="openSendRequestModal()" id="btn-new-req" style="display:none;">＋ New Request</button>
+    <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px;">📩 Requests <span id="reqs-count" class="rcnt">0</span> <span id="reqs-last-sync" style="font-size:11px;font-weight:400;color:var(--text3)"></span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="forceRefreshRequests()" title="Firestore se latest data fetch karo">🔄 Refresh</button>
+      <button class="btn btn-ghost" id="btn-clear-completed-reqs" onclick="bulkDeleteRequests('completed')" style="display:none;color:var(--text2);font-size:12px" title="Saari completed requests delete karo (cleanup)">🧹 Clear Completed</button>
+      <button class="btn btn-ghost" id="btn-clear-rejected-reqs" onclick="bulkDeleteRequests('rejected')" style="display:none;color:var(--text2);font-size:12px" title="Saari rejected requests delete karo (cleanup)">🧹 Clear Rejected</button>
+      <button class="btn btn-blue" onclick="openSendRequestModal()" id="btn-new-req" style="display:none;">＋ New Request</button>
+    </div>
   </div>
   <div class="req-stats" id="req-stats"></div>
   <div class="req-filter-bar" id="req-filter-bar">
@@ -3326,7 +3331,16 @@ function goTab(tab){
   if(tab==='rep')filterReport();
   if(tab==='dash')updateDashboard();
   if(tab==='users')renderUsers();
-  if(tab==='reqs')renderRequests();
+  if(tab==='reqs'){
+    renderRequests();
+    /* Auto-refresh from Firestore when entering Requests tab — catches updates that
+       missed the realtime listener (background tabs, network blips, throttled connections). */
+    if(Date.now()-_LAST_REQ_REFRESH>15000){/* if last refresh > 15s ago */
+      forceRefreshRequests().catch(e=>console.warn('Auto-refresh failed:',e));
+    }
+    /* Mark all visible action-taken requests as seen — clears the red badge */
+    setTimeout(markRequestsSeen,800);
+  }
 }
 
 /* ===== UNIVERSAL HELPERS ===== */
@@ -5361,8 +5375,15 @@ async function saveEntry(){
   syncToFirestore();
   resetPhotoState();
   closeM('entry-modal');refreshAllViews();toast('Entry saved!','s');
-  /* Complete any pending approved request */
-  if(window._pendingReqComplete){completeRequest(window._pendingReqComplete);window._pendingReqComplete=null;}
+  /* Complete any pending approved request — uses admin note if set (Khud Karunga flow) */
+  if(window._pendingReqComplete){
+    completeRequestWithNote(window._pendingReqComplete,window._pendingReqAdminNote);
+    /* Clear needsReview on the entry (admin filled it) */
+    const completedEntry=APP.records.find(r=>r.id===savedEntryId);
+    if(completedEntry)completedEntry.needsReview=false;
+    window._pendingReqComplete=null;
+    window._pendingReqAdminNote=null;
+  }
   /* Auto-send review request to admin if rate/financial data is missing */
   if(needsReview&&savedEntryId&&!id){
     const missingFields=[];
@@ -5381,10 +5402,20 @@ async function saveEntry(){
       createdAt:new Date().toISOString(),
       updatedAt:new Date().toISOString()
     };
-    APP.requests.push(reviewReq);
-    localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
-    syncToFirestore();updateReqBadge();
-    toast('Admin ko notification gaya — Rate bharna baaki hai','i');
+    /* Direct Firestore write so we know if it succeeded — same hardening as submitRequest */
+    try{
+      if(DB&&APP.company){
+        await fsReqCol(APP.company).doc(reviewReq.id).set(cleanUndefined(reviewReq),{merge:true});
+      }
+      APP.requests.push(reviewReq);
+      localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+      _lastSync.requests[reviewReq.id]=_fp(reviewReq);
+      updateReqBadge();
+      toast('Admin ko notification gaya — Rate bharna baaki hai','i');
+    }catch(e){
+      console.error('Review request failed:',e);
+      toast('Entry save ho gayi par admin notification fail — admin ko phone se inform karo','i');
+    }
   }
 }
 
@@ -5923,7 +5954,15 @@ function exportJournalCSV(){
 
 /* Old report functions replaced by filterReport() and exportTabCSVPDF('rep') */
 
-function closeM(id){document.getElementById(id).classList.remove('open');}
+function closeM(id){
+  document.getElementById(id).classList.remove('open');
+  /* If entry modal closed without save, drop any pending request-completion flag
+     so the next entry edit doesn't accidentally mark someone else's request complete. */
+  if(id==='entry-modal'&&window._pendingReqComplete){
+    window._pendingReqComplete=null;
+    window._pendingReqAdminNote=null;
+  }
+}
 function closeOut(e,id){if(e.target.id===id){document.getElementById(id).classList.remove('open');}}
 function updateHeader(){/* No-op — status indicator (#ss) is owned by setSt() which preserves color/style. */}
 function showErr(t,m){document.getElementById('login-err').textContent=m;document.getElementById('login-err').classList.add('show');setTimeout(()=>document.getElementById('login-err').classList.remove('show'),3000);}
@@ -5950,7 +5989,7 @@ function openSendRequestModal(entryId,type){
   document.getElementById('req-modal').classList.add('open');
 }
 
-function submitRequest(){
+async function submitRequest(){
   const type=document.getElementById('req-rtype').value;
   const note=document.getElementById('req-note').value.trim();
   if(!note){toast('Note likhna zaroori hai!','e');return;}
@@ -5971,13 +6010,34 @@ function submitRequest(){
     createdAt:new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
-  APP.requests.push(req);
-  localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
-  syncToFirestore();
-  closeM('req-modal');
-  toast('Request sent to admin!','s');
-  updateReqBadge();
-  renderRequests();
+  /* Disable button to prevent double-submit */
+  const btnSubmit=document.querySelector('#req-modal button.btn-blue, #req-modal button.btn-green');
+  if(btnSubmit){btnSubmit.disabled=true;btnSubmit.textContent='⏳ Sending...';}
+
+  /* CRITICAL: write to Firestore FIRST, await result, then update local state.
+     This way we know definitively whether admin will see it. */
+  try{
+    if(DB&&APP.company){
+      await fsReqCol(APP.company).doc(req.id).set(cleanUndefined(req),{merge:true});
+    }
+    /* Firestore write succeeded — now safe to update local */
+    APP.requests.push(req);
+    localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
+    /* Update _lastSync so listener echo doesn't try to re-write */
+    _lastSync.requests[req.id]=_fp(req);
+    closeM('req-modal');
+    toast('✓ Request admin ko bhej di gayi!','s');
+    updateReqBadge();
+    renderRequests();
+  }catch(e){
+    console.error('Request submit failed:',e);
+    let msg='Request bhej nahi paya';
+    if(e&&e.code==='permission-denied')msg='⚠ Permission denied — admin ko Firebase Rules check karne ko bolo';
+    else if(e&&e.message)msg+=': '+e.message;
+    toast(msg,'e');
+  }finally{
+    if(btnSubmit){btnSubmit.disabled=false;btnSubmit.textContent='✓ Send Request';}
+  }
 }
 
 function updateReqBadge(){
@@ -5997,17 +6057,43 @@ function updateReqBadge(){
   if(isAdmin){
     count=all.filter(r=>r.status==='pending').length;
   }else{
-    /* Exclude 'registration' approved requests — user is already in the app, no further action needed.
-       Only count approved firm-access / edit / delete requests where user still has something to do. */
+    /* User badge: count requests where admin has acted (approved/rejected/completed)
+       AND user hasn't seen the update yet. Tracked per-device via localStorage. */
+    const seenMap=_loadSeenRequests();
     count=all.filter(r=>{
       if(r.requestedBy!==(currentUser?currentUser.email:''))return false;
-      if(r.status!=='approved')return false;
-      if(r.type==='registration')return false;/* registration approval = already used, no badge */
+      if(r.status==='pending')return false;/* admin hasn't acted */
+      if(r.type==='registration')return false;/* registration done = already in app */
+      /* Has user seen this status update? */
+      const seenStatus=seenMap[r.id];
+      if(seenStatus===r.status)return false;/* already seen this action */
       return true;
     }).length;
   }
   badge.textContent=count;
   badge.style.display=count>0?'flex':'none';
+}
+
+/* Track which request statuses the user has seen (per-device) */
+function _loadSeenRequests(){
+  if(!currentUser)return{};
+  try{return JSON.parse(localStorage.getItem('reqs-seen-'+currentUser.email)||'{}');}catch(e){return{};}
+}
+function _saveSeenRequests(map){
+  if(!currentUser)return;
+  localStorage.setItem('reqs-seen-'+currentUser.email,JSON.stringify(map||{}));
+}
+function markRequestsSeen(){
+  if(!currentUser||hasPerm('users'))return;/* admin doesn't need this */
+  const seen=_loadSeenRequests();
+  let changed=false;
+  (APP.requests||[]).forEach(r=>{
+    if(r.requestedBy!==currentUser.email)return;
+    if(r.status==='pending')return;
+    if(r.type==='registration')return;
+    if(seen[r.id]!==r.status){seen[r.id]=r.status;changed=true;}
+  });
+  if(changed){_saveSeenRequests(seen);updateReqBadge();}
 }
 
 function filterRequests(f){
@@ -6017,8 +6103,62 @@ function filterRequests(f){
   renderRequests();
 }
 
+/* === FORCE REFRESH REQUESTS — pull fresh from Firestore =====
+   Use when realtime listener missed an update (background tab, network blip, etc.) */
+let _LAST_REQ_REFRESH=0;
+async function forceRefreshRequests(){
+  if(!DB||!APP.company){toast('Firestore unavailable','e');return;}
+  const btn=document.querySelector('button[onclick*="forceRefreshRequests"]');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Fetching...';}
+  try{
+    /* Pull current firm's requests AND all firm-access/registration from other firms */
+    const c=APP.company;
+    const snap=await fsReqCol(c).get();
+    const fresh=[];
+    snap.forEach(d=>fresh.push(d.data()));
+    APP.requests=fresh;
+    localStorage.setItem('requests-'+c,JSON.stringify(fresh));
+    /* Sync _lastSync map to match */
+    _lastSync.requests={};
+    fresh.forEach(r=>{if(r.id)_lastSync.requests[String(r.id)]=_fp(r);});
+    /* Also pull other firms' requests (firm-access/registration broadcast) */
+    for(const cId of Object.keys(COMPANIES)){
+      if(cId===c)continue;
+      try{
+        const otherSnap=await fsReqCol(cId).get();
+        const otherList=[];otherSnap.forEach(d=>otherList.push(d.data()));
+        localStorage.setItem('requests-'+cId,JSON.stringify(otherList));
+      }catch(e){console.warn('Other firm fetch failed:',cId,e);}
+    }
+    _LAST_REQ_REFRESH=Date.now();
+    updateReqBadge();
+    renderRequests();
+    toast('✓ Requests refreshed — latest data loaded','s');
+  }catch(e){
+    console.error('Refresh failed:',e);
+    toast('Refresh failed: '+(e.message||e),'e');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='🔄 Refresh';}
+  }
+}
+
 function renderRequests(){
   if(!currentUser)return;
+  /* Show admin-only cleanup buttons */
+  const isAdminBtnCheck=hasPerm('users');
+  ['btn-clear-completed-reqs','btn-clear-rejected-reqs'].forEach(id=>{
+    const b=document.getElementById(id);if(b)b.style.display=isAdminBtnCheck?'':'none';
+  });
+  /* Auto-refresh from Firestore if last sync was > 30 seconds ago — catches missed listener events */
+  const sinceLastSync=Date.now()-_LAST_REQ_REFRESH;
+  const lastSyncEl=document.getElementById('reqs-last-sync');
+  if(lastSyncEl){
+    if(_LAST_REQ_REFRESH===0)lastSyncEl.textContent='';
+    else{
+      const sec=Math.floor(sinceLastSync/1000);
+      lastSyncEl.textContent='· last sync '+(sec<60?sec+'s':Math.floor(sec/60)+'m')+' ago';
+    }
+  }
   const isAdmin=hasPerm('users');
   /* Show/hide new request button for non-admin users with add permission */
   const btnNew=document.getElementById('btn-new-req');
@@ -6126,6 +6266,7 @@ function renderRequests(){
           </button>
         `:''}
         ${!isAdmin&&rq.status==='pending'?`<span style="font-size:11px;color:var(--text3);">⏳ Admin ke response ka wait karo...</span>`:''}
+        ${isAdmin?`<button class="btn btn-ghost" style="font-size:11px;color:var(--red);border:1px solid var(--rb);background:var(--rbg);margin-left:auto" onclick="deleteRequest('${rq.id}')" title="Yeh request delete karo">🗑️ Delete</button>`:''}
       </div>
     </div>`;
   });
@@ -6367,17 +6508,20 @@ function adminDoItMyself(reqId){
   const entry=APP.records.find(e=>e.id===rq.entryId);
   if(!entry){toast('Entry nahi mili!','e');return;}
   if(rq.type==='edit'||rq.type==='review'){
-    rq.status='completed';rq.adminNote=rq.type==='review'?'Admin ne details fill kiye':'Admin ne khud edit kiya';rq.actionBy=currentUser.email;rq.updatedAt=new Date().toISOString();
-    /* Clear needsReview flag on the entry */
-    if(entry)entry.needsReview=false;
-    localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
-    localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
-    syncToFirestore();updateReqBadge();renderRequests();
+    /* DON'T mark completed upfront — only mark completed when admin actually SAVES the edit.
+       Use _pendingReqComplete mechanism: saveEntry will call completeRequest after a successful save.
+       If admin closes modal without saving, closeM('entry-modal') clears the flag. */
+    window._pendingReqComplete=reqId;
+    window._pendingReqAdminNote=rq.type==='review'?'Admin ne details fill kiye':'Admin ne khud edit kiya';
+    /* Don't clear needsReview yet — only after save */
     editEntry(rq.entryId);
+    toast('Entry edit karo aur save dabao — request automatic complete ho jayegi','i');
   }else{
     if(!confirm('Delete this entry?\n\n'+entry.party+' | '+entry.item+'\n\nYeh action undo nahi hoga!')){return;}
     rq.status='completed';rq.adminNote='Admin ne khud delete kiya';rq.actionBy=currentUser.email;rq.updatedAt=new Date().toISOString();
     APP.records=APP.records.filter(e=>e.id!==rq.entryId);
+    /* Direct Firestore delete for the entry */
+    if(DB&&APP.company){fsRecCol(APP.company).doc(String(rq.entryId)).delete().catch(e=>console.error(e));delete _lastSync.records[String(rq.entryId)];}
     localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
     localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
     syncToFirestore();refreshAllViews();toast('Entry deleted by admin!','s');
@@ -6385,10 +6529,81 @@ function adminDoItMyself(reqId){
   }
 }
 
+/* === DELETE REQUEST — admin can clean up the requests list ============= */
+async function deleteRequest(reqId){
+  if(!hasPerm('users')){toast('Sirf admin requests delete kar sakta hai','e');return;}
+  const rq=APP.requests.find(r=>r.id===reqId);
+  if(!rq){toast('Request nahi mili','e');return;}
+  const label=rq.type+' — '+(rq.requestedByName||rq.requestedBy||'Unknown')+(rq.note?' — '+rq.note.slice(0,50):'');
+  if(!confirm('Yeh request delete karna hai?\n\n'+label+'\n\nUndo nahi hoga.'))return;
+  /* Remove from APP.requests */
+  APP.requests=APP.requests.filter(r=>r.id!==reqId);
+  /* Direct Firestore delete from current firm's requests sub-collection */
+  if(DB&&APP.company){
+    fsReqCol(APP.company).doc(String(reqId)).delete().catch(e=>console.error('Delete fail:',e));
+    delete _lastSync.requests[String(reqId)];
+  }
+  /* For firm-access / registration requests, also clean from OTHER firms */
+  if(rq.type==='firm-access'||rq.type==='registration'){
+    Object.keys(COMPANIES).forEach(cId=>{
+      if(cId===APP.company)return;
+      if(DB)fsReqCol(cId).doc(String(reqId)).delete().catch(e=>console.error('Delete fail '+cId+':',e));
+      try{
+        const list=JSON.parse(localStorage.getItem('requests-'+cId)||'[]');
+        const filtered=list.filter(r=>r.id!==reqId);
+        localStorage.setItem('requests-'+cId,JSON.stringify(filtered));
+      }catch(e){}
+    });
+  }
+  localStorage.setItem('requests-'+APP.company,JSON.stringify(APP.requests));
+  toast('✓ Request deleted','s');
+  updateReqBadge();renderRequests();
+}
+
+async function bulkDeleteRequests(statusFilter){
+  if(!hasPerm('users')){toast('Sirf admin requests delete kar sakta hai','e');return;}
+  const all=APP.requests||[];
+  const target=all.filter(r=>r.status===statusFilter);
+  if(!target.length){toast('Koi '+statusFilter+' requests nahi hain','i');return;}
+  if(!confirm('⚠ '+target.length+' '+statusFilter+' requests delete karne hain?\n\nYeh action UNDO nahi hoga.'))return;
+  const idsToDelete=target.map(r=>r.id);
+  APP.requests=all.filter(r=>r.status!==statusFilter);
+  /* Direct Firestore delete (in batches) */
+  if(DB&&APP.company){
+    const col=fsReqCol(APP.company);
+    const BATCH=400;
+    for(let i=0;i<idsToDelete.length;i+=BATCH){
+      const batch=DB.batch();
+      idsToDelete.slice(i,i+BATCH).forEach(id=>{batch.delete(col.doc(String(id)));delete _lastSync.requests[String(id)];});
+      try{await batch.commit();}catch(e){console.error('Bulk delete batch failed:',e);}
+    }
+    /* Also clean from other firms for firm-access/registration types */
+    target.forEach(rq=>{
+      if(rq.type==='firm-access'||rq.type==='registration'){
+        Object.keys(COMPANIES).forEach(cId=>{
+          if(cId===APP.company)return;
+          fsReqCol(cId).doc(String(rq.id)).delete().catch(()=>{});
+          try{
+            const list=JSON.parse(localStorage.getItem('requests-'+cId)||'[]');
+            localStorage.setItem('requests-'+cId,JSON.stringify(list.filter(r=>r.id!==rq.id)));
+          }catch(e){}
+        });
+      }
+    });
+  }
+  localStorage.setItem('requests-'+APP.company,JSON.stringify(APP.requests));
+  toast('✓ '+idsToDelete.length+' '+statusFilter+' requests deleted','s');
+  updateReqBadge();renderRequests();
+}
+
 function completeRequest(reqId){
+  return completeRequestWithNote(reqId,null);
+}
+function completeRequestWithNote(reqId,adminNote){
   const rq=APP.requests.find(r=>r.id===reqId);if(!rq)return;
   rq.status='completed';
   rq.updatedAt=new Date().toISOString();
+  if(adminNote){rq.adminNote=adminNote;rq.actionBy=currentUser?currentUser.email:'admin';}
   localStorage.setItem(`requests-${APP.company}`,JSON.stringify(APP.requests));
   syncToFirestore();
   updateReqBadge();
