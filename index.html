@@ -460,6 +460,7 @@
       <button class="btn btn-ghost rep-type-btn" onclick="switchReportType('brokerwise')" data-type="brokerwise">🤝 Broker-wise</button>
       <button class="btn btn-ghost rep-type-btn" onclick="switchReportType('overdue')" data-type="overdue">⚠️ Overdue</button>
       <button class="btn btn-ghost rep-type-btn" onclick="switchReportType('outstanding')" data-type="outstanding">💰 Outstanding</button>
+      <button class="btn btn-ghost rep-type-btn" onclick="switchReportType('stock')" data-type="stock">📊 Stock Balance</button>
     </div>
   </div>
 
@@ -593,6 +594,18 @@
       <input type="file" id="restore-file-input" accept=".json,application/json" style="display:none" onchange="handleRestoreFile(this)">
     </div>
     <div id="migration-status" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.6"></div>
+
+    <!-- Duplicate Cleanup Tool — fixes the "every entry duplicated" bug -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--orange);margin-bottom:10px">🧹 Duplicate Entry Cleanup</h4>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px">Agar same entry do baar import ho gayi hai (CSV import bug ki wajah se), yahan se clean kar sakte ho.<br>
+      <strong>Identical content</strong> wali entries (same GP/party/date/item/bags/weight/rate) ko duplicate maana jayega — sabse purani rakhi jayegi, baki delete.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-ghost" onclick="previewDuplicates()">🔍 Preview Duplicates</button>
+        <button class="btn btn-red" onclick="removeDuplicates()">🗑️ Remove Duplicates</button>
+      </div>
+      <div id="dup-preview-box" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px"></div>
+    </div>
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5">
       <strong style="color:var(--blue)">📦 Backup:</strong> Sab firms ka data ek JSON file mein download hoga (records, journal, requests, users, settings).<br>
       <strong style="color:var(--purple)">📂 Restore:</strong> Backup file load karke wapas restore karo. Existing data overwrite ho jayega — confirm prompt aayega.
@@ -1886,6 +1899,92 @@ function onInterestRateChange(v){
   const r=setCompanyInterestRate(v);
   toast('Interest rate set to '+r+'% per annum','s');
   refreshAllViews();
+}
+
+/* === DUPLICATE DETECTION & CLEANUP =====================================
+   Group records by content signature (type+date+gp+party+item+bags+weight+rate).
+   100% identical rows = duplicates. Keep oldest (first createdAt), remove rest. */
+function _recordSignature(r){
+  return [
+    r.type||'',
+    r.date||'',
+    r.gp||'',
+    (r.party||'').toLowerCase(),
+    (r.item||'').toLowerCase(),
+    (r.bags||0),
+    (r.weight||0),
+    (r.partyWt||0),
+    (r.rate||0)
+  ].join('||');
+}
+function findDuplicateSets(){
+  const groups={};
+  (APP.records||[]).forEach(r=>{
+    const sig=_recordSignature(r);
+    if(!groups[sig])groups[sig]=[];
+    groups[sig].push(r);
+  });
+  return Object.values(groups).filter(g=>g.length>1);
+}
+
+function previewDuplicates(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  const dupSets=findDuplicateSets();
+  const box=document.getElementById('dup-preview-box');
+  if(!box)return;
+  if(!dupSets.length){
+    box.style.display='block';
+    box.innerHTML='<div style="color:var(--green);font-weight:600">✓ No duplicates found — saara data clean hai</div>';
+    return;
+  }
+  const totalDups=dupSets.reduce((s,g)=>s+(g.length-1),0);
+  let html='<div style="color:var(--orange);font-weight:600;margin-bottom:8px">⚠ '+dupSets.length+' duplicate sets found · '+totalDups+' extra entries hain (will be removed)</div>';
+  html+='<div style="max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:6px"><table style="width:100%;border-collapse:collapse;font-size:11px">';
+  html+='<thead style="background:var(--s2);position:sticky;top:0"><tr><th style="padding:6px 8px;text-align:left">Party</th><th style="padding:6px 8px;text-align:left">GP</th><th style="padding:6px 8px;text-align:left">Item</th><th style="padding:6px 8px;text-align:right">Bags</th><th style="padding:6px 8px;text-align:center">Copies</th><th style="padding:6px 8px;text-align:center">Will Remove</th></tr></thead><tbody>';
+  dupSets.slice(0,30).forEach(g=>{/* show first 30 sets */
+    const r=g[0];
+    html+='<tr style="border-top:1px solid var(--border)">'+
+      '<td style="padding:5px 8px"><strong>'+escapeHtml(r.party||'-')+'</strong></td>'+
+      '<td style="padding:5px 8px;font-family:monospace">'+escapeHtml(r.gp||'-')+'</td>'+
+      '<td style="padding:5px 8px">'+escapeHtml(r.item||'-')+' · '+(r.date||'')+'</td>'+
+      '<td style="padding:5px 8px;text-align:right">'+(r.bags||0)+'</td>'+
+      '<td style="padding:5px 8px;text-align:center;color:var(--orange);font-weight:700">'+g.length+'</td>'+
+      '<td style="padding:5px 8px;text-align:center;color:var(--red);font-weight:700">-'+(g.length-1)+'</td>'+
+      '</tr>';
+  });
+  html+='</tbody></table></div>';
+  if(dupSets.length>30)html+='<div style="font-size:11px;color:var(--text3);margin-top:6px">+ '+(dupSets.length-30)+' more sets (not shown)</div>';
+  box.style.display='block';
+  box.innerHTML=html;
+}
+
+function removeDuplicates(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  const dupSets=findDuplicateSets();
+  if(!dupSets.length){toast('Koi duplicates nahi mile — saara data clean hai','s');return;}
+  const totalDups=dupSets.reduce((s,g)=>s+(g.length-1),0);
+  if(!confirm('⚠ '+dupSets.length+' duplicate sets found.\n\n'+
+    totalDups+' entries delete ho jayengi (har set ki sabse purani entry rakhi jayegi).\n\n'+
+    'Yeh action UNDO nahi hoga!\n\nProceed?'))return;
+  const idsToRemove=new Set();
+  dupSets.forEach(g=>{
+    /* Sort by createdAt (oldest first) so we keep the original */
+    g.sort((a,b)=>(a.createdAt||a.lastUpdated||'').localeCompare(b.createdAt||b.lastUpdated||''));
+    for(let i=1;i<g.length;i++)idsToRemove.add(g[i].id);
+  });
+  const before=APP.records.length;
+  APP.records=APP.records.filter(r=>!idsToRemove.has(r.id));
+  /* Direct Firestore delete for each removed ID — more reliable than diff sync */
+  if(DB&&APP.company){
+    const col=fsRecCol(APP.company);
+    idsToRemove.forEach(id=>{col.doc(String(id)).delete().catch(e=>console.error('Delete fail for',id,e));});
+  }
+  localStorage.setItem('data-'+APP.company,JSON.stringify(APP.records));
+  syncToFirestore();
+  refreshAllViews();
+  /* Refresh preview */
+  setTimeout(previewDuplicates,300);
+  toast('✓ '+idsToRemove.size+' duplicate entries removed. '+APP.records.length+' clean entries remain','s');
 }
 
 /* Populate the WhatsApp settings UI from localStorage values */
@@ -3414,7 +3513,12 @@ function importCSV(prefix){
       status:hmap('status','payment status'),
       paid:hmap('paid','paid amount')
     };
-    let count=0,skipped=0;
+    /* Build dedup index of existing records by content signature.
+       If CSV row matches an existing entry, we skip it (prevents the "duplicate import" bug). */
+    const existingSigs=new Set();
+    (APP.records||[]).forEach(r=>existingSigs.add(_recordSignature(r)));
+
+    let count=0,skipped=0,duplicatesSkipped=0;
     const errors=[];
     for(let i=1;i<lines.length;i++){
       const vals=parseCSVLine(lines[i]);
@@ -3433,6 +3537,20 @@ function importCSV(prefix){
       const amt=pwt*rate;
       const statusRaw=get(H.status).toLowerCase();
       const status=['pending','partial','paid','overdue'].includes(statusRaw)?statusRaw:'pending';
+      /* Build signature for this row to check duplicate */
+      const rowSig=[
+        type,
+        get(H.date),
+        get(H.gp),
+        party.toLowerCase(),
+        get(H.item).toLowerCase(),
+        getNum(H.bags),
+        wt,
+        pwt,
+        rate
+      ].join('||');
+      if(existingSigs.has(rowSig)){duplicatesSkipped++;continue;}
+      existingSigs.add(rowSig);/* prevent dupes within the CSV itself */
       APP.records.push({
         id:'REC'+Date.now()+'_'+i,type,
         date:get(H.date)||new Date().toISOString().split('T')[0],
@@ -3462,11 +3580,15 @@ function importCSV(prefix){
     localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
     syncToFirestore();
     refreshAllViews();
-    let msg=count+' entries imported!';
-    if(skipped)msg+=' ('+skipped+' rows skipped: total/blank)';
-    if(errors.length)msg+=' ❌ '+errors.length+' errors';
-    toast(msg,count>0?'s':'e');
+    let msg=count+' entries imported';
+    const extras=[];
+    if(duplicatesSkipped)extras.push('🔁 '+duplicatesSkipped+' duplicates skipped (already in app)');
+    if(skipped)extras.push(skipped+' blank/total rows skipped');
+    if(errors.length)extras.push('❌ '+errors.length+' errors');
+    if(extras.length)msg+=' · '+extras.join(' · ');
+    toast(msg,count>0?'s':'i');
     if(errors.length)console.warn('Import errors:',errors);
+    if(duplicatesSkipped)console.log('Duplicate rows skipped:',duplicatesSkipped);
   };reader.readAsText(file);};input.click();
 }
 function exportTabCSVPDF(prefix){
@@ -4375,8 +4497,99 @@ function filterReport(){
     case 'brokerwise':renderBrokerWiseReport();break;
     case 'overdue':renderOverdueReport();break;
     case 'outstanding':renderOutstandingReport();break;
+    case 'stock':renderStockBalanceReport();break;
     default:renderAllEntriesReport();
   }
+}
+
+/* === STOCK BALANCE REPORT — closing stock per item =====================
+   For each item: inward (received) - outward (dispatched) = closing balance.
+   Tracks bags + weight separately. Negative = oversold (more dispatched than received). */
+function renderStockBalanceReport(){
+  document.getElementById('rep-title').textContent='Stock Balance — Closing Stock per Item';
+  populateDropdowns('rep');
+  const recs=getFilteredRecs('rep');REP_FILTERED_DATA=recs;
+  /* Group by item — track inward / outward separately */
+  const stock={};
+  recs.forEach(r=>{
+    const item=r.item||'(unspecified)';
+    if(!stock[item])stock[item]={item,inBags:0,inWt:0,inEntries:0,outBags:0,outWt:0,outEntries:0,parties:new Set()};
+    const bags=r.bags||0;
+    const wt=r.partyWt||r.weight||0;/* use party-weight as authoritative */
+    if(r.party)stock[item].parties.add(r.party);
+    if(r.type==='inward'){stock[item].inBags+=bags;stock[item].inWt+=wt;stock[item].inEntries++;}
+    else if(r.type==='outward'){stock[item].outBags+=bags;stock[item].outWt+=wt;stock[item].outEntries++;}
+  });
+  const rows=Object.values(stock).map(s=>{
+    s.balBags=s.inBags-s.outBags;
+    s.balWt=s.inWt-s.outWt;
+    return s;
+  }).sort((a,b)=>b.balWt-a.balWt);/* highest stock first */
+
+  if(!rows.length){
+    document.getElementById('rep-output').innerHTML='<div class="empty"><div class="ei">📊</div><h3>Koi data nahi mila</h3><p style="font-size:12px;color:var(--text3)">Filters adjust karo ya entries banao</p></div>';
+    updateRepStats(recs);return;
+  }
+
+  /* Grand totals */
+  const tot={inBags:0,inWt:0,outBags:0,outWt:0,balBags:0,balWt:0};
+  rows.forEach(s=>{tot.inBags+=s.inBags;tot.inWt+=s.inWt;tot.outBags+=s.outBags;tot.outWt+=s.outWt;tot.balBags+=s.balBags;tot.balWt+=s.balWt;});
+
+  let html='<div class="tw"><div class="tsc"><table style="width:100%;border-collapse:collapse">';
+  html+='<thead><tr style="background:#f0f4fc">'+
+    '<th style="padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8">Item</th>'+
+    '<th style="padding:8px 11px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;border-bottom:2px solid #dae4f8;background:#dcfce7">📥 Inward Bags</th>'+
+    '<th style="padding:8px 11px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#15803d;border-bottom:2px solid #dae4f8;background:#dcfce7">📥 Inward Wt (kg)</th>'+
+    '<th style="padding:8px 11px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7c3aed;border-bottom:2px solid #dae4f8;background:#f3e8ff">📤 Outward Bags</th>'+
+    '<th style="padding:8px 11px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#7c3aed;border-bottom:2px solid #dae4f8;background:#f3e8ff">📤 Outward Wt (kg)</th>'+
+    '<th style="padding:8px 11px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;background:var(--bluebg)">📦 Bal Bags</th>'+
+    '<th style="padding:8px 11px;text-align:right;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;background:var(--bluebg)">📦 Bal Wt (kg)</th>'+
+    '<th style="padding:8px 11px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2);border-bottom:2px solid #dae4f8">Status</th>'+
+    '</tr></thead><tbody>';
+  rows.forEach(s=>{
+    const balColor=s.balWt>0?'var(--green)':s.balWt<0?'var(--red)':'var(--text3)';
+    const status=s.balWt>0?'<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">In Stock</span>':
+                  s.balWt<0?'<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">Oversold</span>':
+                  '<span style="background:#f0f4fc;color:var(--text3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">Settled</span>';
+    html+='<tr style="border-bottom:1px solid var(--border);transition:background 0.15s" onmouseover="this.style.background=\'var(--bluebg)\'" onmouseout="this.style.background=\'\'">'+
+      '<td style="padding:10px 11px;font-weight:600">'+escapeHtml(s.item)+'<br><span style="font-size:10px;color:var(--text3);font-weight:400">'+s.inEntries+' inward · '+s.outEntries+' outward · '+s.parties.size+' parties</span></td>'+
+      '<td style="padding:10px 11px;text-align:right;color:#15803d;font-weight:600">'+s.inBags+'</td>'+
+      '<td style="padding:10px 11px;text-align:right;color:#15803d;font-weight:600">'+s.inWt.toFixed(2)+'</td>'+
+      '<td style="padding:10px 11px;text-align:right;color:#7c3aed;font-weight:600">'+s.outBags+'</td>'+
+      '<td style="padding:10px 11px;text-align:right;color:#7c3aed;font-weight:600">'+s.outWt.toFixed(2)+'</td>'+
+      '<td style="padding:10px 11px;text-align:right;color:'+balColor+';font-weight:700;font-family:Rajdhani,sans-serif;font-size:14px">'+s.balBags+'</td>'+
+      '<td style="padding:10px 11px;text-align:right;color:'+balColor+';font-weight:700;font-family:Rajdhani,sans-serif;font-size:14px">'+s.balWt.toFixed(2)+'</td>'+
+      '<td style="padding:10px 11px;text-align:center">'+status+'</td>'+
+      '</tr>';
+  });
+  /* Grand total footer */
+  const totBalColor=tot.balWt>0?'var(--green)':tot.balWt<0?'var(--red)':'var(--text3)';
+  html+='</tbody><tfoot><tr style="background:#1a3a6b;color:#fff;font-weight:700;font-family:Rajdhani,sans-serif;font-size:13px">'+
+    '<td style="padding:11px 12px">GRAND TOTAL ('+rows.length+' items)</td>'+
+    '<td style="padding:11px 12px;text-align:right">'+tot.inBags+'</td>'+
+    '<td style="padding:11px 12px;text-align:right">'+tot.inWt.toFixed(2)+'</td>'+
+    '<td style="padding:11px 12px;text-align:right">'+tot.outBags+'</td>'+
+    '<td style="padding:11px 12px;text-align:right">'+tot.outWt.toFixed(2)+'</td>'+
+    '<td style="padding:11px 12px;text-align:right;font-size:15px">'+tot.balBags+'</td>'+
+    '<td style="padding:11px 12px;text-align:right;font-size:15px">'+tot.balWt.toFixed(2)+'</td>'+
+    '<td></td>'+
+    '</tr></tfoot></table></div></div>';
+
+  /* Summary cards above the table */
+  const settled=rows.filter(s=>s.balWt===0).length;
+  const inStock=rows.filter(s=>s.balWt>0).length;
+  const oversold=rows.filter(s=>s.balWt<0).length;
+  const summary='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px">'+
+    '<div class="sc" style="--cc:var(--blue);padding:10px 12px"><div class="sl">Total Items</div><div class="sv" style="font-size:18px">'+rows.length+'</div></div>'+
+    '<div class="sc" style="--cc:var(--green);padding:10px 12px"><div class="sl">In Stock</div><div class="sv" style="font-size:18px;color:var(--green)">'+inStock+'</div></div>'+
+    '<div class="sc" style="--cc:var(--red);padding:10px 12px"><div class="sl">Oversold</div><div class="sv" style="font-size:18px;color:var(--red)">'+oversold+'</div></div>'+
+    '<div class="sc" style="--cc:var(--teal);padding:10px 12px"><div class="sl">Settled</div><div class="sv" style="font-size:18px">'+settled+'</div></div>'+
+    '<div class="sc" style="--cc:var(--purple);padding:10px 12px"><div class="sl">Net Balance (Bags)</div><div class="sv" style="font-size:18px;color:'+totBalColor+'">'+tot.balBags+'</div></div>'+
+    '<div class="sc" style="--cc:var(--orange);padding:10px 12px"><div class="sl">Net Balance (kg)</div><div class="sv" style="font-size:16px;color:'+totBalColor+'">'+tot.balWt.toFixed(2)+'</div></div>'+
+    '</div>';
+
+  document.getElementById('rep-output').innerHTML=summary+html;
+  updateRepStats(recs);
 }
 
 function exportCurrentReport(){
@@ -5765,7 +5978,10 @@ function findRequestAnywhere(reqId){
 
 /* Save a status-updated request: if firm-access, broadcast to all companies; else save to current company */
 function persistRequestUpdate(rq){
-  if(rq.type==='firm-access'){
+  if(rq.type==='firm-access'||rq.type==='registration'){
+    /* Registration + firm-access requests are broadcast to ALL firms.
+       Update each firm's copy so admin doesn't see a stale pending duplicate
+       when switching between firms. */
     broadcastFirmRequest(rq,'update');
   }else if(APP.company){
     localStorage.setItem('requests-'+APP.company,JSON.stringify(APP.requests));
