@@ -606,6 +606,20 @@
       </div>
       <div id="dup-preview-box" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px"></div>
     </div>
+
+    <!-- Force Sync Tool — Emergency: when local & Firestore are out of sync -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+      <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--red);margin-bottom:10px">🔥 Force Sync (Emergency)</h4>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px">
+        <strong>Use this if:</strong> App mein records dikhai nahi de rahe lekin Firestore Console mein abhi bhi hain. Ya delete karne ke baad bhi cloud mein zinda hain.<br>
+        <strong>Kaam:</strong> Local data ko Firestore par mirror karega — Firestore mein extra (jo local mein nahi) records DELETE ho jayenge.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-ghost" onclick="checkSyncStatus()">📊 Check Sync Status</button>
+        <button class="btn btn-red" onclick="forceLocalToFirestore()">🔥 Force Sync Local → Firestore</button>
+      </div>
+      <div id="force-sync-box" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px"></div>
+    </div>
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text2);line-height:1.5">
       <strong style="color:var(--blue)">📦 Backup:</strong> Sab firms ka data ek JSON file mein download hoga (records, journal, requests, users, settings).<br>
       <strong style="color:var(--purple)">📂 Restore:</strong> Backup file load karke wapas restore karo. Existing data overwrite ho jayega — confirm prompt aayega.
@@ -1956,6 +1970,106 @@ function previewDuplicates(){
   if(dupSets.length>30)html+='<div style="font-size:11px;color:var(--text3);margin-top:6px">+ '+(dupSets.length-30)+' more sets (not shown)</div>';
   box.style.display='block';
   box.innerHTML=html;
+}
+
+/* === FORCE SYNC TOOLS — emergency local↔Firestore reconciliation =====
+   Use when delete didn't propagate or app/cloud are out of sync. */
+
+async function checkSyncStatus(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  if(!DB||!APP.company){toast('Firestore unavailable','e');return;}
+  const box=document.getElementById('force-sync-box');if(!box)return;
+  box.style.display='block';
+  box.innerHTML='<div style="color:var(--blue)">⏳ Firestore se data padh raha hai...</div>';
+  try{
+    const c=APP.company;
+    const [recsSnap,jrnSnap,reqsSnap,partiesSnap]=await Promise.all([
+      fsRecCol(c).get(),fsJrnCol(c).get(),fsReqCol(c).get(),fsPartiesCol(c).get()
+    ]);
+    const fsCounts={records:recsSnap.size,journal:jrnSnap.size,requests:reqsSnap.size,parties:partiesSnap.size};
+    const localCounts={
+      records:(APP.records||[]).length,
+      journal:(APP.journal||[]).length,
+      requests:(APP.requests||[]).length,
+      parties:(APP.parties||[]).length
+    };
+    const fsRecIds=new Set();recsSnap.forEach(d=>fsRecIds.add(d.id));
+    const localRecIds=new Set((APP.records||[]).map(r=>String(r.id)));
+    const onlyInFs=[];fsRecIds.forEach(id=>{if(!localRecIds.has(id))onlyInFs.push(id);});
+    const onlyInLocal=[];localRecIds.forEach(id=>{if(!fsRecIds.has(id))onlyInLocal.push(id);});
+
+    let html='<div style="font-size:12px"><strong>📊 Sync Status — '+(COMPANIES[c]?COMPANIES[c].name:c)+'</strong></div>';
+    html+='<table style="width:100%;margin-top:8px;border-collapse:collapse;font-size:12px">';
+    html+='<thead><tr style="background:var(--surface)"><th style="padding:6px;text-align:left">Collection</th><th style="padding:6px;text-align:right">Local</th><th style="padding:6px;text-align:right">Firestore</th><th style="padding:6px;text-align:right">Status</th></tr></thead><tbody>';
+    ['records','journal','requests','parties'].forEach(k=>{
+      const l=localCounts[k],f=fsCounts[k];
+      const status=l===f?'<span style="color:var(--green)">✓ Match</span>':'<span style="color:var(--red)">⚠ Mismatch</span>';
+      html+='<tr><td style="padding:5px 6px"><strong>'+k+'</strong></td><td style="padding:5px 6px;text-align:right">'+l+'</td><td style="padding:5px 6px;text-align:right">'+f+'</td><td style="padding:5px 6px;text-align:right">'+status+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    if(onlyInFs.length){
+      html+='<div style="margin-top:10px;padding:8px 10px;background:#fef0f0;border:1px solid #fcc8c8;border-radius:6px;color:var(--red);font-size:12px"><strong>🚨 '+onlyInFs.length+' records Firestore mein hain jo local mein nahi.</strong><br>Yeh probably purane delete-fail wale records hain. <strong>Force Sync</strong> chalakar inhe Firestore se delete kar do.</div>';
+    }
+    if(onlyInLocal.length){
+      html+='<div style="margin-top:10px;padding:8px 10px;background:#fff7e0;border:1px solid #fde68a;border-radius:6px;color:#92400e;font-size:12px"><strong>⚠ '+onlyInLocal.length+' records local mein hain jo Firestore mein nahi.</strong><br>Force Sync inhe Firestore par push kar dega.</div>';
+    }
+    if(!onlyInFs.length&&!onlyInLocal.length){
+      html+='<div style="margin-top:10px;padding:8px 10px;background:#dcfce7;border:1px solid #86efac;border-radius:6px;color:#166534;font-size:12px"><strong>✓ Records perfectly in sync.</strong> Koi action zaroori nahi.</div>';
+    }
+    box.innerHTML=html;
+  }catch(e){
+    box.innerHTML='<div style="color:var(--red)">❌ Error: '+(e.message||e)+'</div>';
+  }
+}
+
+async function forceLocalToFirestore(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  if(!DB||!APP.company){toast('Firestore unavailable','e');return;}
+  const c=APP.company;
+  const cName=COMPANIES[c]?COMPANIES[c].name:c;
+
+  /* Read current Firestore state */
+  toast('⏳ Firestore se data fetch ho raha hai...','i');
+  let snap;try{snap=await fsRecCol(c).get();}catch(e){toast('Firestore read failed: '+e.message,'e');return;}
+  const fsIds=new Set();snap.forEach(d=>fsIds.add(d.id));
+  const localIds=new Set((APP.records||[]).map(r=>String(r.id)));
+  const toDelete=[];fsIds.forEach(id=>{if(!localIds.has(id))toDelete.push(id);});
+  const toAdd=(APP.records||[]).filter(r=>r.id&&!fsIds.has(String(r.id)));
+
+  if(!toDelete.length&&!toAdd.length){toast('Already in sync — no changes','s');return;}
+
+  const msg='⚠ FORCE SYNC — '+cName+'\n\n'+
+    'Local: '+localIds.size+' records\n'+
+    'Firestore: '+fsIds.size+' records\n\n'+
+    'Action:\n'+
+    '  • Delete from Firestore: '+toDelete.length+' records (jo local mein nahi)\n'+
+    '  • Add to Firestore: '+toAdd.length+' records (jo local mein hain par cloud mein nahi)\n\n'+
+    'Yeh action UNDO nahi hoga!\n\nProceed?';
+  if(!confirm(msg))return;
+
+  /* Batch delete extras (Firestore batch limit = 500) */
+  const BATCH=400;
+  let deleted=0,added=0,failed=0;
+  for(let i=0;i<toDelete.length;i+=BATCH){
+    const batch=DB.batch();
+    toDelete.slice(i,i+BATCH).forEach(id=>{batch.delete(fsRecCol(c).doc(id));});
+    try{await batch.commit();deleted+=Math.min(BATCH,toDelete.length-i);}
+    catch(e){console.error('Batch delete failed:',e);failed++;}
+  }
+  /* Batch add */
+  for(let i=0;i<toAdd.length;i+=BATCH){
+    const batch=DB.batch();
+    toAdd.slice(i,i+BATCH).forEach(r=>{batch.set(fsRecCol(c).doc(String(r.id)),cleanUndefined(r),{merge:true});});
+    try{await batch.commit();added+=Math.min(BATCH,toAdd.length-i);}
+    catch(e){console.error('Batch add failed:',e);failed++;}
+  }
+
+  /* Reset sync snapshots so listener re-syncs cleanly */
+  _resetSyncSnapshots();
+  toast('✓ Force Sync done — '+deleted+' deleted, '+added+' added'+(failed?', '+failed+' batches failed':''),'s');
+  /* Auto-refresh status display */
+  setTimeout(checkSyncStatus,500);
+  refreshAllViews();
 }
 
 function removeDuplicates(){
@@ -3432,6 +3546,14 @@ function bulkDelete(prefix){
   APP.records=APP.records.filter(r=>!selected.includes(r.id));
   BULK_SELECTED[prefix].clear();
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  /* Direct Firestore delete — don't rely on diff sync (which fails if _lastSync is stale) */
+  if(DB&&APP.company){
+    const col=fsRecCol(APP.company);
+    selected.forEach(id=>{
+      col.doc(String(id)).delete().catch(e=>console.error('Delete fail for',id,e));
+      delete _lastSync.records[String(id)];
+    });
+  }
   syncToFirestore();
   refreshAllViews();toast(selected.length+' entries deleted','s');
 }
@@ -5072,6 +5194,11 @@ function deleteEntry(id){
   if(!confirm('Delete this entry?\n\n'+label+'\n\nYeh action undo nahi hoga!')){return;}
   APP.records=APP.records.filter(e=>e.id!==id);
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
+  /* Direct Firestore delete — explicit, doesn't depend on diff sync state */
+  if(DB&&APP.company){
+    fsRecCol(APP.company).doc(String(id)).delete().catch(e=>console.error('Delete fail for',id,e));
+    delete _lastSync.records[String(id)];
+  }
   syncToFirestore();
   refreshAllViews();toast('Entry deleted!','s');
   if(window._pendingReqComplete){completeRequest(window._pendingReqComplete);window._pendingReqComplete=null;}
