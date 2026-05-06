@@ -1939,16 +1939,20 @@ function onInterestRateChange(v){
    Group records by content signature (type+date+gp+party+item+bags+weight+rate).
    100% identical rows = duplicates. Keep oldest (first createdAt), remove rest. */
 function _recordSignature(r){
+  /* Aggressive normalization — trims strings, normalizes numbers, lowercases.
+     Catches duplicates even with formatting variations (whitespace, trailing zeros, etc). */
+  const norm=v=>String(v==null?'':v).trim().toLowerCase().replace(/\s+/g,' ');
+  const num=v=>{const n=parseFloat(v);return isNaN(n)?0:Math.round(n*100)/100;};/* round to 2 decimals */
   return [
-    r.type||'',
-    r.date||'',
-    r.gp||'',
-    (r.party||'').toLowerCase(),
-    (r.item||'').toLowerCase(),
-    (r.bags||0),
-    (r.weight||0),
-    (r.partyWt||0),
-    (r.rate||0)
+    norm(r.type),
+    norm(r.date),
+    norm(r.gp),
+    norm(r.party),
+    norm(r.item),
+    num(r.bags),
+    num(r.weight),
+    num(r.partyWt),
+    num(r.rate)
   ].join('||');
 }
 function findDuplicateSets(){
@@ -2175,16 +2179,20 @@ function removeDuplicates(){
   });
   const before=APP.records.length;
   APP.records=APP.records.filter(r=>!idsToRemove.has(r.id));
-  /* Direct Firestore delete for each removed ID — more reliable than diff sync */
+  /* Direct Firestore delete for each removed ID — more reliable than diff sync.
+     Also clean from _lastSync map so listener won't echo them back. */
   if(DB&&APP.company){
     const col=fsRecCol(APP.company);
-    idsToRemove.forEach(id=>{col.doc(String(id)).delete().catch(e=>console.error('Delete fail for',id,e));});
+    idsToRemove.forEach(id=>{
+      col.doc(String(id)).delete().catch(e=>console.error('Delete fail for',id,e));
+      delete _lastSync.records[String(id)];
+    });
   }
   localStorage.setItem('data-'+APP.company,JSON.stringify(APP.records));
   syncToFirestore();
   refreshAllViews();
   /* Refresh preview */
-  setTimeout(previewDuplicates,300);
+  setTimeout(previewDuplicates,500);
   toast('✓ '+idsToRemove.size+' duplicate entries removed. '+APP.records.length+' clean entries remain','s');
 }
 
