@@ -622,6 +622,29 @@
       <div id="legacy-cleanup-box" style="display:none;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px"></div>
     </div>
 
+    <!-- NUCLEAR WIPE — Complete fresh-start tool (deletes EVERYTHING for current firm) -->
+    <div style="margin-top:14px;padding-top:14px;border-top:2px solid #fca5a5;background:linear-gradient(to right,#fef0f0,transparent);padding:12px;border-radius:6px">
+      <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:#7f1d1d;margin-bottom:10px">☢️ Nuclear Wipe — Fresh Start (Current Firm)</h4>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px">
+        <strong>Yeh sab kuch DELETE kar dega current firm ke liye:</strong>
+        <ul style="margin:6px 0 0 18px;padding:0">
+          <li>Saari records (entries) — naye + legacy dono jagah</li>
+          <li>Saare payment journal entries</li>
+          <li>Saari pending/approved requests</li>
+          <li>Saare parties (Create Ledger)</li>
+          <li>Migration metadata</li>
+          <li>Local cache</li>
+        </ul>
+        <strong style="color:var(--red)">⚠ User accounts, permissions, login — yeh sab safe rahega.</strong> Sirf data wipe hota hai.<br>
+        <strong style="color:var(--orange)">📦 Backup zaroor download karo PEHLE!</strong> Restore karne ke liye chahiye hoga.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-blue" onclick="downloadFullBackup()" style="font-weight:600">📦 Backup First (Safety)</button>
+        <button class="btn" onclick="nuclearWipeFirm()" style="background:#7f1d1d;color:#fff;font-weight:700">☢️ Wipe Current Firm Completely</button>
+      </div>
+      <div id="nuke-status" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:12px;margin-top:10px"></div>
+    </div>
+
     <!-- Force Sync Tool — Emergency: when local & Firestore are out of sync -->
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
       <h4 style="font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;color:var(--red);margin-bottom:10px">🔥 Force Sync (Emergency)</h4>
@@ -1994,6 +2017,145 @@ function previewDuplicates(){
   if(dupSets.length>30)html+='<div style="font-size:11px;color:var(--text3);margin-top:6px">+ '+(dupSets.length-30)+' more sets (not shown)</div>';
   box.style.display='block';
   box.innerHTML=html;
+}
+
+/* === NUCLEAR WIPE — complete fresh start for current firm =================
+   Deletes EVERYTHING data-wise for the current firm:
+   - New schema: firms/<c>/records, /journal, /requests, /parties, /meta
+   - Legacy schema: app_data/records_<c>, journal_<c>, requests_<c>
+   - localStorage cache for this firm
+   Preserves: user_profiles (login), config/users_<c> (admin's user list)
+   Triple confirmation required to prevent accidents. */
+async function nuclearWipeFirm(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  if(!DB||!APP.company){toast('Firestore unavailable','e');return;}
+  const c=APP.company;
+  const cName=COMPANIES[c]?COMPANIES[c].name:c;
+
+  /* Step 1: Backup reminder */
+  const r1=confirm('☢️ NUCLEAR WIPE — '+cName+'\n\n'+
+    'PEHLE BACKUP DOWNLOAD KIYA HAI?\n\n'+
+    '"OK" = Haan, backup mere paas hai\n'+
+    '"Cancel" = Nahi, pehle backup karunga');
+  if(!r1)return;
+
+  /* Step 2: Show what will be deleted */
+  const recCount=(APP.records||[]).length;
+  const jrnCount=(APP.journal||[]).length;
+  const reqCount=(APP.requests||[]).length;
+  const ptyCount=(APP.parties||[]).length;
+  const r2=confirm('⚠ DELETE ALL CONFIRMATION\n\n'+
+    'Firm: '+cName+'\n\n'+
+    'Yeh saara data delete hoga:\n'+
+    '  • Records: '+recCount+' entries\n'+
+    '  • Journal: '+jrnCount+' vouchers\n'+
+    '  • Requests: '+reqCount+' requests\n'+
+    '  • Parties: '+ptyCount+' parties\n'+
+    '  • Legacy backup (app_data/...) bhi delete hoga\n'+
+    '  • Local cache reset ho jayega\n\n'+
+    'User accounts aur permissions UNTOUCHED rahenge.\n\n'+
+    'UNDO nahi hoga. Sure?');
+  if(!r2)return;
+
+  /* Step 3: Final type-to-confirm */
+  const r3=prompt('FINAL CONFIRMATION\n\nType "WIPE" (capital letters) to proceed:');
+  if(r3!=='WIPE'){toast('Wipe cancelled — text exactly "WIPE" type karna tha','i');return;}
+
+  /* Show progress UI */
+  const status=document.getElementById('nuke-status');
+  if(status){status.style.display='block';status.innerHTML='<div style="color:var(--blue)">⏳ Wipe shuru ho raha hai...</div>';}
+
+  let deleted={records:0,journal:0,requests:0,parties:0,meta:0,legacy:0};
+  let failed=0;
+
+  function updateStatus(msg){
+    if(status)status.innerHTML='<div style="color:var(--blue)">⏳ '+msg+'</div>';
+  }
+
+  try{
+    /* Helper: batch-delete entire collection */
+    async function wipeCollection(colRef,label){
+      updateStatus('Deleting '+label+'...');
+      const snap=await colRef.get();
+      const ids=[];snap.forEach(d=>ids.push(d.id));
+      const BATCH=400;
+      for(let i=0;i<ids.length;i+=BATCH){
+        const batch=DB.batch();
+        ids.slice(i,i+BATCH).forEach(id=>{batch.delete(colRef.doc(id));});
+        try{await batch.commit();deleted[label]+=Math.min(BATCH,ids.length-i);}
+        catch(e){console.error(label+' batch fail:',e);failed++;}
+      }
+    }
+
+    /* Wipe new schema sub-collections */
+    await wipeCollection(fsRecCol(c),'records');
+    await wipeCollection(fsJrnCol(c),'journal');
+    await wipeCollection(fsReqCol(c),'requests');
+    await wipeCollection(fsPartiesCol(c),'parties');
+
+    /* Wipe meta sub-collection (migration timestamp etc.) */
+    updateStatus('Deleting migration metadata...');
+    const metaSnap=await DB.collection('firms').doc(c).collection('meta').get();
+    const metaIds=[];metaSnap.forEach(d=>metaIds.push(d.id));
+    for(const id of metaIds){
+      try{await DB.collection('firms').doc(c).collection('meta').doc(id).delete();deleted.meta++;}
+      catch(e){console.error('meta delete fail:',e);failed++;}
+    }
+
+    /* Wipe legacy single-doc backup (app_data/records_<c>, journal_<c>, requests_<c>) */
+    updateStatus('Deleting legacy backup documents...');
+    for(const kind of ['records','journal','requests']){
+      try{
+        const ref=DB.collection('app_data').doc(kind+'_'+c);
+        const doc=await ref.get();
+        if(doc.exists){await ref.delete();deleted.legacy++;}
+      }catch(e){console.error('Legacy delete fail '+kind+':',e);failed++;}
+    }
+
+    /* Clear local state */
+    updateStatus('Clearing local cache...');
+    APP.records=[];APP.journal=[];APP.requests=[];APP.parties=[];
+    localStorage.removeItem('data-'+c);
+    localStorage.removeItem('journal-'+c);
+    localStorage.removeItem('requests-'+c);
+    localStorage.removeItem('parties-'+c);
+    _resetSyncSnapshots();
+
+    /* Refresh UI */
+    refreshAllViews();
+
+    /* Final status */
+    const total=deleted.records+deleted.journal+deleted.requests+deleted.parties+deleted.meta+deleted.legacy;
+    if(status){
+      status.innerHTML='<div style="color:var(--green);font-weight:600">✅ Wipe complete!</div>'+
+        '<div style="margin-top:6px;font-size:12px">'+
+        '  • Records deleted: '+deleted.records+'<br>'+
+        '  • Journal deleted: '+deleted.journal+'<br>'+
+        '  • Requests deleted: '+deleted.requests+'<br>'+
+        '  • Parties deleted: '+deleted.parties+'<br>'+
+        '  • Meta deleted: '+deleted.meta+'<br>'+
+        '  • Legacy docs deleted: '+deleted.legacy+'/3<br>'+
+        '  • Total: '+total+' documents'+
+        (failed?'<br>  ⚠ '+failed+' batch(es) failed — console mein details':'')+
+        '</div>'+
+        '<div style="margin-top:8px;color:var(--blue);font-weight:600">'+
+        '➡ Ab Records tab → 📥 Import CSV se backup CSV import karo'+
+        '</div>';
+    }
+    toast('☢️ Wipe complete — '+total+' documents deleted. Ab CSV import karo.','s');
+    /* Force a fresh listener attachment to clean state */
+    setTimeout(()=>{
+      if(window._unsubRecords)try{window._unsubRecords();}catch(e){}
+      if(window._unsubJournal)try{window._unsubJournal();}catch(e){}
+      if(window._unsubRequests)try{window._unsubRequests();}catch(e){}
+      if(window._unsubParties)try{window._unsubParties();}catch(e){}
+      startRealtimeSync();
+    },500);
+  }catch(e){
+    console.error('Nuclear wipe error:',e);
+    if(status)status.innerHTML='<div style="color:var(--red)">❌ Error: '+(e.message||e)+'<br>Console mein details dekho.</div>';
+    toast('Wipe failed: '+(e.message||e),'e');
+  }
 }
 
 /* === LEGACY BACKUP CLEANUP — remove pre-migration app_data/* documents ====
