@@ -1988,6 +1988,19 @@ function findDuplicateSets(){
   return Object.values(groups).filter(g=>g.length>1);
 }
 
+/* Deterministic content-stable ID from signature.
+   Used in CSV import — same signature → same ID → Firestore merge prevents
+   duplicates ABSOLUTELY (even if listener race conditions occur). */
+function _stableIdFromSig(sig){
+  let h1=0x811c9dc5,h2=0x01000193;/* FNV-1a-like dual hash for low collision rate */
+  for(let i=0;i<sig.length;i++){
+    const c=sig.charCodeAt(i);
+    h1=((h1^c)*0x01000193)>>>0;
+    h2=((h2+c)*0x85ebca77)>>>0;
+  }
+  return 'CSV_'+h1.toString(36)+'_'+h2.toString(36);
+}
+
 function previewDuplicates(){
   if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
   const dupSets=findDuplicateSets();
@@ -3849,8 +3862,25 @@ function parseCSVLine(line){
   vals.push(cur);
   return vals.map(v=>v.trim());
 }
-function importCSV(prefix){
+async function importCSV(prefix){
   if(!hasPerm('import')){toast('Aapke paas import permission nahi hai!','e');return;}
+  /* CRITICAL: pull latest Firestore state BEFORE import to avoid race with listener.
+     Without this: import can race with listener, causing duplicates. */
+  if(DB&&APP.company){
+    try{
+      toast('⏳ Latest data sync ho raha hai...','i');
+      const snap=await fsRecCol(APP.company).get();
+      const fresh=[];snap.forEach(d=>fresh.push(d.data()));
+      /* Replace APP.records entirely with server state — eliminates ghosts */
+      APP.records=fresh;
+      _lastSync.records={};
+      fresh.forEach(r=>{if(r.id)_lastSync.records[String(r.id)]=_fp(r);});
+      localStorage.setItem('data-'+APP.company,JSON.stringify(fresh));
+    }catch(e){
+      console.error('Pre-import sync failed:',e);
+      if(!confirm('Pre-import sync fail ho gaya — duplicates ka risk hai.\n\nFir bhi import karna hai?'))return;
+    }
+  }
   const input=document.createElement('input');input.type='file';input.accept='.csv';
   input.onchange=e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{
     /* Strip BOM if present, split by newline respecting quoted fields */
@@ -3939,8 +3969,13 @@ function importCSV(prefix){
       ].join('||');
       if(existingSigs.has(rowSig)){duplicatesSkipped++;continue;}
       existingSigs.add(rowSig);/* prevent dupes within the CSV itself */
+      /* CRITICAL: use content-stable ID derived from signature.
+         Re-importing same data → same ID → Firestore merge → physically impossible to duplicate. */
+      const stableId=_stableIdFromSig(rowSig);
+      /* Skip if entry with same stable ID already exists in APP.records */
+      if(APP.records.some(r=>String(r.id)===stableId)){duplicatesSkipped++;continue;}
       APP.records.push({
-        id:'REC'+Date.now()+'_'+i,type,
+        id:stableId,type,
         date:get(H.date)||new Date().toISOString().split('T')[0],
         gp:get(H.gp)||'GP-IMP-'+(i)+'-'+Date.now().toString().slice(-5),
         billFrom:get(H.billFrom),
