@@ -2788,9 +2788,32 @@ async function startRealtimeSync(){
       }
     });
     if(changed){queueSave(storageKey,localArr);onAfter&&onAfter();}
-    /* Auto-push localStorage extras (offline-added items not yet on server) */
+    /* === DUPLICATE PREVENTION GUARD #5 — stale localStorage discard ============
+       This is THE bug that caused "phone PWA refresh → deleted entries reappear,
+       all data duplicated on logout". Old logic pushed any localStorage entry
+       whose ID wasn't on the server. But if device A wiped+re-imported with
+       stable IDs, device B's stale localStorage (with old REC+timestamp IDs but
+       SAME content) would be pushed up as "offline saves" — re-creating every
+       deleted/replaced record as a duplicate.
+       Fix: distinguish stale localStorage (content already on server under a
+       different ID) from genuine offline saves (content not on server at all). */
     if(snap.metadata&&!snap.metadata.fromCache&&!snap.metadata.hasPendingWrites){
-      const extras=localArr.filter(it=>it&&it.id&&!(String(it.id) in _lastSync[stype]));
+      let extras=localArr.filter(it=>it&&it.id&&!(String(it.id) in _lastSync[stype]));
+      if(stype==='records'&&extras.length>0){
+        /* Build set of signatures the server already has */
+        const serverSigs=new Set();
+        localArr.forEach(it=>{if(it&&String(it.id) in _lastSync.records){serverSigs.add(_recordSignature(it));}});
+        const stale=[],trulyNew=[];
+        extras.forEach(it=>{(serverSigs.has(_recordSignature(it))?stale:trulyNew).push(it);});
+        if(stale.length>0){
+          console.warn('Discarding '+stale.length+' stale local records — content already on server with different ID. These are ghosts from before a wipe/re-import on another device.');
+          const staleIds=new Set(stale.map(it=>String(it.id)));
+          for(let i=localArr.length-1;i>=0;i--){if(staleIds.has(String(localArr[i].id))){localArr.splice(i,1);}}
+          queueSave(storageKey,localArr);
+          onAfter&&onAfter();
+        }
+        extras=trulyNew;
+      }
       if(extras.length>0){console.log('Pushing',extras.length,'offline-added',stype);syncToFirestore();}
     }
   }
