@@ -3551,7 +3551,12 @@ function applySort(recs,prefix){
   const out=recs.slice();
   out.sort((a,b)=>{
     let av,bv;
-    if(f==='_default'){av=a.createdAt||a.lastUpdated||((a.date||'')+'T00:00:00.000Z');bv=b.createdAt||b.lastUpdated||((b.date||'')+'T00:00:00.000Z');}
+    if(f==='_default'){
+      /* Default sort = entry date desc (newest transaction first), with createdAt as tie-breaker.
+         Combining into a sortable string ensures imported records (similar createdAt) order by date. */
+      av=(a.date||'')+'|'+(a.createdAt||a.lastUpdated||'');
+      bv=(b.date||'')+'|'+(b.createdAt||b.lastUpdated||'');
+    }
     else if(f==='amount'){av=getEntryAmt(a);bv=getEntryAmt(b);}
     else if(f==='difference'){av=(a.weight||0)-(a.partyWt||0);bv=(b.weight||0)-(b.partyWt||0);}
     else{av=a[f];bv=b[f];}
