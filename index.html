@@ -2125,6 +2125,21 @@ async function nuclearWipeFirm(){
       }catch(e){console.error('Legacy delete fail '+kind+':',e);failed++;}
     }
 
+    /* === DUPLICATE PREVENTION GUARD #3 — re-mark firm as "migrated" =========
+       Wipe just deleted meta/info. Without this, next page load will see
+       missing meta → migrateFirmIfNeeded() runs → if any legacy app_data/*
+       doc survived (network hiccup, partial fail), all that old data gets
+       re-imported as duplicates. Re-writing meta locks the migration off. */
+    updateStatus('Locking migration state...');
+    try{
+      await fsMetaDoc(c).set({
+        migratedAt:new Date().toISOString(),
+        migratedBy:currentUser?currentUser.email:'wipe',
+        recordCount:0,journalCount:0,requestCount:0,
+        fresh:true,wipedAt:new Date().toISOString()
+      });
+    }catch(e){console.error('Meta re-write failed:',e);failed++;}
+
     /* Clear local state */
     updateStatus('Clearing local cache...');
     APP.records=[];APP.journal=[];APP.requests=[];APP.parties=[];
@@ -2625,6 +2640,19 @@ async function migrateFirmIfNeeded(c){
     const meta=await fsMetaDoc(c).get();
     if(meta.exists&&meta.data()&&meta.data().migratedAt){return false;}
   }catch(e){console.warn('Migration check failed for',c,e);return false;}
+  /* === DUPLICATE PREVENTION GUARD #4 — never re-import if new schema has data ===
+     If meta/info goes missing (manual deletion, wipe race, etc.) but the new
+     sub-collection already has docs, do NOT re-import legacy data — that would
+     stack legacy entries on top of current data and create duplicates.
+     Mark as migrated and exit safely. */
+  try{
+    const existing=await fsRecCol(c).limit(1).get();
+    if(!existing.empty){
+      console.log('Skipping migration for',c,'— new schema already populated');
+      try{await fsMetaDoc(c).set({migratedAt:new Date().toISOString(),migratedBy:currentUser?currentUser.email:'auto-skip',autoSkipped:true,note:'meta was missing but records exist — migration locked off'},{merge:true});}catch(e){}
+      return false;
+    }
+  }catch(e){console.warn('New-schema check failed for',c,e);}
   /* Read old single-docs */
   let oldRecs=[],oldJrn=[],oldReqs=[];
   try{
@@ -5521,6 +5549,13 @@ function calcEntry(){
 /* calcPaymentInfo moved to Payment Tab - separate from entry */
 
 async function saveEntry(){
+  /* === DUPLICATE PREVENTION GUARD #1 — re-entry block ====================
+     Async function = double-click race possible. Photo upload (await) + slow
+     Firestore can leave the modal open long enough for user to click Save twice.
+     This flag blocks the second call until the first one finishes. */
+  if(window._saveEntryBusy){console.log('saveEntry: already running — duplicate click ignored');return;}
+  window._saveEntryBusy=true;
+  try{
   const type=document.getElementById('fi-type').value;const date=document.getElementById('fi-date').value;const gp=document.getElementById('fi-gp').value;const party=document.getElementById('fi-party').value;const mobile=document.getElementById('fi-mobile').value;
   const consignee=document.getElementById('fi-consignee').value;const consigneeMobile=document.getElementById('fi-con-mobile').value;const consigneeAddr=document.getElementById('fi-con-addr').value;
   const billFrom=document.getElementById('fi-billfrom').value;const broker=document.getElementById('fi-broker').value;const item=document.getElementById('fi-item').value;
@@ -5578,7 +5613,39 @@ async function saveEntry(){
     const old=APP.records[idx];/* preserve existing payment data */
     APP.records[idx]={...old,...entryData,paid:old.paid||0,paymentStatus:old.paymentStatus||'pending',payMode:old.payMode||'',payDate:old.payDate||'',payReceived:old.payReceived||'',payRef:old.payRef||'',dedCD:old.dedCD||0,dedBrok:old.dedBrok||0,dedTDS:old.dedTDS||0,dedOther:old.dedOther||0,payNote:old.payNote||'',lastUpdated:new Date().toISOString()};
   }}
-  else{APP.records.push({id:'REC'+Date.now(),...entryData,gp:gp||'GP-'+String(APP.records.length+1).padStart(5,'0'),createdBy:currentUser?currentUser.email:'unknown',createdAt:new Date().toISOString()});}
+  else{
+    /* === DUPLICATE PREVENTION GUARD #2 — content-stable ID + signature check ===
+       OLD: id='REC'+Date.now() → same content saved twice = different IDs = 2 records.
+       NEW: id derived from content signature → same content = same ID = Firestore
+       merge:true physically prevents duplicates, even across devices/race conditions. */
+    const newGp=gp||'GP-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();
+    const newRec={...entryData,gp:newGp,createdBy:currentUser?currentUser.email:'unknown',createdAt:new Date().toISOString()};
+    /* Pre-save signature check — warn user if exact same content already exists */
+    const newSig=_recordSignature(newRec);
+    const existingDup=APP.records.find(r=>_recordSignature(r)===newSig);
+    if(existingDup){
+      const ok=confirm('⚠ DUPLICATE ALERT\n\nBilkul same entry pehle se hai:\n\n'+
+        'Party: '+(existingDup.party||'-')+'\n'+
+        'Date: '+(existingDup.date||'-')+'\n'+
+        'Item: '+(existingDup.item||'-')+'\n'+
+        'Bags: '+(existingDup.bags||0)+' · Weight: '+(existingDup.weight||0)+'\n'+
+        'Rate: '+(existingDup.rate||0)+' · GP: '+(existingDup.gp||'-')+'\n\n'+
+        'Phir bhi nayi entry banayein?\n'+
+        'OK = Haan, save karo\n'+
+        'Cancel = Nahi, duplicate skip karo');
+      if(!ok){
+        toast('✓ Duplicate skip ho gaya — original entry safe hai','s');
+        resetPhotoState();closeM('entry-modal');
+        return;
+      }
+    }
+    /* Stable ID from signature — Firestore set with merge:true is now idempotent */
+    let stableId=_stableIdFromSig(newSig);
+    /* Edge case: stable ID collision with a different-content record (extremely rare) */
+    if(APP.records.some(r=>String(r.id)===stableId)){stableId=stableId+'_'+Date.now().toString(36);}
+    newRec.id=stableId;
+    APP.records.push(newRec);
+  }
   /* Get the saved entry ID for review request */
   const savedEntryId=id||(APP.records[APP.records.length-1]?APP.records[APP.records.length-1].id:null);
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
@@ -5627,6 +5694,7 @@ async function saveEntry(){
       toast('Entry save ho gayi par admin notification fail — admin ko phone se inform karo','i');
     }
   }
+  }finally{window._saveEntryBusy=false;}
 }
 
 function showPartyDrop(val,type){
