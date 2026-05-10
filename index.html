@@ -14,7 +14,7 @@
   <title>Inward Outward Pro - Tracking & Management System</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Rajdhani:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-:root{--bg:#f0f2f5;--surface:#fff;--s2:#f7f8fa;--s3:#eef0f4;--border:#dde1e9;--border2:#c5cad6;--text:#1a2332;--text2:#4a5568;--text3:#8a95a8;--blue:#1a5fc8;--blue2:#1450a8;--bluebg:#e8f0fd;--green:#1a7a3c;--gbg:#e8f5ed;--gb:#c8ecd4;--yellow:#b45309;--ybg:#fef3e2;--yb:#fde8b4;--orange:#c2410c;--obg:#fff0eb;--ob:#fdd5c0;--red:#b91c1c;--rbg:#fef0f0;--rb:#fcc8c8;--purple:#7c3aed;--pbg:#f3e8ff;--pb:#ddd6fe;--teal:#0f766e;--tbg:#f0fdfa;--tb:#99f6e4;--ok:#16a34a;--danger:#dc2626;--sh:0 2px 10px rgba(0,0,0,0.07);--r:8px;}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Noto Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:0 2px 12px rgba(26,63,140,0.3);flex-wrap:wrap;gap:6px;}.logo{display:flex;align-items:center;gap:10px;}.logo-icon{width:34px;height:34px;background:rgba(255,255,255,0.2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;}.logo-text{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;color:#fff;line-height:1;}.logo-sub{font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;}.hdr-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;justify-content:flex-end;}.hdr-stat{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;text-align:center;}.hdr-stat .v{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#fff;}.hdr-stat .l{font-size:8px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;}.btn-w{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:12px;transition:all 0.2s;}.btn-w:hover{background:rgba(255,255,255,0.28);}.btn-add{background:#fff;color:var(--blue2);border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:700;transition:all 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.15);}.btn-add:hover{background:#f0f4ff;transform:translateY(-1px);}main{max-width:1600px;margin:0 auto;padding:16px 18px;}.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:3px;width:100%;margin-bottom:16px;box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}.tab{white-space:nowrap;flex-shrink:0;padding:6px 15px;border:none;background:transparent;color:var(--text3);border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;display:flex;align-items:center;gap:4px;}.tab:hover{color:var(--blue);background:var(--bluebg);}.tab.active{background:var(--blue);color:#fff;}.tab.inward-tab.active{background:var(--teal);}.tab.outward-tab.active{background:var(--purple);}.tab.pay-tab.active{background:#15803d;color:#fff;}.btn{padding:7px 13px;border:none;border-radius:6px;cursor:pointer;font-family:'Noto Sans',sans-serif;font-size:12px;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue2);}.btn-green{background:#16a34a;color:#fff;}.btn-green:hover{background:#15803d;}.btn-ghost{background:var(--s2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{background:var(--s3);}.btn-red{background:var(--rbg);color:var(--red);border:1px solid var(--rb);}.btn-teal{background:var(--teal);color:#fff;}.btn-purple{background:var(--purple);color:#fff;}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px;}.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:var(--sh);}.sc:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,0,0,0.1);}.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,var(--blue));border-radius:8px 8px 0 0;}.si{font-size:19px;margin-bottom:5px;display:block;}.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;}.sv{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1;}.ss2{font-size:11px;color:var(--text3);margin-top:2px;}.charts{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px;}.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh);}.ct{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue2);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--border);}.br{display:flex;align-items:center;gap:7px;margin-bottom:7px;}.bl{width:100px;font-size:11px;color:var(--text2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.bt{flex:1;height:15px;background:var(--s3);border-radius:3px;overflow:hidden;}.bf{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;transition:width 1s ease;}.bv{font-size:10px;color:#fff;font-weight:700;font-family:'JetBrains Mono',monospace;}.fbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 15px;margin-bottom:13px;box-shadow:var(--sh);}.ftitle{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;}.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:7px;align-items:end;}.fi,.fs{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:6px 9px;font-size:12px;font-family:'Noto Sans',sans-serif;outline:none;width:100%;transition:all 0.2s;}.fi:focus,.fs:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}.th2{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:2px solid var(--border);background:var(--s2);}.ttl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;}.rcnt{font-size:11px;background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue);padding:2px 9px;border-radius:20px;font-weight:600;}.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch;}table{width:100%;border-collapse:collapse;font-size:12px;}thead tr{background:#f0f4fc;}th{padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;white-space:nowrap;}tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}tbody tr:nth-child(even){background:#fafbfc;}tbody tr:hover{background:var(--bluebg)!important;}td{padding:8px 11px;white-space:nowrap;color:var(--text);}td a{color:var(--blue);cursor:pointer;text-decoration:none;}td a:hover{text-decoration:underline;}.fc2{display:flex;align-items:center;gap:7px;}.fa{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;flex-shrink:0;}.amt{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--green);}.mono{font-family:'JetBrains Mono',monospace;font-size:11px;}.pag{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-top:1px solid var(--border);background:var(--s2);}.pi{font-size:11px;color:var(--text3);}.pbs{display:flex;gap:3px;}.pb2{width:25px;height:25px;border:1px solid var(--border);background:var(--surface);color:var(--text2);border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}.pb2:hover{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}.pb2.on{background:var(--blue);color:#fff;border-color:var(--blue);}.ov{display:none;position:fixed;inset:0;background:rgba(26,35,50,0.55);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;}.ov.open{display:flex;}.modal{background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:min(900px,96vw);max-height:93vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:su 0.25s cubic-bezier(0.34,1.56,0.64,1);}@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.mh{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;border-radius:10px 10px 0 0;z-index:10;}.mt{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px;}.mx{width:27px;height:27px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.8);border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}.mx:hover{background:rgba(255,255,255,0.2);}.mb{padding:18px;background:#fff;}.mf{padding:11px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-radius:0 0 10px 10px;position:sticky;bottom:0;}.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue);margin-bottom:9px;padding-bottom:6px;border-bottom:2px solid var(--bluebg);display:flex;align-items:center;gap:6px;}.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.full{grid-column:1/-1;}.fg2{display:flex;flex-direction:column;gap:4px;}.flbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}.finp{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:8px 10px;font-size:13px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;width:100%;}.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.finp::placeholder{color:var(--text3);}.finp:read-only{background:#f0f4fc;color:var(--blue);font-weight:700;}.div{height:1px;background:var(--border);margin:14px 0;}.summary-box{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);border-radius:10px;padding:16px 18px;margin-top:4px;}.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}.sum-item{text-align:center;}.sum-v{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.sum-l{font-size:9px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}.store-header{background:linear-gradient(135deg,#0f766e,#14b8a6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.own-header{background:linear-gradient(135deg,#6d28d9,#8b5cf6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.dash-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.dash-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;}.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;}.jcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all 0.2s;box-shadow:var(--sh);}.jcard:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 4px 18px rgba(26,95,200,0.12);}.jh{display:flex;align-items:center;gap:9px;margin-bottom:11px;}.jav{width:40px;height:40px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;flex-shrink:0;}.jn{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}.jm{font-size:10px;color:var(--text3);}.jstats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}.jst{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:7px 9px;}.jsv{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;}.jsl{font-size:10px;color:var(--text3);}.tc{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px;}.toast{background:#fff;border:1px solid var(--border2);border-radius:7px;padding:9px 13px;display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,0.1);animation:ti 0.3s cubic-bezier(0.34,1.56,0.64,1);max-width:280px;color:var(--text);}@keyframes ti{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}.toast.s{border-left:3px solid var(--ok);}.toast.e{border-left:3px solid var(--danger);}.toast.i{border-left:3px solid var(--blue);}.hidden{display:none!important;}.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:none;align-items:center;justify-content:center;z-index:9999;}.login-wrap.show-login{display:flex;}.login-box{background:#fff;border-radius:12px;padding:36px 32px;width:min(380px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.3);}.login-logo{text-align:center;margin-bottom:24px;}.login-logo .icon{font-size:40px;display:block;margin-bottom:8px;}.login-logo h2{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#1a3a6b;}.login-logo p{font-size:12px;color:#8a95a8;margin-top:3px;}.login-field{margin-bottom:14px;}.login-field label{display:block;font-size:11px;font-weight:600;color:#8a95a8;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}.login-field input{width:100%;background:#f7f8fa;border:1px solid #dde1e9;color:#1a2332;border-radius:7px;padding:10px 13px;font-size:14px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;}.login-field input:focus{border-color:#1a5fc8;box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.login-btn{width:100%;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);color:#fff;border:none;border-radius:7px;padding:11px;font-size:15px;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;transition:all 0.2s;margin-top:4px;}.login-btn:hover{opacity:0.9;transform:translateY(-1px);}.login-err{background:#fef0f0;border:1px solid #fcc8c8;color:#b91c1c;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none;}.login-err.show{display:block;}.stl{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:7px;}.stl span{color:var(--blue);}.bliv{background:rgba(22,163,74,0.1);color:var(--ok);border:1px solid rgba(22,163,74,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}.empty{text-align:center;padding:40px 20px;color:var(--text3);}.ei{font-size:36px;margin-bottom:9px;opacity:0.4;}.empty h3{font-family:'Rajdhani',sans-serif;font-size:16px;margin-bottom:6px;color:var(--text2);}.pay-badge{background:#e8f5ed;color:#1a7a3c;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;}.pay-total{background:var(--gbg);border:1px solid var(--gb);border-radius:7px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px;}.pmb{padding:6px 4px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--s2);color:var(--text2);transition:all 0.15s;}.pmb.active{background:#1a5fc8;color:#fff;border-color:#1a5fc8;}.ps-paid{background:#dcfce7;color:#166534;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-partial{background:#fef9c3;color:#854d0e;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-pending{background:#fee2e2;color:#991b1b;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-overdue{background:#7f1d1d;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-awaiting-wt{background:#fff0eb;color:#c2410c;border:1px solid #fdd5c0;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.act-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;border:none;font-size:14px;transition:all 0.15s;margin:0 1px;vertical-align:middle;}.act-view{background:#e8f5ed;color:#16a34a;border:1px solid #c8ecd4;}.act-view:hover{background:#dcfce7;transform:scale(1.1);}.act-edit{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.act-edit:hover{background:#dbeafe;transform:scale(1.1);}.act-del{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}.act-del:hover{background:#fecaca;transform:scale(1.1);}.type-in{background:#e8f5ed;color:#15803d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.type-out{background:#f3e8ff;color:#7c3aed;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.company-sel{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;font-size:11px;color:#fff;cursor:pointer;font-family:'Noto Sans',sans-serif;outline:none;}.company-sel option{color:#1a2332;background:#fff;}.user-badge-wrap{position:relative;flex-shrink:0;}.req-badge{position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}.req-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);transition:all 0.2s;}.req-card:hover{border-color:var(--blue);}.req-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px;display:inline-block;}.req-type.edit-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.req-type.delete-req{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}.req-type.review-req{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;}.req-type.firm-req{background:#f3e8ff;color:#6d28d9;border:1px solid #ddd6fe;}.act-photo{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.loader-spinner{width:52px;height:52px;border:4px solid rgba(255,255,255,0.2);border-top:4px solid #fff;border-radius:50%;animation:spin-loader 0.8s linear infinite;}@keyframes spin-loader{to{transform:rotate(360deg);}}.loader-bar{height:100%;width:30%;background:linear-gradient(90deg,rgba(255,255,255,0.3),#fff,rgba(255,255,255,0.3));border-radius:4px;animation:loader-slide 1.5s ease-in-out infinite;}@keyframes loader-slide{0%{width:10%;margin-left:0;}50%{width:50%;margin-left:25%;}100%{width:10%;margin-left:90%;}}@keyframes pulse-install{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.4);}50%{box-shadow:0 0 0 8px rgba(255,255,255,0);}}.act-photo:hover{background:#fde68a;transform:scale(1.1);}.photo-section{background:var(--s2);border:1px dashed var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}.user-card{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}.role-badge.admin{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.role-badge.manager{background:#e8f5ed;color:#1a7a3c;border:1px solid #c8ecd4;}.role-badge.viewer{background:#fef3e2;color:#b45309;border:1px solid #fde8b4;}.perm-lbl{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;background:#f0f4fc;transition:all 0.15s;}.perm-lbl:hover{background:#e8f0fd;border-color:#1a5fc8;}.perm-lbl input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#1a5fc8;flex-shrink:0;}.perm-lbl.chk{background:#e8f0fd;border-color:#1a5fc8;color:#1a3a6b;font-weight:600;}.company-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:24px;}.company-screen h2{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;}.company-screen p{font-size:13px;color:rgba(255,255,255,0.7);text-align:center;margin-top:-16px;}.company-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}.company-card{background:#fff;border-radius:12px;padding:30px 36px;width:280px;text-align:center;cursor:pointer;transition:all 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.2);}.company-card:hover{transform:translateY(-6px);box-shadow:0 16px 50px rgba(0,0,0,0.3);}.company-card .cicon{font-size:42px;margin-bottom:12px;display:block;}.company-card .cname{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#1a3a6b;margin-bottom:4px;}.company-card .cloc{font-size:12px;color:#8a95a8;}.sort-bar{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap;}.sb{padding:3px 9px;background:var(--s2);border:1px solid var(--border);color:var(--text3);border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.2s;}.sb:hover,.sb.on{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}mark{background:rgba(26,95,200,0.1);color:var(--blue2);border-radius:2px;padding:0 2px;font-weight:600;}@media(max-width:900px){.fg{grid-template-columns:1fr 1fr;}.charts{grid-template-columns:1fr;}.fgrid3,.fgrid4{grid-template-columns:1fr 1fr;}.sum-grid{grid-template-columns:1fr 1fr;}}.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sc{overflow:hidden;}.dash-stats-grid .sv{word-break:break-all;}@media(max-width:900px){.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sv{font-size:17px;}}
+:root{--bg:#f0f2f5;--surface:#fff;--s2:#f7f8fa;--s3:#eef0f4;--border:#dde1e9;--border2:#c5cad6;--text:#1a2332;--text2:#4a5568;--text3:#8a95a8;--blue:#1a5fc8;--blue2:#1450a8;--bluebg:#e8f0fd;--green:#1a7a3c;--gbg:#e8f5ed;--gb:#c8ecd4;--yellow:#b45309;--ybg:#fef3e2;--yb:#fde8b4;--orange:#c2410c;--obg:#fff0eb;--ob:#fdd5c0;--red:#b91c1c;--rbg:#fef0f0;--rb:#fcc8c8;--purple:#7c3aed;--pbg:#f3e8ff;--pb:#ddd6fe;--teal:#0f766e;--tbg:#f0fdfa;--tb:#99f6e4;--ok:#16a34a;--danger:#dc2626;--sh:0 2px 10px rgba(0,0,0,0.07);--r:8px;}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Noto Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;}header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);min-height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:0 2px 12px rgba(26,63,140,0.3);flex-wrap:wrap;gap:6px;}.logo{display:flex;align-items:center;gap:10px;}.logo-icon{width:34px;height:34px;background:rgba(255,255,255,0.2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;}.logo-text{font-family:'Rajdhani',sans-serif;font-size:19px;font-weight:700;color:#fff;line-height:1;}.logo-sub{font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;}.hdr-r{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;justify-content:flex-end;}.hdr-stat{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;text-align:center;}.hdr-stat .v{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:#fff;}.hdr-stat .l{font-size:8px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;}.btn-w{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:12px;transition:all 0.2s;}.btn-w:hover{background:rgba(255,255,255,0.28);}.btn-add{background:#fff;color:var(--blue2);border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;font-weight:700;transition:all 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.15);}.btn-add:hover{background:#f0f4ff;transform:translateY(-1px);}main{max-width:1600px;margin:0 auto;padding:16px 18px;}.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:3px;width:100%;margin-bottom:16px;box-shadow:var(--sh);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}.tab{white-space:nowrap;flex-shrink:0;padding:6px 15px;border:none;background:transparent;color:var(--text3);border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;display:flex;align-items:center;gap:4px;}.tab:hover{color:var(--blue);background:var(--bluebg);}.tab.active{background:var(--blue);color:#fff;}.tab.inward-tab.active{background:var(--teal);}.tab.outward-tab.active{background:var(--purple);}.tab.pay-tab.active{background:#15803d;color:#fff;}.btn{padding:7px 13px;border:none;border-radius:6px;cursor:pointer;font-family:'Noto Sans',sans-serif;font-size:12px;font-weight:500;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:var(--blue2);}.btn-green{background:#16a34a;color:#fff;}.btn-green:hover{background:#15803d;}.btn-ghost{background:var(--s2);color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{background:var(--s3);}.btn-red{background:var(--rbg);color:var(--red);border:1px solid var(--rb);}.btn-teal{background:var(--teal);color:#fff;}.btn-purple{background:var(--purple);color:#fff;}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:16px;}.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:var(--sh);}.sc:hover{transform:translateY(-2px);box-shadow:0 4px 18px rgba(0,0,0,0.1);}.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--cc,var(--blue));border-radius:8px 8px 0 0;}.si{font-size:19px;margin-bottom:5px;display:block;}.sl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:600;}.sv{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;line-height:1;}.ss2{font-size:11px;color:var(--text3);margin-top:2px;}.charts{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:16px;}.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh);}.ct{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--blue2);margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--border);}.br{display:flex;align-items:center;gap:7px;margin-bottom:7px;}.bl{width:100px;font-size:11px;color:var(--text2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.bt{flex:1;height:15px;background:var(--s3);border-radius:3px;overflow:hidden;}.bf{height:100%;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px;transition:width 1s ease;}.bv{font-size:10px;color:#fff;font-weight:700;font-family:'JetBrains Mono',monospace;}.fbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 15px;margin-bottom:13px;box-shadow:var(--sh);}.ftitle{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:9px;}.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:7px;align-items:end;}.fi,.fs{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:6px 9px;font-size:12px;font-family:'Noto Sans',sans-serif;outline:none;width:100%;transition:all 0.2s;}.fi:focus,.fs:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.tw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}.th2{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:2px solid var(--border);background:var(--s2);}.ttl{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;}.rcnt{font-size:11px;background:var(--bluebg);border:1px solid #c5d8f8;color:var(--blue);padding:2px 9px;border-radius:20px;font-weight:600;}.tsc{overflow-x:auto;-webkit-overflow-scrolling:touch;}table{width:100%;border-collapse:collapse;font-size:12px;}thead tr{background:#f0f4fc;}th{padding:8px 11px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue2);border-bottom:2px solid #dae4f8;white-space:nowrap;}tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}tbody tr:nth-child(even){background:#fafbfc;}tbody tr:hover{background:var(--bluebg)!important;}td{padding:8px 11px;white-space:nowrap;color:var(--text);}td a{color:var(--blue);cursor:pointer;text-decoration:none;}td a:hover{text-decoration:underline;}.fc2{display:flex;align-items:center;gap:7px;}.fa{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;flex-shrink:0;}.amt{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--green);}.mono{font-family:'JetBrains Mono',monospace;font-size:11px;}.pag{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-top:1px solid var(--border);background:var(--s2);}.pi{font-size:11px;color:var(--text3);}.pbs{display:flex;gap:3px;}.pb2{width:25px;height:25px;border:1px solid var(--border);background:var(--surface);color:var(--text2);border-radius:4px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}.pb2:hover{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}.pb2.on{background:var(--blue);color:#fff;border-color:var(--blue);}.ov{display:none;position:fixed;inset:0;background:rgba(26,35,50,0.55);backdrop-filter:blur(4px);z-index:10100;align-items:center;justify-content:center;}.ov.open{display:flex;}.modal{background:var(--surface);border:1px solid var(--border2);border-radius:10px;width:min(900px,96vw);max-height:93vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:su 0.25s cubic-bezier(0.34,1.56,0.64,1);}@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}.mh{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;border-radius:10px 10px 0 0;z-index:10;}.mt{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px;}.mx{width:27px;height:27px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.8);border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}.mx:hover{background:rgba(255,255,255,0.2);}.mb{padding:18px;background:#fff;}.mf{padding:11px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--s2);border-radius:0 0 10px 10px;position:sticky;bottom:0;}.sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--blue);margin-bottom:9px;padding-bottom:6px;border-bottom:2px solid var(--bluebg);display:flex;align-items:center;gap:6px;}.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.fgrid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px;margin-bottom:14px;}.full{grid-column:1/-1;}.fg2{display:flex;flex-direction:column;gap:4px;}.flbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}.finp{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:8px 10px;font-size:13px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;width:100%;}.finp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.finp::placeholder{color:var(--text3);}.finp:read-only{background:#f0f4fc;color:var(--blue);font-weight:700;}.div{height:1px;background:var(--border);margin:14px 0;}.summary-box{background:linear-gradient(135deg,#1a3a6b,#1a5fc8);border-radius:10px;padding:16px 18px;margin-top:4px;}.sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}.sum-item{text-align:center;}.sum-v{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.sum-l{font-size:9px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}.store-header{background:linear-gradient(135deg,#0f766e,#14b8a6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.own-header{background:linear-gradient(135deg,#6d28d9,#8b5cf6);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}.dash-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:#fff;}.dash-sub{font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;}.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px;}.jcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all 0.2s;box-shadow:var(--sh);}.jcard:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 4px 18px rgba(26,95,200,0.12);}.jh{display:flex;align-items:center;gap:9px;margin-bottom:11px;}.jav{width:40px;height:40px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;flex-shrink:0;}.jn{font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;}.jm{font-size:10px;color:var(--text3);}.jstats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px;}.jst{background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:7px 9px;}.jsv{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;}.jsl{font-size:10px;color:var(--text3);}.tc{position:fixed;bottom:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:6px;}.toast{background:#fff;border:1px solid var(--border2);border-radius:7px;padding:9px 13px;display:flex;align-items:center;gap:8px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,0.1);animation:ti 0.3s cubic-bezier(0.34,1.56,0.64,1);max-width:280px;color:var(--text);}@keyframes ti{from{transform:translateX(50px);opacity:0}to{transform:translateX(0);opacity:1}}.toast.s{border-left:3px solid var(--ok);}.toast.e{border-left:3px solid var(--danger);}.toast.i{border-left:3px solid var(--blue);}.hidden{display:none!important;}.login-wrap{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:none;align-items:center;justify-content:center;z-index:9999;}.login-wrap.show-login{display:flex;}.login-box{background:#fff;border-radius:12px;padding:36px 32px;width:min(380px,92vw);box-shadow:0 20px 60px rgba(0,0,0,0.3);}.login-logo{text-align:center;margin-bottom:24px;}.login-logo .icon{font-size:40px;display:block;margin-bottom:8px;}.login-logo h2{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#1a3a6b;}.login-logo p{font-size:12px;color:#8a95a8;margin-top:3px;}.login-field{margin-bottom:14px;}.login-field label{display:block;font-size:11px;font-weight:600;color:#8a95a8;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}.login-field input{width:100%;background:#f7f8fa;border:1px solid #dde1e9;color:#1a2332;border-radius:7px;padding:10px 13px;font-size:14px;font-family:'Noto Sans',sans-serif;outline:none;transition:all 0.2s;}.login-field input:focus{border-color:#1a5fc8;box-shadow:0 0 0 3px rgba(26,95,200,0.1);background:#fff;}.login-btn{width:100%;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);color:#fff;border:none;border-radius:7px;padding:11px;font-size:15px;font-weight:700;font-family:'Rajdhani',sans-serif;cursor:pointer;transition:all 0.2s;margin-top:4px;}.login-btn:hover{opacity:0.9;transform:translateY(-1px);}.login-err{background:#fef0f0;border:1px solid #fcc8c8;color:#b91c1c;border-radius:6px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none;}.login-err.show{display:block;}.stl{font-family:Rajdhani,sans-serif;font-size:15px;font-weight:700;margin-bottom:13px;display:flex;align-items:center;gap:7px;}.stl span{color:var(--blue);}.bliv{background:rgba(22,163,74,0.1);color:var(--ok);border:1px solid rgba(22,163,74,0.25);padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}.empty{text-align:center;padding:40px 20px;color:var(--text3);}.ei{font-size:36px;margin-bottom:9px;opacity:0.4;}.empty h3{font-family:'Rajdhani',sans-serif;font-size:16px;margin-bottom:6px;color:var(--text2);}.pay-badge{background:#e8f5ed;color:#1a7a3c;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;}.pay-total{background:var(--gbg);border:1px solid var(--gb);border-radius:7px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;flex-wrap:wrap;gap:8px;}.pmb{padding:6px 4px;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--s2);color:var(--text2);transition:all 0.15s;}.pmb.active{background:#1a5fc8;color:#fff;border-color:#1a5fc8;}.ps-paid{background:#dcfce7;color:#166534;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-partial{background:#fef9c3;color:#854d0e;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-pending{background:#fee2e2;color:#991b1b;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-overdue{background:#7f1d1d;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.ps-awaiting-wt{background:#fff0eb;color:#c2410c;border:1px solid #fdd5c0;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;}.act-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;border:none;font-size:14px;transition:all 0.15s;margin:0 1px;vertical-align:middle;}.act-view{background:#e8f5ed;color:#16a34a;border:1px solid #c8ecd4;}.act-view:hover{background:#dcfce7;transform:scale(1.1);}.act-edit{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.act-edit:hover{background:#dbeafe;transform:scale(1.1);}.act-del{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;}.act-del:hover{background:#fecaca;transform:scale(1.1);}.type-in{background:#e8f5ed;color:#15803d;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.type-out{background:#f3e8ff;color:#7c3aed;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}.company-sel{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:6px;padding:4px 10px;font-size:11px;color:#fff;cursor:pointer;font-family:'Noto Sans',sans-serif;outline:none;}.company-sel option{color:#1a2332;background:#fff;}.user-badge-wrap{position:relative;flex-shrink:0;}.req-badge{position:absolute;top:-4px;right:-4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}.req-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;box-shadow:var(--sh);transition:all 0.2s;}.req-card:hover{border-color:var(--blue);}.req-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px;display:inline-block;}.req-type.edit-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.req-type.delete-req{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}.req-type.review-req{background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;}.req-type.firm-req{background:#f3e8ff;color:#6d28d9;border:1px solid #ddd6fe;}.act-photo{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}.loader-spinner{width:52px;height:52px;border:4px solid rgba(255,255,255,0.2);border-top:4px solid #fff;border-radius:50%;animation:spin-loader 0.8s linear infinite;}@keyframes spin-loader{to{transform:rotate(360deg);}}.loader-bar{height:100%;width:30%;background:linear-gradient(90deg,rgba(255,255,255,0.3),#fff,rgba(255,255,255,0.3));border-radius:4px;animation:loader-slide 1.5s ease-in-out infinite;}@keyframes loader-slide{0%{width:10%;margin-left:0;}50%{width:50%;margin-left:25%;}100%{width:10%;margin-left:90%;}}@keyframes pulse-install{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,0.4);}50%{box-shadow:0 0 0 8px rgba(255,255,255,0);}}.act-photo:hover{background:#fde68a;transform:scale(1.1);}.photo-section{background:var(--s2);border:1px dashed var(--border2);border-radius:8px;padding:12px 14px;margin-bottom:14px;}.users-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}.user-card{background:#fff;border:1px solid #dde1e9;border-radius:8px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}.role-badge.admin{background:#e8f0fd;color:#1a5fc8;border:1px solid #c5d8f8;}.role-badge.manager{background:#e8f5ed;color:#1a7a3c;border:1px solid #c8ecd4;}.role-badge.viewer{background:#fef3e2;color:#b45309;border:1px solid #fde8b4;}.perm-lbl{display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;background:#f0f4fc;transition:all 0.15s;}.perm-lbl:hover{background:#e8f0fd;border-color:#1a5fc8;}.perm-lbl input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:#1a5fc8;flex-shrink:0;}.perm-lbl.chk{background:#e8f0fd;border-color:#1a5fc8;color:#1a3a6b;font-weight:600;}.company-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a3a6b,#1a5fc8);display:flex;align-items:center;justify-content:center;z-index:9998;flex-direction:column;gap:24px;}.company-screen h2{font-family:'Rajdhani',sans-serif;font-size:28px;font-weight:700;color:#fff;text-align:center;}.company-screen p{font-size:13px;color:rgba(255,255,255,0.7);text-align:center;margin-top:-16px;}.company-cards{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}.company-card{background:#fff;border-radius:12px;padding:30px 36px;width:280px;text-align:center;cursor:pointer;transition:all 0.3s;box-shadow:0 10px 40px rgba(0,0,0,0.2);}.company-card:hover{transform:translateY(-6px);box-shadow:0 16px 50px rgba(0,0,0,0.3);}.company-card .cicon{font-size:42px;margin-bottom:12px;display:block;}.company-card .cname{font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:#1a3a6b;margin-bottom:4px;}.company-card .cloc{font-size:12px;color:#8a95a8;}.sort-bar{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap;}.sb{padding:3px 9px;background:var(--s2);border:1px solid var(--border);color:var(--text3);border-radius:4px;cursor:pointer;font-size:11px;transition:all 0.2s;}.sb:hover,.sb.on{background:var(--bluebg);color:var(--blue);border-color:var(--blue);}mark{background:rgba(26,95,200,0.1);color:var(--blue2);border-radius:2px;padding:0 2px;font-weight:600;}@media(max-width:900px){.fg{grid-template-columns:1fr 1fr;}.charts{grid-template-columns:1fr;}.fgrid3,.fgrid4{grid-template-columns:1fr 1fr;}.sum-grid{grid-template-columns:1fr 1fr;}}.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sc{overflow:hidden;}.dash-stats-grid .sv{word-break:break-all;}@media(max-width:900px){.dash-stats-grid{grid-template-columns:repeat(4,1fr);}.dash-stats-grid .sv{font-size:17px;}}
 .rep-stats-grid .sv{font-size:16px;word-break:break-all;line-height:1.1;}
 @media(max-width:900px){.rep-stats-grid{grid-template-columns:repeat(3,1fr)!important;}.rep-stats-grid .sv{font-size:15px;}}
 @media(max-width:600px){.rep-stats-grid{grid-template-columns:repeat(2,1fr)!important;}.rep-stats-grid .sv{font-size:18px;}}
@@ -1263,6 +1263,23 @@
 <div class="ledger-print-layer" id="ledger-print-layer"></div>
 <script>
 const COMPANIES={aggarwal:{name:'Aggarwal Agro Foods',icon:'🌾'},krishna:{name:'Krishna Rice Mills',icon:'🍚'}};
+/* Full firm details for Tally-style ledger headers */
+const FIRM_INFO={
+  aggarwal:{
+    name:'AGGARWAL AGRO FOODS',
+    addr:['VILLAGE MUTTO','SAMRALA , LUDHIANA'],
+    fssai:'12120441000560',
+    contact:'+91-94630-62171',
+    email:'ankitgarg.nsit@gmail.com'
+  },
+  krishna:{
+    name:'KRISHNA RICE MILLS',
+    addr:['SAMRALA , LUDHIANA'],
+    fssai:'',
+    contact:'',
+    email:''
+  }
+};
 
 /* ===== PHOTO UPLOAD — Google Apps Script (saves to Ankit's Drive) ===== */
 const PHOTO_UPLOAD_URL='https://script.google.com/macros/s/AKfycbxTFoX6TGvEco-fL-w9dAjTcfX51D6acL2HNQh4KugWlxZLYZaNwSqRVXkrIMQRpULv4A/exec';
@@ -2599,6 +2616,8 @@ function refreshAllViews(){
       if(t==='reqs')renderRequests();
     }
   });
+  /* Auto-refresh open ledger overlay if any (after edit/delete from action buttons) */
+  if(typeof _refreshLedgerIfActive==='function')_refreshLedgerIfActive();
 }
 
 function cleanUndefined(obj){if(!obj||typeof obj!=='object')return obj;if(Array.isArray(obj))return obj.map(cleanUndefined);const c={};Object.keys(obj).forEach(k=>{if(obj[k]!==undefined)c[k]=cleanUndefined(obj[k]);});return c;}
@@ -4365,55 +4384,249 @@ function openEntryWithItem(item){
 }
 
 /* ===== TALLY PRIME STYLE PARTY LEDGER ===== */
-function getPartyLedgerLines(name){
-  /* Tally convention for this app:
-     Inward (goods received from party) → Cr (we owe party — dena hai)
-     Outward (goods sent to party) → Dr (party owes us — lena hai)
-     Payment on Inward entry (we paid party) → Dr (dena kam hua)
-     Payment on Outward entry (party paid us) → Cr (lena kam hua)
-     Balance negative = Cr = we owe; positive = Dr = party owes us */
+/* === LEDGER HELPERS — firm info, party info, auto-refresh, clear payment === */
+function getFirmInfo(c){
+  if(!c)return {name:'',addr:[],fssai:'',contact:'',email:''};
+  /* User-saved override (via "Edit Firm Info" button in ledger) takes priority */
+  try{
+    const saved=JSON.parse(localStorage.getItem('firmInfo-'+c)||'null');
+    if(saved&&saved.name)return saved;
+  }catch(e){}
+  if(typeof FIRM_INFO!=='undefined'&&FIRM_INFO[c])return FIRM_INFO[c];
+  return {name:(COMPANIES[c]?COMPANIES[c].name.toUpperCase():(c||'')),addr:[],fssai:'',contact:'',email:''};
+}
+
+function getPartyInfo(name){
+  if(!name)return {name:'',mobile:'',address:''};
+  /* Primary: party master record */
+  const p=(APP.parties||[]).find(x=>(x.name||'').toLowerCase()===String(name).toLowerCase());
+  if(p)return {name:p.name||name,mobile:p.mobile||'',address:p.address||''};
+  /* Fallback: scan records for any saved mobile/address for this party */
+  const recs=(APP.records||[]).filter(r=>r.party===name||r.consignee===name);
+  let mobile='',address='';
+  for(const r of recs){
+    if(r.party===name&&r.mobile&&!mobile)mobile=r.mobile;
+    if(r.consignee===name){
+      if(r.consigneeMobile&&!mobile)mobile=r.consigneeMobile;
+      if(r.consigneeAddr&&!address)address=r.consigneeAddr;
+    }
+    if(mobile&&address)break;
+  }
+  return {name,mobile,address};
+}
+
+/* Quick edit firm info — uses sequential prompts (lightweight UI) */
+function editFirmInfo(){
+  if(!hasPerm('users')){toast('Admin permission chahiye','e');return;}
+  const c=APP.company;if(!c){toast('Pehle firm select karo','e');return;}
+  const cur=getFirmInfo(c);
+  const name=prompt('Firm ka naam:',cur.name||'');if(name===null)return;
+  const addr=prompt('Address (comma se separate karo multiple lines ke liye):',(cur.addr||[]).join(', ')||'');if(addr===null)return;
+  const fssai=prompt('FSSAI Number (khali bhi rakh sakte ho):',cur.fssai||'');if(fssai===null)return;
+  const contact=prompt('Contact (e.g., +91-94630-12345):',cur.contact||'');if(contact===null)return;
+  const email=prompt('Email:',cur.email||'');if(email===null)return;
+  const info={
+    name:name.trim(),
+    addr:addr.split(',').map(s=>s.trim()).filter(Boolean),
+    fssai:fssai.trim(),contact:contact.trim(),email:email.trim()
+  };
+  localStorage.setItem('firmInfo-'+c,JSON.stringify(info));
+  toast('✓ Firm info saved — '+info.name,'s');
+  _refreshLedgerIfActive();
+}
+
+/* === LEDGER DATE FILTER HELPERS ======================================== */
+function _currentFinancialYear(){
+  /* Indian FY: April 1 → March 31. Auto-detect based on today. */
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=now.getMonth();/* 0=Jan, 3=April */
+  const startYear=m>=3?y:y-1;
+  return{
+    start:startYear+'-04-01',
+    end:(startYear+1)+'-03-31'
+  };
+}
+function applyLedgerDateFilter(){
+  const f=document.getElementById('led-from-date');
+  const t=document.getElementById('led-to-date');
+  window._ledgerFromDate=(f&&f.value)||'';
+  window._ledgerToDate=(t&&t.value)||'';
+  if(window._ledgerFromDate&&window._ledgerToDate&&window._ledgerFromDate>window._ledgerToDate){
+    toast('From date To date se baad ki nahi ho sakti','e');return;
+  }
+  if(window._activeLedgerParty)printPartyLedger(window._activeLedgerParty);
+}
+function resetLedgerDateFilter(){
+  window._ledgerFromDate='';window._ledgerToDate='';
+  if(window._activeLedgerParty)printPartyLedger(window._activeLedgerParty);
+}
+function setLedgerDatePreset(preset){
+  const today=new Date();
+  const isoToday=today.toISOString().slice(0,10);
+  let from='',to=isoToday;
+  if(preset==='fy'){
+    const fy=_currentFinancialYear();
+    from=fy.start;to=fy.end;
+  }else if(preset==='month'){
+    from=isoToday.slice(0,8)+'01';
+  }else if(preset==='30d'){
+    const d=new Date(today.getTime()-30*86400000);
+    from=d.toISOString().slice(0,10);
+  }else if(preset==='7d'){
+    const d=new Date(today.getTime()-7*86400000);
+    from=d.toISOString().slice(0,10);
+  }
+  window._ledgerFromDate=from;window._ledgerToDate=to;
+  if(window._activeLedgerParty)printPartyLedger(window._activeLedgerParty);
+}
+
+/* Auto-refresh the ledger overlay if it's currently open (preserving scroll) */
+function _refreshLedgerIfActive(){
+  const layer=document.getElementById('ledger-print-layer');
+  if(!layer||!layer.classList.contains('is-on'))return;
+  if(!window._activeLedgerParty)return;
+  const scrollY=layer.scrollTop;
+  printPartyLedger(window._activeLedgerParty);
+  setTimeout(()=>{const l2=document.getElementById('ledger-print-layer');if(l2)l2.scrollTop=scrollY;},50);
+}
+
+/* Clear payment fields on a record — used by 🗑 button on payment rows */
+function clearEntryPayment(recId){
+  if(!hasPerm('payment')){toast('Payment permission chahiye','e');return;}
+  const r=APP.records.find(x=>x.id===recId);if(!r){toast('Entry nahi mili','e');return;}
+  if(!(r.paid>0)){toast('Iss entry par koi payment nahi hai','i');return;}
+  if(!confirm('Payment clear kar do?\n\nEntry: '+(r.party||'')+' | '+(r.item||'')+'\nPaid: ₹'+r.paid+'\n\nPaid amount 0 ho jayega. Entry safe rahegi (sirf payment data clear).'))return;
+  r.paid=0;r.payDate='';r.payMode='';r.payRef='';r.payReceived='';r.payNote='';
+  r.dedCD=0;r.dedBrok=0;r.dedTDS=0;r.dedOther=0;
+  r.paymentStatus='pending';
+  r.lastUpdated=new Date().toISOString();
+  localStorage.setItem('data-'+APP.company,JSON.stringify(APP.records));
+  syncToFirestore();
+  refreshAllViews();
+  toast('✓ Payment clear ho gaya','s');
+}
+
+function getPartyLedgerLines(name,fromDate,toDate){
+  /* === TALLY PRIME STYLE LEDGER ROW BUILDER ============================
+     Each row's `crDr` label refers to the CONTRA account (Tally convention):
+       - Outward sale  → Cr (Sales A/c credited)    → Debit column (party debited)
+       - Inward purchase → Dr (Purchase A/c debited) → Credit column (party credited)
+       - Receipt from customer → Dr (Bank A/c debited) → Credit column
+       - Payment to supplier → Cr (Bank A/c credited) → Debit column
+     Balance: positive = Dr (party owes us) · negative = Cr (we owe party)
+     fromDate / toDate (YYYY-MM-DD) — optional period filter. Entries outside
+     the range fold into an "Opening Balance" row at the top. */
   const lines=[];
+  let recCount=0,payCount=0;
   getVisibleRecords().filter(r=>r.party===name).forEach(r=>{
     const amt=getEntryAmt(r);
-    const gpLabel='GP '+(r.gp||'—');
-    const bags=r.bags||0;
     const item=r.item||'';
+    const gp=r.gp||'—';
+    const wt=r.weight||0;
+    const pwt=r.partyWt||0;
+    const rate=r.rate||0;
     const payDate=r.payDate||'';
     if(r.type==='inward'){
-      /* Goods received from party → Cr (we owe them) */
+      /* Goods received from party → party Credited (we owe them) · Purchase A/c debited */
       lines.push({
         date:r.date||'',sort:1,sub:0,
-        particulars:'Inward — '+gpLabel+' | '+item+' | '+bags+' Bags × ₹'+(r.rate||0)+' (Wt: '+(r.partyWt||0)+' kg)',
-        dr:0,cr:amt,vch:'Inward',recId:r.id
+        crDr:'Dr',
+        title:item?(item+' Purchase'):'Purchase',
+        vchType:'Purchase',
+        vchNo:gp,
+        narration:r.notes||'',
+        weight:wt,partyWt:pwt,rate:rate,bags:r.bags||0,
+        dr:0,cr:amt,
+        vch:'Inward',recId:r.id,
+        /* Legacy field for fallback rendering */
+        particulars:(item||'Purchase')+' — GP '+gp
       });
-      /* Payment on inward → Dr (we paid them, reducing what we owe) */
       if((r.paid||0)>0){
+        payCount++;
         lines.push({
           date:payDate||r.date||'',sort:2,sub:1,
-          particulars:'  Payment — '+gpLabel+' | '+(r.payMode||'Cash')+(payDate?' | Date: '+payDate:''),
-          dr:r.paid,cr:0,vch:'Payment',recId:r.id
+          crDr:'Cr',
+          title:(r.payMode||'Cash')+' Payment',
+          vchType:'Payment',
+          vchNo:'P-'+payCount,
+          narration:r.payNote||r.payRef||'',
+          weight:0,partyWt:0,rate:0,bags:0,
+          dr:r.paid,cr:0,
+          vch:'Payment',recId:r.id,
+          particulars:(r.payMode||'Cash')+' Payment — GP '+gp
         });
       }
     }else{
-      /* Goods sent to party → Dr (party owes us) */
+      /* Goods sent to party → party Debited (they owe us) · Sales A/c credited */
       lines.push({
         date:r.date||'',sort:1,sub:0,
-        particulars:'Outward — '+gpLabel+' | '+item+' | '+bags+' Bags × ₹'+(r.rate||0)+' (Wt: '+(r.partyWt||0)+' kg)',
-        dr:amt,cr:0,vch:'Outward',recId:r.id
+        crDr:'Cr',
+        title:item?(item+' Sale'):'Sale',
+        vchType:'Bill of Supply',
+        vchNo:gp,
+        narration:r.notes||'',
+        weight:wt,partyWt:pwt,rate:rate,bags:r.bags||0,
+        dr:amt,cr:0,
+        vch:'Outward',recId:r.id,
+        particulars:(item||'Sale')+' — GP '+gp
       });
-      /* Payment on outward → Cr (party paid us, reducing what they owe) */
       if((r.paid||0)>0){
+        recCount++;
         lines.push({
           date:payDate||r.date||'',sort:2,sub:1,
-          particulars:'  Payment received — '+gpLabel+' | '+(r.payMode||'Cash')+(payDate?' | Date: '+payDate:''),
-          dr:0,cr:r.paid,vch:'Receipt',recId:r.id
+          crDr:'Dr',
+          title:(r.payMode||'Cash')+' Receipt',
+          vchType:'Receipt',
+          vchNo:'R-'+recCount,
+          narration:r.payNote||r.payRef||'',
+          weight:0,partyWt:0,rate:0,bags:0,
+          dr:0,cr:r.paid,
+          vch:'Receipt',recId:r.id,
+          particulars:(r.payMode||'Cash')+' Receipt — GP '+gp
         });
       }
     }
   });
   lines.sort((a,b)=>{const c=String(a.date).localeCompare(String(b.date));if(c)return c;if(a.sort!==b.sort)return a.sort-b.sort;return(a.sub||0)-(b.sub||0);});
+  /* Compute running balance for ALL lines first (so opening balance is correct) */
   let bal=0;
-  return lines.map(l=>{bal+=l.dr-l.cr;return{...l,balance:bal};});
+  const withBal=lines.map(l=>{bal+=l.dr-l.cr;return{...l,balance:bal};});
+  /* Apply date filter (if any) — entries before fromDate fold into opening balance */
+  if(!fromDate&&!toDate)return withBal;
+  let openingBal=0;
+  const filtered=[];
+  withBal.forEach(l=>{
+    const d=l.date||'';
+    const beforeStart=fromDate&&d<fromDate;
+    const afterEnd=toDate&&d>toDate;
+    if(beforeStart){openingBal=l.balance;return;}
+    if(afterEnd)return;
+    filtered.push(l);
+  });
+  /* Prepend opening balance row if there were prior transactions */
+  if(openingBal!==0){
+    filtered.unshift({
+      date:fromDate||'',sort:0,sub:0,
+      crDr:openingBal>=0?'Dr':'Cr',
+      title:'Opening Balance',
+      vchType:'',vchNo:'',
+      narration:'Brought forward — previous period balance',
+      weight:0,partyWt:0,rate:0,bags:0,
+      dr:openingBal>0?openingBal:0,cr:openingBal<0?Math.abs(openingBal):0,
+      vch:'Opening',recId:null,
+      particulars:'Opening Balance',
+      balance:openingBal
+    });
+    /* Recompute running balance from opening balance for filtered rows */
+    let b=openingBal;
+    return filtered.map((l,i)=>{
+      if(i===0)return l;/* opening row already has its balance */
+      b+=l.dr-l.cr;
+      return{...l,balance:b};
+    });
+  }
+  return filtered;
 }
 
 /* Helper: get party net balance quickly */
@@ -4426,91 +4639,251 @@ function closeLedgerPrintLayer(){
   if(typeof window.__ledgerAfterPrint==='function'){window.removeEventListener('afterprint',window.__ledgerAfterPrint);window.__ledgerAfterPrint=null;}
   const layer=document.getElementById('ledger-print-layer');
   if(!layer)return;layer.classList.remove('is-on');layer.innerHTML='';document.body.style.overflow='';
+  /* Clear active ledger + date filter so next open starts fresh */
+  window._activeLedgerParty=null;
+  window._ledgerFromDate='';window._ledgerToDate='';
 }
 
 function printPartyLedger(name){
-  const lines=getPartyLedgerLines(name);
+  /* === TALLY PRIME STYLE PARTY LEDGER ===================================
+     Clean white background, centered firm header (with full address), party
+     name + period below, then 11-column table:
+       Date · Cr/Dr · Particulars · Vch Type · Vch No · Own Wt · Party Wt ·
+       Rate · Debit · Credit · (Actions — hidden on print)
+     Bottom: TOTAL row (Wt totals + Dr/Cr grand totals) + Closing Balance row.
+     Mirrors Tally Prime layout exactly, with extra weight/rate columns. */
+  /* Track active ledger party — used by _refreshLedgerIfActive after edits */
+  window._activeLedgerParty=name;
+  /* Pull active date filter (set via Apply / Preset buttons) */
+  const filterFrom=window._ledgerFromDate||'';
+  const filterTo=window._ledgerToDate||'';
+  const lines=getPartyLedgerLines(name,filterFrom,filterTo);
   const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const today=new Date().toISOString().slice(0,10);
-  const companyNames={'aggarwal':'Aggarwal Agro Foods','krishna':'Krishna Rice Mills'};
-  const companyName=companyNames[APP.company]||APP.company||'';
+  const c=APP.company;
+  /* Use helpers — read user's saved firm info + party master address */
+  const firm=getFirmInfo(c);
+  const partyInfo=getPartyInfo(name);
 
-  let html='<div class="ledger-print-noprint" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">'
-    +'<button type="button" style="background:#1a3a6b;color:#fff;border:none;padding:9px 20px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600" onclick="window.print()">🖨 Print / Save as PDF</button>'
-    +'<button type="button" style="background:#0f766e;color:#fff;border:none;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600" onclick="exportPartyLedgerCSV(\''+esc(name.replace(/'/g,"\\'"))+'\')">📥 Download CSV</button>'
-    +'<button type="button" style="background:#7c3aed;color:#fff;border:none;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600" onclick="showPartyLedgerInReports(\''+esc(name.replace(/'/g,"\\'"))+'\')">📈 Reports Tab</button>'
-    +'<button type="button" style="background:#e5e7eb;color:#333;border:1px solid #cbd5e1;padding:9px 16px;border-radius:6px;cursor:pointer;font-size:13px" onclick="closeLedgerPrintLayer()">✕ Band karo</button>'
-    +'<span style="font-size:11px;color:#64748b;margin-left:8px">Ctrl+P bhi use kar sakte ho</span></div>';
-
-  html+='<div style="border-bottom:3px solid #1a3a6b;padding-bottom:10px;margin-bottom:14px">'
-    +'<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px">'
-    +'<div><div style="font-size:20px;font-weight:700;color:#1a3a6b;font-family:Rajdhani,sans-serif">'+esc(name)+'</div>'
-    +'<div style="font-size:11px;color:#64748b">Party Ledger — Tally Prime Style</div></div>'
-    +'<div style="text-align:right"><div style="font-size:10px;color:#64748b">Print date: '+today+'</div>'
-    +'<div style="font-size:10px;color:#64748b">'+esc(companyName)+'</div></div></div></div>';
+  /* Date range — prefer filter dates, fallback to data range */
+  const dateList=lines.map(l=>l.date).filter(d=>d).sort();
+  const fromDate=filterFrom||dateList[0]||'';
+  const toDate=filterTo||dateList[dateList.length-1]||today;
 
   const drTotal=lines.reduce((s,l)=>s+l.dr,0);
   const crTotal=lines.reduce((s,l)=>s+l.cr,0);
+  const totalOwnWt=lines.reduce((s,l)=>s+(l.weight||0),0);
+  const totalPartyWt=lines.reduce((s,l)=>s+(l.partyWt||0),0);
   const closingBal=lines.length?lines[lines.length-1].balance:0;
 
-  html+='<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px">'
-    +'<thead><tr style="background:#1a3a6b">'
-    +'<th style="padding:7px 8px;text-align:left;color:#fff;font-size:10px;font-weight:600">Date</th>'
-    +'<th style="padding:7px 8px;text-align:left;color:#fff;font-size:10px;font-weight:600">Particulars</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#fff;font-size:10px;font-weight:600">Vch Type</th>'
-    +'<th style="padding:7px 8px;text-align:right;color:#fff;font-size:10px;font-weight:600">Debit (Dr)</th>'
-    +'<th style="padding:7px 8px;text-align:right;color:#fff;font-size:10px;font-weight:600">Credit (Cr)</th>'
-    +'<th style="padding:7px 8px;text-align:right;color:#fff;font-size:10px;font-weight:600">Balance</th>'
-    +'<th style="padding:7px 8px;text-align:center;color:#fff;font-size:10px;font-weight:600">Actions</th>'
+  /* Tally-style date format: "6-Apr-26" */
+  const fmtTallyDate=d=>{
+    if(!d||typeof d!=='string')return '';
+    const parts=d.split('-');
+    if(parts.length!==3)return d;
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const m=months[parseInt(parts[1],10)-1]||parts[1];
+    return parseInt(parts[2],10)+'-'+m+'-'+parts[0].slice(2);
+  };
+  /* Tally-style number format — no ₹, Indian comma grouping, 2 decimals */
+  const fmtNum=v=>{const n=parseFloat(v);return isNaN(n)||n===0?'':n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  const fmtWt=v=>{const n=parseFloat(v);return isNaN(n)||n===0?'':n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+
+  /* === RESPONSIVE STYLE BLOCK — laptop / tablet / mobile === */
+  html='<style>'
+    +'#ledger-print-layer .led-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}'
+    +'#ledger-print-layer .led-btn{border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;padding:9px 16px;color:#fff;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s;white-space:nowrap}'
+    +'#ledger-print-layer .led-btn:hover{transform:translateY(-1px);opacity:0.95}'
+    +'#ledger-print-layer .led-btn-print{background:#1a3a6b}'
+    +'#ledger-print-layer .led-btn-csv{background:#0f766e}'
+    +'#ledger-print-layer .led-btn-share{background:#16a34a}'
+    +'#ledger-print-layer .led-btn-firm{background:#7c3aed}'
+    +'#ledger-print-layer .led-btn-close{background:#e5e7eb;color:#333;border:1px solid #cbd5e1}'
+    +'#ledger-print-layer .led-paper{font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;padding:14px 16px;max-width:1280px;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,0.04);border:1px solid #e5e7eb;border-radius:8px}'
+    +'#ledger-print-layer .led-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -2px}'
+    +'#ledger-print-layer table.led{width:100%;border-collapse:collapse;font-size:11.5px;min-width:900px}'
+    +'#ledger-print-layer table.led th,#ledger-print-layer table.led td{padding:7px 5px;vertical-align:top}'
+    +'#ledger-print-layer table.led th{border-top:1.5px solid #000;border-bottom:1.5px solid #000;font-weight:700;font-size:11px;background:#fafbfc}'
+    +'#ledger-print-layer table.led td{border-bottom:1px solid #eef0f2}'
+    +'#ledger-print-layer table.led .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}'
+    +'#ledger-print-layer table.led .l{text-align:left}'
+    +'#ledger-print-layer table.led .c{text-align:center}'
+    +'#ledger-print-layer table.led .narr{font-size:10.5px;color:#444;font-style:italic;white-space:normal;line-height:1.35;max-width:200px}'
+    +'#ledger-print-layer .led-firm-name{font-size:18px;font-weight:700;letter-spacing:0.5px}'
+    +'#ledger-print-layer .led-firm-line{font-size:11.5px}'
+    +'#ledger-print-layer .led-party-name{font-size:15px;font-weight:700}'
+    +'#ledger-print-layer .led-party-line{font-size:11.5px}'
+    +'#ledger-print-layer .led-period{text-align:center;font-size:11.5px;margin:8px 0 2px}'
+    +'@media (max-width:768px){'
+    +'#ledger-print-layer{padding:10px 8px}'
+    +'#ledger-print-layer .led-paper{padding:12px 10px}'
+    +'#ledger-print-layer .led-btn{padding:8px 12px;font-size:12px;flex:1;min-width:auto;justify-content:center}'
+    +'#ledger-print-layer .led-btn-close{flex:0 0 auto}'
+    +'#ledger-print-layer .led-firm-name{font-size:15px}'
+    +'#ledger-print-layer .led-firm-line{font-size:10.5px}'
+    +'#ledger-print-layer .led-party-name{font-size:13px}'
+    +'#ledger-print-layer table.led{font-size:10.5px;min-width:760px}'
+    +'#ledger-print-layer table.led th,#ledger-print-layer table.led td{padding:5px 3px}'
+    +'#ledger-print-layer table.led .narr{max-width:140px;font-size:10px}'
+    +'}'
+    +'@media (max-width:480px){'
+    +'#ledger-print-layer .led-toolbar{gap:6px}'
+    +'#ledger-print-layer .led-btn{padding:7px 8px;font-size:11.5px}'
+    +'#ledger-print-layer table.led{min-width:680px}'
+    +'}'
+    +'</style>';
+
+  /* === TOOLBAR (hidden on print) === */
+  html+='<div class="led-toolbar ledger-print-noprint">'
+    +'<button type="button" class="led-btn led-btn-print" onclick="window.print()">🖨 Print/PDF</button>'
+    +'<button type="button" class="led-btn led-btn-share" onclick="sharePartyLedger(\''+esc(name.replace(/'/g,"\\'"))+'\')" title="WhatsApp / Email / etc.">📤 Share</button>'
+    +'<button type="button" class="led-btn led-btn-csv" onclick="exportPartyLedgerCSV(\''+esc(name.replace(/'/g,"\\'"))+'\')">📥 CSV</button>'
+    +'<button type="button" class="led-btn led-btn-firm" onclick="editFirmInfo()" title="Apni firm ka address/FSSAI/contact yahan edit karo">✏️ Firm</button>'
+    +'<button type="button" class="led-btn led-btn-close" onclick="closeLedgerPrintLayer()">✕ Band</button>'
+    +'</div>';
+
+  /* === DATE FILTER ROW (hidden on print) === */
+  const fy=_currentFinancialYear();
+  const fromVal=filterFrom||'';
+  const toVal=filterTo||'';
+  html+='<div class="led-date-filter ledger-print-noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#f7f8fa;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:12px">'
+    +'<span style="font-size:12px;font-weight:600;color:#1a3a6b">📅 Period:</span>'
+    +'<input type="date" id="led-from-date" value="'+esc(fromVal)+'" style="padding:6px 8px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px" placeholder="From">'
+    +'<span style="font-size:12px;color:#666">to</span>'
+    +'<input type="date" id="led-to-date" value="'+esc(toVal)+'" style="padding:6px 8px;border:1px solid #cbd5e1;border-radius:4px;font-size:12px" placeholder="To">'
+    +'<button class="led-btn led-btn-print" style="padding:6px 14px;font-size:12px" onclick="applyLedgerDateFilter()">✓ Apply</button>'
+    +'<button class="led-btn led-btn-close" style="padding:6px 12px;font-size:12px" onclick="resetLedgerDateFilter()">All Dates</button>'
+    +'<span style="border-left:1px solid #cbd5e1;height:20px;margin:0 4px"></span>'
+    +'<span style="font-size:11px;color:#666">Quick:</span>'
+    +'<button class="led-btn" style="background:#0ea5e9;color:#fff;padding:5px 10px;font-size:11px" onclick="setLedgerDatePreset(\'fy\')" title="'+fy.start+' to '+fy.end+'">This FY</button>'
+    +'<button class="led-btn" style="background:#0ea5e9;color:#fff;padding:5px 10px;font-size:11px" onclick="setLedgerDatePreset(\'month\')">This Month</button>'
+    +'<button class="led-btn" style="background:#0ea5e9;color:#fff;padding:5px 10px;font-size:11px" onclick="setLedgerDatePreset(\'30d\')">Last 30 Days</button>'
+    +'<button class="led-btn" style="background:#0ea5e9;color:#fff;padding:5px 10px;font-size:11px" onclick="setLedgerDatePreset(\'7d\')">Last 7 Days</button>'
+    +(filterFrom||filterTo?'<span style="font-size:11px;color:#16a34a;font-weight:600;margin-left:4px">✓ Filter active</span>':'')
+    +'</div>';
+
+  /* === LEDGER PAPER (Tally Prime feel) === */
+  html+='<div class="led-paper">';
+
+  /* Firm header — centered, multi-line */
+  html+='<div style="text-align:center;margin-bottom:6px">'
+    +'<div class="led-firm-name">'+esc(firm.name)+'</div>';
+  (firm.addr||[]).forEach(line=>{html+='<div class="led-firm-line">'+esc(line)+'</div>';});
+  if(firm.fssai)html+='<div class="led-firm-line">FSSAI Number : '+esc(firm.fssai)+'</div>';
+  if(firm.contact)html+='<div class="led-firm-line">Contact : '+esc(firm.contact)+'</div>';
+  if(firm.email)html+='<div class="led-firm-line">E-Mail : '+esc(firm.email)+'</div>';
+  html+='</div>';
+
+  /* Party heading — name + Ledger Account + mobile + address (from party master) */
+  html+='<div style="text-align:center;margin:14px 0 2px">'
+    +'<div class="led-party-name">'+esc(name)+'</div>'
+    +'<div class="led-party-line" style="margin-top:1px">Ledger Account</div>';
+  if(partyInfo.address)html+='<div class="led-party-line" style="margin-top:2px">'+esc(partyInfo.address)+'</div>';
+  if(partyInfo.mobile)html+='<div class="led-party-line" style="margin-top:1px">📱 '+esc(partyInfo.mobile)+'</div>';
+  html+='</div>';
+
+  /* Period + page-no */
+  if(fromDate&&toDate){
+    html+='<div class="led-period">'+fmtTallyDate(fromDate)+' to '+fmtTallyDate(toDate)+'</div>';
+  }
+  html+='<div style="text-align:right;font-size:10px;color:#666;margin-bottom:4px">Page 1</div>';
+
+  /* === MAIN TABLE === */
+  html+='<div class="led-table-wrap"><table class="led">'
+    +'<thead><tr>'
+    +'<th class="l">Date</th>'
+    +'<th class="c" style="width:30px"></th>'
+    +'<th class="l">Particulars</th>'
+    +'<th class="l">Narration</th>'
+    +'<th class="num">Vch No.</th>'
+    +'<th class="num">Own Wt</th>'
+    +'<th class="num">Party Wt</th>'
+    +'<th class="num">Rate</th>'
+    +'<th class="num">Debit</th>'
+    +'<th class="num">Credit</th>'
+    +'<th class="c ledger-print-noprint">Actions</th>'
     +'</tr></thead><tbody>';
 
   if(lines.length){
-    lines.forEach((l,i)=>{
-      const isSub=l.sub&&l.sub>0;
+    let lastDate='';
+    lines.forEach(l=>{
       const hasRecId=l.recId!=null;
+      const showDate=l.date&&l.date!==lastDate;
+      if(showDate)lastDate=l.date;
       const rec=hasRecId?APP.records.find(x=>x.id===l.recId):null;
       const dirForEdit=rec?(rec.type==='inward'?'pay':'receive'):'pay';
-      let actionCell='—';
+      const crColor=l.crDr==='Cr'?'#0a7d28':l.crDr==='Dr'?'#a82626':'#777';
+
+      let actionCell='';
       if(hasRecId){
-        const btnStyle='background:#1a3a6b;color:#fff;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px;margin:0 1px';
-        const editBtnStyle='background:#1a5fc8;color:#fff;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px;margin:0 1px';
-        const payBtnStyle='background:#b45309;color:#fff;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px;margin:0 1px';
+        /* Action buttons NO LONGER call closeLedgerPrintLayer() — modal opens
+           on top (z-index 10100 > ledger 10050). After save/delete, the
+           refreshAllViews → _refreshLedgerIfActive() chain re-renders this
+           ledger automatically with updated data, scroll position preserved. */
+        const bs='background:#1a3a6b;color:#fff;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px;margin:0 1px';
+        const es='background:#1a5fc8;color:#fff;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px;margin:0 1px';
+        const ds='background:#b91c1c;color:#fff;border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px;margin:0 1px';
         if(l.vch==='Inward'||l.vch==='Outward'){
-          actionCell='<button class="ledger-print-noprint" style="'+btnStyle+'" onclick="event.stopPropagation();closeLedgerPrintLayer();viewEntry(\''+l.recId+'\')">👁</button>'
-            +'<button class="ledger-print-noprint" style="'+editBtnStyle+'" onclick="event.stopPropagation();closeLedgerPrintLayer();editEntry(\''+l.recId+'\')">✏️</button>'
-            +'<button class="ledger-print-noprint" style="'+payBtnStyle+'" onclick="event.stopPropagation();closeLedgerPrintLayer();viewPaymentDetails(\''+l.recId+'\')">💳</button>';
+          actionCell='<button class="ledger-print-noprint" title="View entry" style="'+bs+'" onclick="event.stopPropagation();viewEntry(\''+l.recId+'\')">👁</button>'
+            +'<button class="ledger-print-noprint" title="Edit entry" style="'+es+'" onclick="event.stopPropagation();editEntry(\''+l.recId+'\')">✏️</button>'
+            +'<button class="ledger-print-noprint" title="Delete entry — saari jagah se hat jayegi" style="'+ds+'" onclick="event.stopPropagation();deleteEntry(\''+l.recId+'\')">🗑</button>';
         }else if(l.vch==='Payment'||l.vch==='Receipt'){
-          actionCell='<button class="ledger-print-noprint" style="'+btnStyle+'" onclick="event.stopPropagation();closeLedgerPrintLayer();viewPaymentDetails(\''+l.recId+'\')">👁</button>'
-            +'<button class="ledger-print-noprint" style="'+editBtnStyle+'" onclick="event.stopPropagation();closeLedgerPrintLayer();openPaymentModal(\''+l.recId+'\',\''+dirForEdit+'\',true)">✏️</button>';
+          actionCell='<button class="ledger-print-noprint" title="View payment" style="'+bs+'" onclick="event.stopPropagation();viewPaymentDetails(\''+l.recId+'\')">👁</button>'
+            +'<button class="ledger-print-noprint" title="Edit payment" style="'+es+'" onclick="event.stopPropagation();openPaymentModal(\''+l.recId+'\',\''+dirForEdit+'\',true)">✏️</button>'
+            +'<button class="ledger-print-noprint" title="Payment delete — paid amount 0 ho jayega, entry safe" style="'+ds+'" onclick="event.stopPropagation();clearEntryPayment(\''+l.recId+'\')">🗑</button>';
         }
       }
-      const rowClick=hasRecId?(l.vch==='Inward'||l.vch==='Outward'?`onclick="closeLedgerPrintLayer();viewEntry('${l.recId}')"`:l.vch==='Payment'||l.vch==='Receipt'?`onclick="closeLedgerPrintLayer();viewPaymentDetails('${l.recId}')"`:''):'';
+      /* Row click also opens view modal (without closing ledger) */
+      const rowClick=hasRecId?(l.vch==='Inward'||l.vch==='Outward'?`onclick="viewEntry('${l.recId}')"`:l.vch==='Payment'||l.vch==='Receipt'?`onclick="viewPaymentDetails('${l.recId}')"`:''):'';
       const cursorStyle=hasRecId?'cursor:pointer;':'';
-      html+='<tr style="background:'+(isSub?'#f9fafb':i%2?'#f8fafc':'#fff')+';border-bottom:1px solid #e5e7eb;'+cursorStyle+'" '+rowClick+' title="'+(hasRecId?'Row click = Open · Use action buttons for Edit':'no-action')+'">'
-        +'<td style="padding:6px 8px;font-family:JetBrains Mono,monospace;white-space:nowrap;font-size:10px">'+(isSub?'':esc(l.date))+'</td>'
-        +'<td style="padding:6px 8px;max-width:340px;white-space:normal;line-height:1.35;'+(isSub?'color:#64748b;font-size:10px;padding-left:20px':'')+'">'+esc(l.particulars)+'</td>'
-        +'<td style="padding:6px 8px;text-align:center;font-size:10px;'+(isSub?'color:#94a3b8':'')+'">'+esc(l.vch)+'</td>'
-        +'<td style="padding:6px 8px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;'+(l.dr?'color:#dc2626':'')+'">'+(l.dr?fmtINR(l.dr):'\u2014')+'</td>'
-        +'<td style="padding:6px 8px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:600;color:#15803d">'+(l.cr?fmtINR(l.cr):'\u2014')+'</td>'
-        +'<td style="padding:6px 8px;text-align:right;font-family:Rajdhani,sans-serif;font-weight:700;color:'+(l.balance>=0?'#166534':'#dc2626')+'">'+fmtINR(Math.abs(l.balance))+' '+(l.balance<0?'Cr':l.balance>0?'Dr':'')+'</td>'
-        +'<td style="padding:6px 8px;text-align:center;white-space:nowrap">'+actionCell+'</td>'
+      const dim='color:#bbb';
+
+      html+='<tr style="'+cursorStyle+'" '+rowClick+'>'
+        +'<td style="color:#444;white-space:nowrap">'+(showDate?fmtTallyDate(l.date):'')+'</td>'
+        +'<td class="c" style="font-style:italic;color:'+crColor+'">'+esc(l.crDr||'')+'</td>'
+        +'<td style="font-weight:600">'+esc(l.title||'')+'</td>'
+        +'<td class="narr">'+esc(l.narration||'')+'</td>'
+        +'<td class="num" style="color:#444">'+esc(l.vchNo||'')+'</td>'
+        +'<td class="num">'+(l.weight?fmtWt(l.weight):'<span style="'+dim+'">—</span>')+'</td>'
+        +'<td class="num">'+(l.partyWt?fmtWt(l.partyWt):'<span style="'+dim+'">—</span>')+'</td>'
+        +'<td class="num">'+(l.rate?fmtNum(l.rate):'<span style="'+dim+'">—</span>')+'</td>'
+        +'<td class="num" style="font-weight:'+(l.dr?'600':'400')+'">'+(l.dr?fmtNum(l.dr):'<span style="'+dim+'">—</span>')+'</td>'
+        +'<td class="num" style="font-weight:'+(l.cr?'600':'400')+'">'+(l.cr?fmtNum(l.cr):'<span style="'+dim+'">—</span>')+'</td>'
+        +'<td class="c ledger-print-noprint" style="white-space:nowrap">'+actionCell+'</td>'
         +'</tr>';
     });
   }else{
-    html+='<tr><td colspan="7" style="padding:20px;text-align:center;color:#8a95a8">Koi ledger entry nahi mili</td></tr>';
+    html+='<tr><td colspan="11" style="padding:30px;text-align:center;color:#8a95a8">Koi ledger entry nahi mili — pehle entry banao</td></tr>';
   }
 
-  html+='</tbody><tfoot><tr style="background:#f0f4fc;border-top:2px solid #1a3a6b;font-weight:700">'
-    +'<td colspan="3" style="padding:8px;font-size:11px;font-weight:700">Saransh (Summary)</td>'
-    +'<td style="padding:8px;text-align:right;font-family:Rajdhani,sans-serif;font-size:13px">'+fmtINR(drTotal)+'</td>'
-    +'<td style="padding:8px;text-align:right;font-family:Rajdhani,sans-serif;font-size:13px;color:#dc2626">'+fmtINR(crTotal)+'</td>'
-    +'<td style="padding:8px;text-align:right;font-family:Rajdhani,sans-serif;font-size:14px;color:'+(closingBal>=0?'#166534':'#dc2626')+'">'+fmtINR(Math.abs(closingBal))+' '+(closingBal<0?'Cr':closingBal>0?'Dr':'')+'</td>'
-    +'<td style="padding:8px;"></td>'
-    +'</tr></tfoot></table>';
+  /* TOTAL row — colspan adjusts for new column layout (11 cols incl actions) */
+  const tfS='padding:9px 5px;border-top:1.5px solid #000;border-bottom:1.5px solid #000;font-weight:700;font-size:12px;background:#fafbfc';
+  html+='</tbody><tfoot>'
+    +'<tr>'
+    +'<td colspan="5" style="'+tfS+';text-align:right">TOTAL</td>'
+    +'<td class="num" style="'+tfS+'">'+(totalOwnWt?fmtWt(totalOwnWt):'—')+'</td>'
+    +'<td class="num" style="'+tfS+'">'+(totalPartyWt?fmtWt(totalPartyWt):'—')+'</td>'
+    +'<td class="num" style="'+tfS+';color:#bbb">—</td>'
+    +'<td class="num" style="'+tfS+'">'+fmtNum(drTotal)+'</td>'
+    +'<td class="num" style="'+tfS+'">'+fmtNum(crTotal)+'</td>'
+    +'<td class="ledger-print-noprint" style="'+tfS+'"></td>'
+    +'</tr>';
+  /* Closing balance */
+  if(lines.length&&closingBal!==0){
+    const balColor=closingBal>=0?'#0a7d28':'#a82626';
+    html+='<tr>'
+      +'<td colspan="8" style="padding:9px 5px;text-align:right;font-weight:700;color:'+balColor+';font-size:12px">Closing Balance</td>'
+      +'<td colspan="2" class="num" style="padding:9px 5px;font-weight:700;color:'+balColor+';font-size:13px;border-bottom:1.5px solid #000">'+fmtNum(Math.abs(closingBal))+' '+(closingBal<0?'Cr':'Dr')+'</td>'
+      +'<td class="ledger-print-noprint"></td>'
+      +'</tr>';
+  }
+  html+='</tfoot></table></div>';
 
-  html+='<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e5e7eb;padding-top:8px;font-size:10px;color:#94a3b8">'
-    +'<span>Dr Total: '+fmtINR(drTotal)+' | Cr Total: '+fmtINR(crTotal)+' | Baaki: '+fmtINR(Math.abs(closingBal))+' '+(closingBal<0?'Cr':closingBal>0?'Dr':'')+'</span>'
-    +'<span>Generated by Inward Outward Pro</span></div>';
+  /* Footer */
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:6px;font-size:10px;color:#888">'
+    +'<span>Generated: '+today+'</span>'
+    +'<span>Inward Outward Tracker Pro</span></div>';
+  html+='</div>';
 
   const layer=document.getElementById('ledger-print-layer');
   if(!layer){toast('Print layer nahi mila','e');return;}
@@ -4518,25 +4891,136 @@ function printPartyLedger(name){
   if(typeof window.__ledgerAfterPrint==='function')window.removeEventListener('afterprint',window.__ledgerAfterPrint);
   window.__ledgerAfterPrint=function(){closeLedgerPrintLayer();};
   window.addEventListener('afterprint',window.__ledgerAfterPrint);
-  toast('Ledger ready — Print / PDF dabao','s');
+  toast('Tally-style ledger ready — Print/PDF ke liye 🖨 button','s');
 }
 
 function exportPartyLedgerCSV(name){
-  const lines=getPartyLedgerLines(name);
+  /* Tally-style CSV with extra weight/rate columns + Narration — matches on-screen ledger
+     Respects active date filter so CSV reflects whatever user is viewing */
+  const lines=getPartyLedgerLines(name,window._ledgerFromDate||'',window._ledgerToDate||'');
   const drTotal=lines.reduce((s,l)=>s+l.dr,0);
   const crTotal=lines.reduce((s,l)=>s+l.cr,0);
+  const totalOwnWt=lines.reduce((s,l)=>s+(l.weight||0),0);
+  const totalPartyWt=lines.reduce((s,l)=>s+(l.partyWt||0),0);
   const closingBal=lines.length?lines[lines.length-1].balance:0;
-  let csv='Date,Particulars,Vch Type,Debit (Dr),Credit (Cr),Balance\n';
+  let csv='Date,Cr/Dr,Particulars,Narration,Vch No.,Own Wt,Party Wt,Rate,Debit,Credit,Balance\n';
   lines.forEach(l=>{
-    const isSub=l.sub&&l.sub>0;
-    csv+='"'+(isSub?'':l.date)+'","'+String(l.particulars).replace(/"/g,'""')+'","'+l.vch+'",'+(l.dr||'')+','+(l.cr||'')+','+(Math.abs(l.balance))+(l.balance<0?' Cr':l.balance>0?' Dr':'')+'\n';
+    const balStr=Math.abs(l.balance)+(l.balance<0?' Cr':l.balance>0?' Dr':'');
+    csv+='"'+(l.date||'')+'","'+(l.crDr||'')+'","'+String(l.title||'').replace(/"/g,'""')+'","'+String(l.narration||'').replace(/"/g,'""')+'","'+(l.vchNo||'')+'",'
+        +(l.weight||'')+','+(l.partyWt||'')+','+(l.rate||'')+','+(l.dr||'')+','+(l.cr||'')+',"'+balStr+'"\n';
   });
-  csv+='"","— SARANSH —","",'+drTotal+','+crTotal+','+Math.abs(closingBal)+(closingBal<0?' Cr':closingBal>0?' Dr':'')+'\n';
+  csv+='"","","TOTAL","","",'+totalOwnWt.toFixed(2)+','+totalPartyWt.toFixed(2)+',,'+drTotal+','+crTotal+',"'+Math.abs(closingBal)+(closingBal<0?' Cr':closingBal>0?' Dr':'')+'"\n';
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');
   let slug=String(name).replace(/[^\w\-]+/g,'_').replace(/^_|_$/g,'').slice(0,40);
   a.href=url;a.download='Ledger_'+(slug||'Party')+'.csv';a.click();URL.revokeObjectURL(url);
   toast('CSV downloaded — '+name,'s');
+}
+
+/* === SHARE PARTY LEDGER — WhatsApp / Email / native share sheet =========
+   Builds a clean text version of the ledger and uses the Web Share API
+   (navigator.share) on mobile/PWA — opens system share sheet so user can
+   pick WhatsApp, Email, Telegram, etc. Desktop fallback shows a chooser
+   modal with WhatsApp Web, Email, and Copy-to-clipboard options. */
+function _buildLedgerShareText(name){
+  /* Use the same filter that's currently active in the ledger view */
+  const lines=getPartyLedgerLines(name,window._ledgerFromDate||'',window._ledgerToDate||'');
+  const c=APP.company;
+  const firm=getFirmInfo(c);
+  const partyInfo=getPartyInfo(name);
+  const drTotal=lines.reduce((s,l)=>s+l.dr,0);
+  const crTotal=lines.reduce((s,l)=>s+l.cr,0);
+  const totalOwnWt=lines.reduce((s,l)=>s+(l.weight||0),0);
+  const totalPartyWt=lines.reduce((s,l)=>s+(l.partyWt||0),0);
+  const closingBal=lines.length?lines[lines.length-1].balance:0;
+  const dateList=lines.map(l=>l.date).filter(d=>d).sort();
+  const fromDate=dateList[0]||'';
+  const toDate=dateList[dateList.length-1]||'';
+  const fmtTallyDate=d=>{
+    if(!d||typeof d!=='string')return '';
+    const parts=d.split('-');if(parts.length!==3)return d;
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const m=months[parseInt(parts[1],10)-1]||parts[1];
+    return parseInt(parts[2],10)+'-'+m+'-'+parts[0].slice(2);
+  };
+  const fmt=v=>{const n=parseFloat(v);return isNaN(n)?'0':n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  let txt='';
+  txt+='*📒 PARTY LEDGER*\n';
+  txt+='━━━━━━━━━━━━━━━━━━\n';
+  txt+='*'+(firm.name||'')+'*\n';
+  (firm.addr||[]).forEach(line=>{txt+=line+'\n';});
+  if(firm.contact)txt+='📞 '+firm.contact+'\n';
+  txt+='\n*Party:* '+name+'\n';
+  if(partyInfo.address)txt+='📍 '+partyInfo.address+'\n';
+  if(partyInfo.mobile)txt+='📱 '+partyInfo.mobile+'\n';
+  if(fromDate&&toDate)txt+='📅 '+fmtTallyDate(fromDate)+' to '+fmtTallyDate(toDate)+'\n';
+  txt+='━━━━━━━━━━━━━━━━━━\n\n';
+  /* Compact line list */
+  let lastDate='';
+  lines.forEach(l=>{
+    const d=l.date&&l.date!==lastDate?fmtTallyDate(l.date):'      ';
+    if(l.date)lastDate=l.date;
+    txt+=d+' | '+(l.crDr||'')+' '+(l.title||'')+'\n';
+    if(l.vchNo)txt+='   Vch: '+l.vchNo;
+    if(l.weight||l.rate)txt+=' | Wt: '+fmt(l.partyWt||l.weight||0)+' × ₹'+fmt(l.rate||0);
+    txt+='\n';
+    if(l.dr)txt+='   Debit: ₹'+fmt(l.dr)+'\n';
+    if(l.cr)txt+='   Credit: ₹'+fmt(l.cr)+'\n';
+    if(l.narration)txt+='   📝 '+l.narration+'\n';
+    txt+='\n';
+  });
+  txt+='━━━━━━━━━━━━━━━━━━\n';
+  txt+='*TOTALS*\n';
+  if(totalOwnWt)txt+='Own Wt:  '+fmt(totalOwnWt)+'\n';
+  if(totalPartyWt)txt+='Party Wt: '+fmt(totalPartyWt)+'\n';
+  txt+='Debit:  ₹'+fmt(drTotal)+'\n';
+  txt+='Credit: ₹'+fmt(crTotal)+'\n';
+  if(closingBal!==0){
+    txt+='*Closing: ₹'+fmt(Math.abs(closingBal))+' '+(closingBal<0?'Cr':'Dr')+'*\n';
+  }
+  txt+='━━━━━━━━━━━━━━━━━━\n';
+  txt+='_Generated by Inward Outward Tracker Pro_';
+  return txt;
+}
+
+async function sharePartyLedger(name){
+  const text=_buildLedgerShareText(name);
+  const title='Ledger — '+name;
+  /* Try native share sheet first (works on mobile/PWA — WhatsApp, Email, etc. all show up) */
+  if(navigator.share){
+    try{
+      await navigator.share({title:title,text:text});
+      toast('✓ Share ho gaya','s');
+      return;
+    }catch(e){
+      /* User cancelled — don't show error. Other errors fall through to chooser. */
+      if(e.name==='AbortError')return;
+      console.warn('navigator.share failed, falling back:',e);
+    }
+  }
+  /* Fallback chooser modal — desktop browsers without native share */
+  const enc=encodeURIComponent(text);
+  const waUrl='https://wa.me/?text='+enc;
+  const mailUrl='mailto:?subject='+encodeURIComponent(title)+'&body='+enc;
+  const html='<div style="padding:20px;max-width:380px;text-align:center">'
+    +'<div style="font-size:16px;font-weight:700;color:#1a3a6b;margin-bottom:6px">📤 Share Ledger</div>'
+    +'<div style="font-size:12px;color:#666;margin-bottom:18px">'+name+'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:10px">'
+    +'<a href="'+waUrl+'" target="_blank" style="background:#16a34a;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">📱 WhatsApp</a>'
+    +'<a href="'+mailUrl+'" style="background:#1a5fc8;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">✉️ Email</a>'
+    +'<button type="button" onclick="navigator.clipboard.writeText(window._shareLedgerCache||\'\').then(()=>{toast(\'✓ Copy ho gaya — paste karo\',\'s\');closeM(\'share-modal\');})" style="background:#6b7280;color:#fff;padding:11px;border:none;border-radius:7px;font-weight:600;font-size:13px;cursor:pointer">📋 Copy Text</button>'
+    +'<button type="button" onclick="closeM(\'share-modal\')" style="background:#e5e7eb;color:#333;padding:9px;border:1px solid #cbd5e1;border-radius:7px;font-size:13px;cursor:pointer;margin-top:6px">Cancel</button>'
+    +'</div></div>';
+  window._shareLedgerCache=text;
+  let m=document.getElementById('share-modal');
+  if(!m){
+    m=document.createElement('div');m.id='share-modal';m.className='ov';
+    m.onclick=function(e){if(e.target===m)closeM('share-modal');};
+    m.innerHTML='<div class="modal" style="max-width:420px;border-radius:12px"></div>';
+    document.body.appendChild(m);
+  }
+  m.querySelector('.modal').innerHTML=html;
+  m.classList.add('open');
 }
 
 function showPartyLedgerInReports(name){
