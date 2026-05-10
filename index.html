@@ -35,7 +35,37 @@
 @media(max-width:600px){.party-master-grid{grid-template-columns:1fr;}}@media(max-width:600px){.dash-stats-grid{grid-template-columns:1fr 1fr!important;}.dash-stats-grid .sv{font-size:20px;}.tsc table{min-width:700px;}.modal{width:99vw!important;max-height:96vh!important;}.fgrid3,.fgrid2,.fgrid,.fgrid4{grid-template-columns:1fr!important;}.stats-grid{grid-template-columns:1fr 1fr;}main{padding:6px;}header{padding:5px 8px;}.hdr-stat{display:none;}.tab{padding:6px 10px;font-size:12px;white-space:nowrap;}.btn{padding:6px 10px;font-size:12px;}.sum-grid{grid-template-columns:1fr 1fr!important;}.fg{grid-template-columns:1fr!important;}.pay-total{flex-direction:column;gap:5px;}.hdr-r{gap:4px;}}::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--s3);}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .ledger-print-layer{position:fixed;inset:0;z-index:10050;background:#fff;overflow:auto;padding:18px 20px 24px;display:none;font-family:'Noto Sans',Arial,sans-serif;color:#111;font-size:12px;box-shadow:0 0 0 1px #e5e7eb;}
 .ledger-print-layer.is-on{display:block;}
-@media print{body *{visibility:hidden!important;}.ledger-print-layer,.ledger-print-layer *{visibility:visible!important;}.ledger-print-layer{position:absolute;inset:0;display:block!important;background:#fff;box-shadow:none;padding:10mm;}.ledger-print-noprint{display:none!important;}}
+@media print{
+  @page{size:A4 portrait;margin:10mm 8mm;}
+  html,body{height:auto !important;overflow:visible !important;background:#fff !important;}
+  body *{visibility:hidden !important;}
+  .ledger-print-layer,.ledger-print-layer *{visibility:visible !important;}
+  .ledger-print-layer{
+    position:static !important;
+    inset:auto !important;
+    display:block !important;
+    background:#fff !important;
+    box-shadow:none !important;
+    border:none !important;
+    padding:0 !important;
+    overflow:visible !important;
+    height:auto !important;
+    max-height:none !important;
+    width:100% !important;
+  }
+  .ledger-print-noprint{display:none !important;}
+  /* Inner wrappers — kill all overflow/scroll constraints so full content prints */
+  #ledger-print-layer .led-paper{box-shadow:none !important;border:none !important;padding:0 !important;max-width:none !important;margin:0 !important;}
+  #ledger-print-layer .led-table-wrap{overflow:visible !important;margin:0 !important;}
+  #ledger-print-layer table.led{font-size:9.5px !important;width:100% !important;min-width:0 !important;}
+  #ledger-print-layer table.led th,#ledger-print-layer table.led td{padding:4px 3px !important;}
+  /* Multi-page row protection — don't split rows across pages */
+  #ledger-print-layer table.led thead{display:table-header-group;}
+  #ledger-print-layer table.led tfoot{display:table-row-group;}
+  #ledger-print-layer table.led tr{page-break-inside:avoid;break-inside:avoid;}
+  /* Hide narration on print if you want compact (uncomment to enable) */
+  /* #ledger-print-layer table.led td.narr{display:none !important;} */
+}
 .ledger-btn{background:#1a3a6b;color:#fff;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;}.ledger-btn:hover{background:#1a5fc8;transform:translateY(-1px);}
 .req-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
 .req-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;text-align:center;box-shadow:var(--sh);}
@@ -4983,34 +5013,211 @@ function _buildLedgerShareText(name){
   return txt;
 }
 
+/* === LOAD jsPDF + autoTable on demand (CDN) ============================
+   Used by PDF share. Cached after first load. ~150KB total. */
+function _loadPdfLibs(){
+  if(window._pdfLibsReady)return Promise.resolve(window.jspdf);
+  if(window._pdfLibsLoading)return window._pdfLibsLoading;
+  const load=(src)=>new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Failed to load '+src));
+    document.head.appendChild(s);
+  });
+  window._pdfLibsLoading=(async()=>{
+    await load('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    await load('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+    window._pdfLibsReady=true;
+    return window.jspdf;
+  })();
+  return window._pdfLibsLoading;
+}
+
+/* === Generate Party Ledger as PDF Blob — uses jsPDF + autoTable =========
+   Returns: { blob: PDF Blob, filename: 'Ledger_Foo.pdf' } */
+async function generatePartyLedgerPDF(name){
+  await _loadPdfLibs();
+  const {jsPDF}=window.jspdf;
+  /* Portrait A4 — looks more like a Tally Prime printout. 10 columns fit by
+     using compact font + linebreak overflow on text-heavy columns. */
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const c=APP.company;
+  const firm=getFirmInfo(c);
+  const partyInfo=getPartyInfo(name);
+  const lines=getPartyLedgerLines(name,window._ledgerFromDate||'',window._ledgerToDate||'');
+  const drTotal=lines.reduce((s,l)=>s+l.dr,0);
+  const crTotal=lines.reduce((s,l)=>s+l.cr,0);
+  const totalOwnWt=lines.reduce((s,l)=>s+(l.weight||0),0);
+  const totalPartyWt=lines.reduce((s,l)=>s+(l.partyWt||0),0);
+  const closingBal=lines.length?lines[lines.length-1].balance:0;
+  const fmt=v=>{const n=parseFloat(v);return isNaN(n)||n===0?'':n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});};
+  const fmtTallyDate=d=>{
+    if(!d||typeof d!=='string')return '';
+    const parts=d.split('-');if(parts.length!==3)return d;
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const m=months[parseInt(parts[1],10)-1]||parts[1];
+    return parseInt(parts[2],10)+'-'+m+'-'+parts[0].slice(2);
+  };
+  const dateList=lines.map(l=>l.date).filter(d=>d).sort();
+  const fromDate=window._ledgerFromDate||dateList[0]||'';
+  const toDate=window._ledgerToDate||dateList[dateList.length-1]||'';
+
+  /* === Firm header === */
+  const pageW=doc.internal.pageSize.getWidth();
+  let y=12;
+  doc.setFont('helvetica','bold').setFontSize(14);
+  doc.text(firm.name||'',pageW/2,y,{align:'center'});y+=5;
+  doc.setFont('helvetica','normal').setFontSize(9);
+  (firm.addr||[]).forEach(line=>{doc.text(line,pageW/2,y,{align:'center'});y+=4;});
+  if(firm.fssai){doc.text('FSSAI Number : '+firm.fssai,pageW/2,y,{align:'center'});y+=4;}
+  if(firm.contact){doc.text('Contact : '+firm.contact,pageW/2,y,{align:'center'});y+=4;}
+  if(firm.email){doc.text('E-Mail : '+firm.email,pageW/2,y,{align:'center'});y+=4;}
+  y+=3;
+  /* Party header */
+  doc.setFont('helvetica','bold').setFontSize(11);
+  doc.text(name,pageW/2,y,{align:'center'});y+=4.5;
+  doc.setFont('helvetica','normal').setFontSize(9);
+  doc.text('Ledger Account',pageW/2,y,{align:'center'});y+=4;
+  if(partyInfo.address){doc.text(partyInfo.address,pageW/2,y,{align:'center'});y+=4;}
+  if(partyInfo.mobile){doc.text('Mobile: '+partyInfo.mobile,pageW/2,y,{align:'center'});y+=4;}
+  if(fromDate&&toDate){doc.text(fmtTallyDate(fromDate)+' to '+fmtTallyDate(toDate),pageW/2,y,{align:'center'});y+=4;}
+  y+=2;
+
+  /* === Table === */
+  const head=[['Date','C/D','Particulars','Narration','Vch No','Own Wt','Party Wt','Rate','Debit','Credit']];
+  let lastDate='';
+  const body=lines.map(l=>{
+    const showDate=l.date&&l.date!==lastDate;
+    if(showDate)lastDate=l.date;
+    return [
+      showDate?fmtTallyDate(l.date):'',
+      l.crDr||'',
+      l.title||'',
+      l.narration||'',
+      l.vchNo||'',
+      l.weight?fmt(l.weight):'',
+      l.partyWt?fmt(l.partyWt):'',
+      l.rate?fmt(l.rate):'',
+      l.dr?fmt(l.dr):'',
+      l.cr?fmt(l.cr):''
+    ];
+  });
+  /* TOTAL row */
+  body.push([
+    {content:'TOTAL',colSpan:5,styles:{halign:'right',fontStyle:'bold',fillColor:[245,247,250]}},
+    {content:totalOwnWt?fmt(totalOwnWt):'',styles:{halign:'right',fontStyle:'bold',fillColor:[245,247,250]}},
+    {content:totalPartyWt?fmt(totalPartyWt):'',styles:{halign:'right',fontStyle:'bold',fillColor:[245,247,250]}},
+    {content:'',styles:{fillColor:[245,247,250]}},
+    {content:fmt(drTotal),styles:{halign:'right',fontStyle:'bold',fillColor:[245,247,250]}},
+    {content:fmt(crTotal),styles:{halign:'right',fontStyle:'bold',fillColor:[245,247,250]}}
+  ]);
+  /* Closing balance row */
+  if(closingBal!==0){
+    const balText=fmt(Math.abs(closingBal))+' '+(closingBal<0?'Cr':'Dr');
+    body.push([
+      {content:'Closing Balance',colSpan:8,styles:{halign:'right',fontStyle:'bold',textColor:closingBal>=0?[10,125,40]:[168,38,38]}},
+      {content:balText,colSpan:2,styles:{halign:'right',fontStyle:'bold',textColor:closingBal>=0?[10,125,40]:[168,38,38]}}
+    ]);
+  }
+
+  doc.autoTable({
+    head:head,body:body,startY:y,
+    theme:'plain',
+    styles:{fontSize:7,cellPadding:1.3,lineColor:[238,240,242],lineWidth:0.1,overflow:'linebreak'},
+    headStyles:{fillColor:[250,251,252],textColor:[0,0,0],fontStyle:'bold',fontSize:7.5,lineColor:[0,0,0],lineWidth:{top:0.5,bottom:0.5}},
+    /* Portrait A4: ~194mm usable width. 10 columns sized to fit comfortably. */
+    columnStyles:{
+      0:{cellWidth:16},                                                          /* Date */
+      1:{cellWidth:7,halign:'center',fontStyle:'italic',textColor:[100,100,100]},/* Cr/Dr */
+      2:{cellWidth:28,fontStyle:'bold'},                                         /* Particulars */
+      3:{cellWidth:30,fontStyle:'italic',textColor:[80,80,80]},                  /* Narration */
+      4:{cellWidth:14,halign:'right',textColor:[80,80,80]},                      /* Vch No */
+      5:{cellWidth:14,halign:'right'},                                           /* Own Wt */
+      6:{cellWidth:14,halign:'right'},                                           /* Party Wt */
+      7:{cellWidth:13,halign:'right'},                                           /* Rate */
+      8:{cellWidth:18,halign:'right'},                                           /* Debit */
+      9:{cellWidth:18,halign:'right'}                                            /* Credit */
+    },
+    didParseCell:function(data){
+      if(data.section==='body'&&data.row.index<body.length-(closingBal!==0?2:1)){
+        const l=lines[data.row.index];
+        if(l&&data.column.index===1){
+          data.cell.styles.textColor=l.crDr==='Cr'?[10,125,40]:l.crDr==='Dr'?[168,38,38]:[100,100,100];
+        }
+      }
+    }
+  });
+
+  /* Footer */
+  const finalY=doc.lastAutoTable.finalY||y;
+  const pageH=doc.internal.pageSize.getHeight();
+  doc.setFontSize(7).setTextColor(140,140,140);
+  doc.text('Generated: '+new Date().toISOString().slice(0,10),10,pageH-6);
+  doc.text('Inward Outward Tracker Pro',pageW-10,pageH-6,{align:'right'});
+
+  const blob=doc.output('blob');
+  const slug=String(name).replace(/[^\w\-]+/g,'_').replace(/^_|_$/g,'').slice(0,40);
+  return{blob:blob,filename:'Ledger_'+(slug||'Party')+'.pdf'};
+}
+
 async function sharePartyLedger(name){
+  toast('PDF generate ho rahi hai...','i');
+  let pdfData=null;
+  try{pdfData=await generatePartyLedgerPDF(name);}
+  catch(e){
+    console.warn('PDF generation failed:',e);
+    toast('PDF nahi ban payi — text mein share kar rahe hain','i');
+  }
   const text=_buildLedgerShareText(name);
   const title='Ledger — '+name;
-  /* Try native share sheet first (works on mobile/PWA — WhatsApp, Email, etc. all show up) */
+  /* TRY 1: Native share with PDF FILE (mobile/PWA — WhatsApp gets PDF attachment) */
+  if(pdfData&&navigator.canShare){
+    try{
+      const file=new File([pdfData.blob],pdfData.filename,{type:'application/pdf'});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({title:title,text:text,files:[file]});
+        toast('✓ PDF share ho gaya','s');
+        return;
+      }
+    }catch(e){
+      if(e.name==='AbortError')return;
+      console.warn('PDF share failed, trying text:',e);
+    }
+  }
+  /* TRY 2: Native share with text only */
   if(navigator.share){
     try{
       await navigator.share({title:title,text:text});
       toast('✓ Share ho gaya','s');
       return;
     }catch(e){
-      /* User cancelled — don't show error. Other errors fall through to chooser. */
       if(e.name==='AbortError')return;
-      console.warn('navigator.share failed, falling back:',e);
+      console.warn('navigator.share text failed:',e);
     }
   }
-  /* Fallback chooser modal — desktop browsers without native share */
+  /* FALLBACK: Desktop chooser modal — WhatsApp/Email/Copy/Download PDF */
   const enc=encodeURIComponent(text);
   const waUrl='https://wa.me/?text='+enc;
   const mailUrl='mailto:?subject='+encodeURIComponent(title)+'&body='+enc;
+  /* Cache PDF blob URL for download button */
+  let pdfDlBtn='';
+  if(pdfData){
+    if(window._sharePdfUrl)URL.revokeObjectURL(window._sharePdfUrl);
+    window._sharePdfUrl=URL.createObjectURL(pdfData.blob);
+    window._sharePdfFilename=pdfData.filename;
+    pdfDlBtn='<a href="'+window._sharePdfUrl+'" download="'+pdfData.filename+'" style="background:#dc2626;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">📄 Download PDF</a>';
+  }
   const html='<div style="padding:20px;max-width:380px;text-align:center">'
     +'<div style="font-size:16px;font-weight:700;color:#1a3a6b;margin-bottom:6px">📤 Share Ledger</div>'
     +'<div style="font-size:12px;color:#666;margin-bottom:18px">'+name+'</div>'
     +'<div style="display:flex;flex-direction:column;gap:10px">'
-    +'<a href="'+waUrl+'" target="_blank" style="background:#16a34a;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">📱 WhatsApp</a>'
-    +'<a href="'+mailUrl+'" style="background:#1a5fc8;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">✉️ Email</a>'
-    +'<button type="button" onclick="navigator.clipboard.writeText(window._shareLedgerCache||\'\').then(()=>{toast(\'✓ Copy ho gaya — paste karo\',\'s\');closeM(\'share-modal\');})" style="background:#6b7280;color:#fff;padding:11px;border:none;border-radius:7px;font-weight:600;font-size:13px;cursor:pointer">📋 Copy Text</button>'
+    +pdfDlBtn
+    +'<a href="'+waUrl+'" target="_blank" style="background:#16a34a;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">📱 WhatsApp (Text)</a>'
+    +'<a href="'+mailUrl+'" style="background:#1a5fc8;color:#fff;padding:11px;border-radius:7px;text-decoration:none;font-weight:600;font-size:13px">✉️ Email (Text)</a>'
+    +'<button type="button" onclick="navigator.clipboard.writeText(window._shareLedgerCache||\'\').then(()=>{toast(\'✓ Copy ho gaya\',\'s\');closeM(\'share-modal\');})" style="background:#6b7280;color:#fff;padding:11px;border:none;border-radius:7px;font-weight:600;font-size:13px;cursor:pointer">📋 Copy Text</button>'
     +'<button type="button" onclick="closeM(\'share-modal\')" style="background:#e5e7eb;color:#333;padding:9px;border:1px solid #cbd5e1;border-radius:7px;font-size:13px;cursor:pointer;margin-top:6px">Cancel</button>'
-    +'</div></div>';
+    +'</div>'
+    +(pdfData?'<div style="margin-top:12px;font-size:11px;color:#666">💡 PDF download karke phir WhatsApp/Email mein attach karo for full table</div>':'')
+    +'</div>';
   window._shareLedgerCache=text;
   let m=document.getElementById('share-modal');
   if(!m){
@@ -7588,9 +7795,14 @@ document.addEventListener('DOMContentLoaded',init);
   aLink.rel='apple-touch-icon';aLink.href=iconUrl;
   document.head.appendChild(aLink);
 
-  /* Register Service Worker from inline code */
+  /* Register Service Worker from inline code
+     CACHE_NAME bumped to v3 — forces ALL old PWA caches to be discarded so
+     installed PWAs pick up the latest code (ledger fixes, print fixes, PDF
+     share, dup guards). Network-first strategy: always try fresh fetch first,
+     fall back to cache only when offline. Prevents "PWA stuck on company
+     select" issue where stale cached HTML was being served. */
   const swCode=`
-    const CACHE_NAME='io-tracker-v1';
+    const CACHE_NAME='io-tracker-v3';
     const OFFLINE_URL=self.registration.scope;
     self.addEventListener('install',e=>{
       self.skipWaiting();
@@ -7598,11 +7810,13 @@ document.addEventListener('DOMContentLoaded',init);
     });
     self.addEventListener('activate',e=>{
       e.waitUntil(clients.claim());
+      /* Aggressively delete ALL old caches (any name that isn't current) */
       e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));
     });
     self.addEventListener('fetch',e=>{
       if(e.request.method!=='GET')return;
       if(e.request.url.includes('firestore.googleapis.com')||e.request.url.includes('googleapis.com/identitytoolkit'))return;
+      /* NETWORK-FIRST: always try fresh from network, fallback to cache only on failure */
       e.respondWith(
         fetch(e.request).then(r=>{
           if(r&&r.status===200&&r.type==='basic'){
@@ -7613,6 +7827,8 @@ document.addEventListener('DOMContentLoaded',init);
         }).catch(()=>caches.match(e.request).then(r=>r||caches.match(OFFLINE_URL)))
       );
     });
+    /* Allow page to force-activate new SW immediately */
+    self.addEventListener('message',e=>{if(e.data==='SKIP_WAITING')self.skipWaiting();});
   `;
   if('serviceWorker' in navigator){
     const swBlob=new Blob([swCode],{type:'application/javascript'});
