@@ -37,13 +37,17 @@
 .ledger-print-layer.is-on{display:block;}
 @media print{
   @page{size:A4 portrait;margin:10mm 8mm;}
-  html,body{height:auto !important;overflow:visible !important;background:#fff !important;}
-  body *{visibility:hidden !important;}
-  .ledger-print-layer,.ledger-print-layer *{visibility:visible !important;}
-  .ledger-print-layer{
+  html,body{height:auto !important;overflow:visible !important;background:#fff !important;margin:0 !important;padding:0 !important;}
+  /* === BLANK FIRST PAGE FIX ============================================
+     Old code used `visibility:hidden` on body * — that hid pixels but kept
+     the layout intact, so header + tabs + dashboard still occupied space
+     and pushed the ledger to page 2/3. `display:none` collapses layout
+     completely so the ledger appears at the very top of page 1. */
+  body > *:not(#ledger-print-layer){display:none !important;}
+  #ledger-print-layer{
+    display:block !important;
     position:static !important;
     inset:auto !important;
-    display:block !important;
     background:#fff !important;
     box-shadow:none !important;
     border:none !important;
@@ -51,7 +55,8 @@
     overflow:visible !important;
     height:auto !important;
     max-height:none !important;
-    width:100% !important;
+    width:auto !important;
+    margin:0 !important;
   }
   .ledger-print-noprint{display:none !important;}
   /* Inner wrappers — kill all overflow/scroll constraints so full content prints */
@@ -63,8 +68,6 @@
   #ledger-print-layer table.led thead{display:table-header-group;}
   #ledger-print-layer table.led tfoot{display:table-row-group;}
   #ledger-print-layer table.led tr{page-break-inside:avoid;break-inside:avoid;}
-  /* Hide narration on print if you want compact (uncomment to enable) */
-  /* #ledger-print-layer table.led td.narr{display:none !important;} */
 }
 .ledger-btn{background:#1a3a6b;color:#fff;border:none;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;}.ledger-btn:hover{background:#1a5fc8;transform:translateY(-1px);}
 .req-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;}
@@ -165,6 +168,12 @@
     <div class="company-card" onclick="selectCompany('aggarwal')"><div class="cicon">🌾</div><div class="cname">Aggarwal Agro Foods</div><div class="cloc">Samrala, Punjab</div></div>
     <div class="company-card" onclick="selectCompany('krishna')"><div class="cicon">🍚</div><div class="cname">Krishna Rice Mills</div><div class="cloc">Samrala, Punjab</div></div>
   </div>
+  <!-- Emergency escape buttons — if user gets stuck on this screen due to permissions race condition -->
+  <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center">
+    <button onclick="location.reload()" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:7px;padding:9px 18px;font-size:13px;cursor:pointer;font-weight:600">🔄 Refresh</button>
+    <button onclick="logout()" style="background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:7px;padding:9px 18px;font-size:13px;cursor:pointer;font-weight:600">🚪 Logout</button>
+  </div>
+  <div style="margin-top:16px;color:rgba(255,255,255,0.7);font-size:11px;text-align:center;max-width:400px;padding:0 20px">Agar koi card click nahi ho raha — Refresh dabao. Phir bhi nahi chal raha — Logout karke wapas login karo.</div>
 </div>
 
 <header>
@@ -1365,6 +1374,23 @@ function loadUsers(){
             mergeUserPermissions();applyPermissions();addUserBadge();
             renderUsers();
             console.log('Live sync: users updated from server');
+            /* === STUCK-ON-COMPANY-SCREEN AUTO-RECOVERY ====================
+               If user logged in but got parked on the company-select screen
+               because users[] was empty at the time of access check, now
+               that we have fresh user data, re-evaluate access. Eligible
+               users will auto-proceed into the app. */
+            const compScreen=document.getElementById('company-screen');
+            if(compScreen&&compScreen.style.display!=='none'&&currentUser){
+              const allowed=getAllowedCompanies();
+              if(allowed.length>0){
+                console.log('Auto-recovering from stuck company-screen — granting access');
+                refreshFirmUI();
+                /* If user has a saved company that they can access, auto-select it */
+                const saved=localStorage.getItem('app-company');
+                if(saved&&allowed.includes(saved))selectCompany(saved);
+                else if(allowed.length===1)selectCompany(allowed[0]);
+              }
+            }
           }
         }
       }, err=>console.error('Users listener error:',err));
@@ -1470,18 +1496,40 @@ function checkSession(){
     if(fbUser){
       setSt('load');
       let profile=null;
+      let profileFetchFailed=false;
       if(DB){
         try{
           const doc=await DB.collection('user_profiles').doc(fbUser.uid).get();
-          if(doc.exists)profile=doc.data();
-        }catch(e){console.log('Profile load err:',e);}
+          if(doc.exists){
+            profile=doc.data();
+          }else{
+            /* Doc genuinely doesn't exist — legitimate first-time signup */
+            profile={id:fbUser.uid,name:fbUser.displayName||fbUser.email.split('@')[0],email:fbUser.email,role:'viewer',status:'pending',createdAt:new Date().toISOString()};
+            DB.collection('user_profiles').doc(fbUser.uid).set(profile).catch(e=>console.log(e));
+          }
+        }catch(e){
+          /* === CRITICAL FIX — admin downgrade prevention ====================
+             Old code blindly created a viewer/pending profile on any error,
+             which OVERWROTE existing admin profiles when Firestore reads
+             failed (network glitch, fresh PWA token race, security rules
+             evaluating). That's why mdpmandy71's admin status was reset.
+             New behavior: on read failure, do NOT create a new profile.
+             Show login again and ask user to retry. */
+          console.error('Profile load failed — NOT overwriting any existing profile:',e);
+          profileFetchFailed=true;
+        }
+      }
+      if(profileFetchFailed){
+        toast('Profile load fail — internet check karo aur dobara try karo','e');
+        try{await AUTH.signOut();}catch(_){}
+        showLoginUI();setSt('err');
+        return;
       }
       if(!profile){
-        /* SECURITY: Never auto-grant admin role here — this fallback runs in race conditions
-           and could let any signup-during-init become admin. Always default to viewer/pending.
-           First admin must be set manually in Firebase Console (Firestore → user_profiles → role:"admin" + status:"approved"). */
-        profile={id:fbUser.uid,name:fbUser.displayName||fbUser.email.split('@')[0],email:fbUser.email,role:'viewer',status:'pending',createdAt:new Date().toISOString()};
-        if(DB){DB.collection('user_profiles').doc(fbUser.uid).set(profile).catch(e=>console.log(e));}
+        /* DB unavailable AND no cached profile — block to be safe */
+        toast('Database connection nahi — refresh karo','e');
+        showLoginUI();setSt('err');
+        return;
       }
       /* === CHECK APPROVAL STATUS === */
       /* Admin (first user) is always approved. Others need explicit approval. */
@@ -1653,11 +1701,16 @@ let SESSION_FIRM_GRANTS=new Set();
 function getAllowedCompanies(){
   /* Returns array of company IDs this user can access (admin-assigned + session grants) */
   if(!currentUser)return [];
-  /* Admin always has access to all firms */
+  /* DIRECT admin check first — bypasses users-array dependency.
+     CRITICAL for PWA: at login moment, users[] may still be loading from
+     Firestore. Without this direct check, admins were getting stuck on the
+     company-select screen because hasPerm('users') falls through to a check
+     that needs the users array. Now admin role on currentUser is enough. */
+  if(currentUser.role==='admin')return Object.keys(COMPANIES);
   if(hasPerm('users'))return Object.keys(COMPANIES);
   /* Find user in users list */
   const email=(currentUser.email||currentUser.username||'').toLowerCase();
-  const match=users.find(u=>{
+  const match=(users||[]).find(u=>{
     const ue=(u.username||u.email||'').toLowerCase();
     return ue===email||ue===email.split('@')[0];
   });
@@ -2588,7 +2641,10 @@ function hideLoader(){
   clearTimeout(window._loaderTimeout);
 }
 function selectCompany(id){
-  if(!canAccessCompany(id)){toast('Iss firm ka access nahi hai — admin ko request bhejo','e');requestFirmAccess(id);return;}
+  /* Admin role bypass — race-condition safe. If users[] hasn't loaded yet
+     but currentUser.role is admin (from Firebase profile), grant access. */
+  const isAdminBypass=currentUser&&currentUser.role==='admin';
+  if(!isAdminBypass&&!canAccessCompany(id)){toast('Iss firm ka access nahi hai — admin ko request bhejo','e');requestFirmAccess(id);return;}
   const name=COMPANIES[id]?COMPANIES[id].name:id;
   showLoader(name+' khul raha hai...','Data load ho raha hai — please wait');
   APP.company=id;localStorage.setItem('app-company',id);closeCompanyScreen();updateCompanySelect();loadData();
@@ -6331,8 +6387,20 @@ async function saveEntry(){
     /* === DUPLICATE PREVENTION GUARD #2 — content-stable ID + signature check ===
        OLD: id='REC'+Date.now() → same content saved twice = different IDs = 2 records.
        NEW: id derived from content signature → same content = same ID = Firestore
-       merge:true physically prevents duplicates, even across devices/race conditions. */
-    const newGp=gp||'GP-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();
+       merge:true physically prevents duplicates, even across devices/race conditions.
+       GP NUMBER: scan all existing records for highest GP-NNNNN number, then +1.
+       Clean sequential format. Race-safe because stable ID uses FULL content
+       signature (not just GP) — even if 2 devices generate the same GP for
+       different entries, they get different stable IDs (content differs). */
+    let newGp=gp;
+    if(!newGp){
+      let maxGpNum=0;
+      (APP.records||[]).forEach(r=>{
+        const m=String(r.gp||'').match(/GP-(\d+)/);
+        if(m){const n=parseInt(m[1],10);if(!isNaN(n)&&n>maxGpNum)maxGpNum=n;}
+      });
+      newGp='GP-'+String(maxGpNum+1).padStart(5,'0');
+    }
     const newRec={...entryData,gp:newGp,createdBy:currentUser?currentUser.email:'unknown',createdAt:new Date().toISOString()};
     /* Pre-save signature check — warn user if exact same content already exists */
     const newSig=_recordSignature(newRec);
