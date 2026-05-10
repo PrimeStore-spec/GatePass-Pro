@@ -6168,6 +6168,13 @@ async function saveEntry(){
     window._pendingReqComplete=null;
     window._pendingReqAdminNote=null;
   }
+  /* Auto-complete ANY orphan review requests for this entry — covers the case
+     where admin edited from Records/Inward/Outward tab directly (not via
+     "Fill Details" button on the request). */
+  if(id&&typeof autoCompleteStuckRequests==='function'){
+    const cleared=autoCompleteStuckRequests();
+    if(cleared>0)toast('✓ '+cleared+' pending review request auto-complete ho gayi','s');
+  }
   /* Auto-send review request to admin if rate/financial data is missing */
   if(needsReview&&savedEntryId&&!id){
     const missingFields=[];
@@ -6929,6 +6936,9 @@ async function forceRefreshRequests(){
 
 function renderRequests(){
   if(!currentUser)return;
+  /* Auto-complete orphan review requests on every render — cleans stuck
+     requests where admin already edited the entry directly. */
+  if(typeof autoCompleteStuckRequests==='function')autoCompleteStuckRequests();
   /* Show admin-only cleanup buttons */
   const isAdminBtnCheck=hasPerm('users');
   ['btn-clear-completed-reqs','btn-clear-rejected-reqs'].forEach(id=>{
@@ -7383,6 +7393,40 @@ async function bulkDeleteRequests(statusFilter){
 
 function completeRequest(reqId){
   return completeRequestWithNote(reqId,null);
+}
+
+/* === AUTO-COMPLETE STUCK REVIEW REQUESTS ================================
+   Bug fix: when admin edits an entry directly (Records/Inward/Outward tab)
+   instead of clicking "Fill Details" on the review request, the pending
+   review request gets orphaned. This scans all pending review requests
+   and auto-completes them if the underlying entry now has rate filled. */
+function autoCompleteStuckRequests(){
+  if(!APP.requests||!APP.requests.length)return 0;
+  if(typeof isFullAccess==='function'&&!isFullAccess())return 0;/* admin only */
+  let completed=0;
+  APP.requests.forEach(rq=>{
+    if(rq.status!=='pending')return;
+    if(rq.type!=='review')return;
+    const entry=APP.records.find(r=>r.id===rq.entryId);
+    if(!entry)return;
+    /* Review request was created because rate (and/or billFrom) was missing.
+       If rate is now filled, the request is fulfilled. */
+    if((entry.rate||0)>0){
+      rq.status='completed';
+      rq.adminNote=rq.adminNote||'Auto-completed — admin ne entry edit kar ke rate fill kiya';
+      rq.actionBy=currentUser?currentUser.email:'admin-auto';
+      rq.updatedAt=new Date().toISOString();
+      entry.needsReview=false;
+      completed++;
+    }
+  });
+  if(completed>0){
+    try{localStorage.setItem('requests-'+APP.company,JSON.stringify(APP.requests));}catch(e){}
+    if(typeof syncToFirestore==='function')syncToFirestore();
+    if(typeof updateReqBadge==='function')updateReqBadge();
+    console.log('Auto-completed',completed,'stale review requests');
+  }
+  return completed;
 }
 function completeRequestWithNote(reqId,adminNote){
   const rq=APP.requests.find(r=>r.id===reqId);if(!rq)return;
