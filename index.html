@@ -4190,24 +4190,55 @@ function exportTabCSVPDF(prefix){
   if(!recs.length){toast('No data to export','e');return;}
   const choice=prompt('Type "csv" for CSV or "pdf" for PDF:','csv');
   if(choice==='pdf'){exportTabAsPDF(recs,prefix);return;}
-  /* Format matches import format exactly — columns align with downloadSampleCSV headers + extra audit/status columns */
-  let csv='Type,Date,GP No,Bill From,Broker,Party (Bill To),Mobile,Consignee,Consignee Mobile,Consignee Address,Item,Bags,Weight,Party Wt,Difference,Rate,Amount,Due Days,Unloaded Date,Vehicle,Driver,Notes,Status,Paid\n';
+  /* === FINANCIAL PRIVACY GUARD =====================================
+     Non-payment users CANNOT export rate/amount/due/status/paid columns.
+     UI mein `.hide-finance .fc` se hide hai, but exports were leaking. */
+  const showFin=hasPerm('payment');
   const esc=(v)=>{const s=String(v==null?'':v);return s.includes(',')||s.includes('"')||s.includes('\n')?'"'+s.replace(/"/g,'""')+'"':s;};
-  recs.forEach(r=>{const wt=r.weight||0;const pwt=r.partyWt||0;csv+=`${esc(r.type)},${esc(r.date)},${esc(r.gp||'')},${esc(r.billFrom||'')},${esc(r.broker||'')},${esc(r.party)},${esc(r.mobile||'')},${esc(r.consignee||'')},${esc(r.consigneeMobile||'')},${esc(r.consigneeAddr||'')},${esc(r.item||'')},${r.bags||0},${wt.toFixed(2)},${pwt.toFixed(2)},${(wt-pwt).toFixed(2)},${r.rate||0},${getEntryAmt(r).toFixed(2)},${r.dueNotes||30},${esc(r.unloadedDate||'')},${esc(r.vehicle||'')},${esc(r.driver||'')},${esc(r.notes||'')},${esc(r.paymentStatus||'pending')},${r.paid||0}\n`;});
-  /* Totals row */
+  /* Build headers conditionally — financial columns only if user has permission */
+  const headers=['Type','Date','GP No','Bill From','Broker','Party (Bill To)','Mobile','Consignee','Consignee Mobile','Consignee Address','Item','Bags','Weight','Party Wt','Difference'];
+  if(showFin)headers.push('Rate','Amount','Due Days');
+  headers.push('Unloaded Date','Vehicle','Driver','Notes');
+  if(showFin)headers.push('Status','Paid');
+  let csv=headers.join(',')+'\n';
+  recs.forEach(r=>{
+    const wt=r.weight||0;const pwt=r.partyWt||0;
+    const cols=[esc(r.type),esc(r.date),esc(r.gp||''),esc(r.billFrom||''),esc(r.broker||''),esc(r.party),esc(r.mobile||''),esc(r.consignee||''),esc(r.consigneeMobile||''),esc(r.consigneeAddr||''),esc(r.item||''),r.bags||0,wt.toFixed(2),pwt.toFixed(2),(wt-pwt).toFixed(2)];
+    if(showFin)cols.push(r.rate||0,getEntryAmt(r).toFixed(2),r.dueNotes||30);
+    cols.push(esc(r.unloadedDate||''),esc(r.vehicle||''),esc(r.driver||''),esc(r.notes||''));
+    if(showFin)cols.push(esc(r.paymentStatus||'pending'),r.paid||0);
+    csv+=cols.join(',')+'\n';
+  });
+  /* Totals row — built dynamically to match the header layout */
   const totBags=recs.reduce((s,r)=>s+(r.bags||0),0);const totWt=recs.reduce((s,r)=>s+(r.weight||0),0);const totPwt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const totAmt=recs.reduce((s,r)=>s+getEntryAmt(r),0);const totPaid=recs.reduce((s,r)=>s+(r.paid||0),0);
-  csv+=`TOTAL,,,,,,,,,,,${totBags},${totWt.toFixed(2)},${totPwt.toFixed(2)},${(totWt-totPwt).toFixed(2)},,${totAmt.toFixed(2)},,,,,,,${totPaid.toFixed(2)}\n`;
-  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${prefix}-${APP.company}-${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);toast('CSV exported!','s');
+  const totCols=['TOTAL','','','','','','','','','','',totBags,totWt.toFixed(2),totPwt.toFixed(2),(totWt-totPwt).toFixed(2)];
+  if(showFin)totCols.push('',totAmt.toFixed(2),'');
+  totCols.push('','','','');
+  if(showFin)totCols.push('',totPaid.toFixed(2));
+  csv+=totCols.join(',')+'\n';
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${prefix}-${APP.company}-${new Date().toISOString().split('T')[0]}.csv`;a.click();URL.revokeObjectURL(url);toast('CSV exported!'+(showFin?'':' (financial columns hidden — non-admin user)'),'s');
 }
 function exportTabAsPDF(recs,prefix){
+  /* === FINANCIAL PRIVACY GUARD — same as CSV ====================== */
+  const showFin=hasPerm('payment');
   const compName=APP.company==='aggarwal'?'Aggarwal Agro Foods':'Krishna Rice Mills';
-  const ths='<th>Date</th><th>Type</th><th>GP</th><th>Bill From</th><th>Broker</th><th>Party</th><th>Consignee</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Diff</th><th>Rate</th><th>Amount</th><th>Due Days</th><th>Unloaded</th><th>Vehicle</th><th>Status</th>';
+  /* Conditional column set — finance columns omitted for non-payment users */
+  const finTH=showFin?'<th>Rate</th><th>Amount</th><th>Due Days</th>':'';
+  const statusTH=showFin?'<th>Status</th>':'';
+  const ths='<th>Date</th><th>Type</th><th>GP</th><th>Bill From</th><th>Broker</th><th>Party</th><th>Consignee</th><th>Item</th><th>Bags</th><th>Weight</th><th>Party Wt</th><th>Diff</th>'+finTH+'<th>Unloaded</th><th>Vehicle</th>'+statusTH;
   let tbl='<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;font-size:9px;width:100%"><tr style="background:#1a5fc8;color:#fff;font-size:8px">'+ths+'</tr>';
   recs.forEach((r,i)=>{const wt=r.weight||0;const pwt=r.partyWt||0;const diff=wt-pwt;const amt=getEntryAmt(r);
-    tbl+=`<tr style="background:${i%2?'#f7f8fa':'#fff'}"><td>${r.date}</td><td>${r.type}</td><td>${r.gp||'-'}</td><td>${r.billFrom||'-'}</td><td>${r.broker||'-'}</td><td>${r.party}</td><td>${r.consignee||'-'}</td><td>${r.item||'-'}</td><td>${r.bags||0}</td><td>${wt.toFixed(2)}</td><td>${pwt.toFixed(2)}</td><td style="color:${diff>0?'green':diff<0?'red':'#999'}">${diff.toFixed(2)}</td><td>${r.rate||0}</td><td style="font-weight:600">${fmtINR(amt)}</td><td>${r.dueNotes||30} din</td><td>${r.unloadedDate||'-'}</td><td>${r.vehicle||'-'}</td><td>${r.paymentStatus}</td></tr>`;
+    const finCols=showFin?`<td>${r.rate||0}</td><td style="font-weight:600">${fmtINR(amt)}</td><td>${r.dueNotes||30} din</td>`:'';
+    const statusCol=showFin?`<td>${r.paymentStatus}</td>`:'';
+    tbl+=`<tr style="background:${i%2?'#f7f8fa':'#fff'}"><td>${r.date}</td><td>${r.type}</td><td>${r.gp||'-'}</td><td>${r.billFrom||'-'}</td><td>${r.broker||'-'}</td><td>${r.party}</td><td>${r.consignee||'-'}</td><td>${r.item||'-'}</td><td>${r.bags||0}</td><td>${wt.toFixed(2)}</td><td>${pwt.toFixed(2)}</td><td style="color:${diff>0?'green':diff<0?'red':'#999'}">${diff.toFixed(2)}</td>${finCols}<td>${r.unloadedDate||'-'}</td><td>${r.vehicle||'-'}</td>${statusCol}</tr>`;
   });
   const totBags=recs.reduce((s,r)=>s+(r.bags||0),0);const totWt=recs.reduce((s,r)=>s+(r.weight||0),0);const totPwt=recs.reduce((s,r)=>s+(r.partyWt||0),0);const totDiff=totWt-totPwt;const totAmt=recs.reduce((s,r)=>s+getEntryAmt(r),0);
-  tbl+=`<tr style="background:#1a3a6b;color:#fff;font-weight:700;font-size:10px"><td colspan="8" style="text-align:right;padding:8px">GRAND TOTAL</td><td style="padding:8px">${totBags}</td><td style="padding:8px">${totWt.toFixed(2)}</td><td style="padding:8px">${totPwt.toFixed(2)}</td><td style="padding:8px">${totDiff.toFixed(2)}</td><td></td><td style="padding:8px">${fmtINR(totAmt)}</td><td colspan="4"></td></tr></table>`;
+  /* Totals — conditional spans to match new column count */
+  if(showFin){
+    tbl+=`<tr style="background:#1a3a6b;color:#fff;font-weight:700;font-size:10px"><td colspan="8" style="text-align:right;padding:8px">GRAND TOTAL</td><td style="padding:8px">${totBags}</td><td style="padding:8px">${totWt.toFixed(2)}</td><td style="padding:8px">${totPwt.toFixed(2)}</td><td style="padding:8px">${totDiff.toFixed(2)}</td><td></td><td style="padding:8px">${fmtINR(totAmt)}</td><td colspan="4"></td></tr></table>`;
+  }else{
+    tbl+=`<tr style="background:#1a3a6b;color:#fff;font-weight:700;font-size:10px"><td colspan="8" style="text-align:right;padding:8px">GRAND TOTAL</td><td style="padding:8px">${totBags}</td><td style="padding:8px">${totWt.toFixed(2)}</td><td style="padding:8px">${totPwt.toFixed(2)}</td><td style="padding:8px">${totDiff.toFixed(2)}</td><td colspan="2"></td></tr></table>`;
+  }
   const w=window.open('','_blank');w.document.write('<html><head><title>'+compName+' - '+prefix+'</title></head><body style="font-family:sans-serif;padding:15px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px"><div><h2 style="color:#1a3a6b;margin:0">'+compName+'</h2><p style="color:#666;font-size:12px;margin:4px 0 0 0">Samrala, Punjab</p></div><div style="text-align:right"><h3 style="margin:0;color:#333">'+prefix.toUpperCase()+' Report</h3><p style="font-size:11px;color:#666;margin:4px 0 0 0">Date: '+new Date().toLocaleDateString('en-IN')+'</p></div></div>'+tbl+'<div style="margin-top:20px;padding-top:10px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:10px;color:#999"><span>Generated by Inward Outward Pro</span><span>Total Entries: '+recs.length+'</span></div><script>setTimeout(()=>{window.print()},500)<\/script></body></html>');w.document.close();
 }
 
@@ -5831,7 +5862,16 @@ function exportCurrentReport(){
   if(!REP_FILTERED_DATA.length){toast('No data to export','e');return;}
   const choice=prompt('Type "csv" for CSV or "pdf" for PDF:','csv');
   if(choice==='pdf'){exportReportAsPDF(REP_FILTERED_DATA);return;}
-  const fields=getSelectedFields();
+  /* === FINANCIAL PRIVACY GUARD ====================================
+     Non-payment users get their selected finance fields silently stripped. */
+  const showFin=hasPerm('payment');
+  let fields=getSelectedFields();
+  if(!showFin){
+    const FIN=new Set(['rate','amount','paid','balance','duedate','status']);
+    const removed=fields.filter(f=>FIN.has(f));
+    fields=fields.filter(f=>!FIN.has(f));
+    if(removed.length)toast('Financial columns hide kiye gaye ('+removed.length+') — non-admin user','i');
+  }
   /* Map field keys to header labels */
   const labelMap={type:'Type',date:'Date',gp:'GP No',billfrom:'Bill From',broker:'Broker',party:'Party (Bill To)',consignee:'Consignee',item:'Item',bags:'Bags',weight:'Weight',partywt:'Party Wt',diff:'Difference',rate:'Rate',amount:'Amount',paid:'Paid',balance:'Balance',duedate:'Due Date',vehicle:'Vehicle',status:'Status'};
   let csv=fields.map(f=>labelMap[f]||f).join(',')+'\n';
@@ -5874,19 +5914,36 @@ function exportCurrentReport(){
 }
 /* Report PDF export — matches on-screen grouped report layout exactly */
 function exportReportAsPDF(recs){
+  /* === FINANCIAL PRIVACY GUARD — same as other exports ============== */
+  const showFin=hasPerm('payment');
   const compName=APP.company==='aggarwal'?'Aggarwal Agro Foods':'Krishna Rice Mills';
-  const ths='<th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Type</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Date</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">GP No</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Bill From</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Broker</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Party (Bill To)</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Consignee</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Item</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Bags</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Weight</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Party Wt</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Diff</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Rate</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Amount</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Paid</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Balance</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Due Date</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Vehicle</th><th style="padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8">Status</th>';
+  const thStyle='padding:5px 4px;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;background:#1a5fc8;color:#fff;border:1px solid #1450a8';
+  const TH=(lbl)=>'<th style="'+thStyle+'">'+lbl+'</th>';
+  /* Build TH set — finance columns only if user has permission */
+  let ths=TH('Type')+TH('Date')+TH('GP No')+TH('Bill From')+TH('Broker')+TH('Party (Bill To)')+TH('Consignee')+TH('Item')+TH('Bags')+TH('Weight')+TH('Party Wt')+TH('Diff');
+  if(showFin)ths+=TH('Rate')+TH('Amount')+TH('Paid')+TH('Balance')+TH('Due Date');
+  ths+=TH('Vehicle');
+  if(showFin)ths+=TH('Status');
   /* Helper: build a data row for PDF */
   function pdfRow(r,i){
     const wt=r.weight||0;const pwt=r.partyWt||0;const diff=wt-pwt;const amt=getEntryAmt(r);const bal=amt-(r.paid||0);const dd=getDueDate(r).toISOString().split('T')[0];const today=new Date().toISOString().split('T')[0];const isOverdue=dd<today&&(r.paymentStatus||'pending')!=='paid';
-    const bg=isOverdue?'#fef0f0':i%2?'#f7f8fa':'#fff';const s='padding:4px;font-size:8px;border:1px solid #dde1e9;';
-    return `<tr style="background:${bg}"><td style="${s}color:${r.type==='inward'?'#15803d':'#7c3aed'};font-weight:700">${r.type==='inward'?'INWARD':'OUTWARD'}</td><td style="${s}">${r.date}</td><td style="${s}font-family:monospace">${r.gp||'-'}</td><td style="${s}">${r.billFrom||'-'}</td><td style="${s}">${r.broker||'-'}</td><td style="${s}font-weight:700">${r.party}</td><td style="${s}">${r.consignee||'-'}</td><td style="${s}">${r.item||'-'}</td><td style="${s}">${r.bags||0}</td><td style="${s}">${wt.toFixed(2)}</td><td style="${s}">${pwt.toFixed(2)}</td><td style="${s}color:${diff>0?'#15803d':diff<0?'#b91c1c':'#999'};font-weight:600">${diff.toFixed(2)}</td><td style="${s}">${r.rate||0}</td><td style="${s}font-weight:700;color:#1a5fc8">${fmtINR(amt)}</td><td style="${s}color:#15803d;font-weight:600">${fmtINR(r.paid||0)}</td><td style="${s}color:${bal>0?'#b91c1c':'#15803d'};font-weight:700">${fmtINR(bal)}</td><td style="${s}${isOverdue?'color:#b91c1c;font-weight:600':''}">${dd}</td><td style="${s}">${r.vehicle||'-'}</td><td style="${s}">${r.paymentStatus||'pending'}</td></tr>`;
+    const bg=isOverdue&&showFin?'#fef0f0':i%2?'#f7f8fa':'#fff';const s='padding:4px;font-size:8px;border:1px solid #dde1e9;';
+    let row=`<tr style="background:${bg}"><td style="${s}color:${r.type==='inward'?'#15803d':'#7c3aed'};font-weight:700">${r.type==='inward'?'INWARD':'OUTWARD'}</td><td style="${s}">${r.date}</td><td style="${s}font-family:monospace">${r.gp||'-'}</td><td style="${s}">${r.billFrom||'-'}</td><td style="${s}">${r.broker||'-'}</td><td style="${s}font-weight:700">${r.party}</td><td style="${s}">${r.consignee||'-'}</td><td style="${s}">${r.item||'-'}</td><td style="${s}">${r.bags||0}</td><td style="${s}">${wt.toFixed(2)}</td><td style="${s}">${pwt.toFixed(2)}</td><td style="${s}color:${diff>0?'#15803d':diff<0?'#b91c1c':'#999'};font-weight:600">${diff.toFixed(2)}</td>`;
+    if(showFin)row+=`<td style="${s}">${r.rate||0}</td><td style="${s}font-weight:700;color:#1a5fc8">${fmtINR(amt)}</td><td style="${s}color:#15803d;font-weight:600">${fmtINR(r.paid||0)}</td><td style="${s}color:${bal>0?'#b91c1c':'#15803d'};font-weight:700">${fmtINR(bal)}</td><td style="${s}${isOverdue?'color:#b91c1c;font-weight:600':''}">${dd}</td>`;
+    row+=`<td style="${s}">${r.vehicle||'-'}</td>`;
+    if(showFin)row+=`<td style="${s}">${r.paymentStatus||'pending'}</td>`;
+    row+='</tr>';
+    return row;
   }
-  /* Helper: build a totals row for PDF */
+  /* Helper: build a totals row for PDF — colspan adjusts to current column count */
   function pdfTotals(grp){
     const tB=grp.reduce((s,r)=>s+(r.bags||0),0);const tW=grp.reduce((s,r)=>s+(r.weight||0),0);const tP=grp.reduce((s,r)=>s+(r.partyWt||0),0);const tD=tW-tP;const tA=grp.reduce((s,r)=>s+getEntryAmt(r),0);const tPd=grp.reduce((s,r)=>s+(r.paid||0),0);const tBl=tA-tPd;
     const s='padding:6px 4px;font-size:9px;font-weight:700;border:1px solid #c5d8f8;';
-    return `<tr style="background:#e8f0fd"><td colspan="8" style="${s}text-align:right;text-transform:uppercase;letter-spacing:1px">TOTAL</td><td style="${s}">${tB}</td><td style="${s}">${tW.toFixed(2)}</td><td style="${s}">${tP.toFixed(2)}</td><td style="${s}color:${tD>0?'#15803d':tD<0?'#b91c1c':'#999'}">${tD.toFixed(2)}</td><td style="${s}"></td><td style="${s}color:#1a5fc8">${fmtINR(tA)}</td><td style="${s}color:#15803d">${fmtINR(tPd)}</td><td style="${s}color:#b91c1c">${fmtINR(tBl)}</td><td colspan="3" style="${s}"></td></tr>`;
+    if(showFin){
+      return `<tr style="background:#e8f0fd"><td colspan="8" style="${s}text-align:right;text-transform:uppercase;letter-spacing:1px">TOTAL</td><td style="${s}">${tB}</td><td style="${s}">${tW.toFixed(2)}</td><td style="${s}">${tP.toFixed(2)}</td><td style="${s}color:${tD>0?'#15803d':tD<0?'#b91c1c':'#999'}">${tD.toFixed(2)}</td><td style="${s}"></td><td style="${s}color:#1a5fc8">${fmtINR(tA)}</td><td style="${s}color:#15803d">${fmtINR(tPd)}</td><td style="${s}color:#b91c1c">${fmtINR(tBl)}</td><td colspan="3" style="${s}"></td></tr>`;
+    }
+    /* Non-fin: only Type, Date, GP, Bill From, Broker, Party, Consignee, Item, Bags, Weight, Party Wt, Diff, Vehicle */
+    return `<tr style="background:#e8f0fd"><td colspan="8" style="${s}text-align:right;text-transform:uppercase;letter-spacing:1px">TOTAL</td><td style="${s}">${tB}</td><td style="${s}">${tW.toFixed(2)}</td><td style="${s}">${tP.toFixed(2)}</td><td style="${s}color:${tD>0?'#15803d':tD<0?'#b91c1c':'#999'}">${tD.toFixed(2)}</td><td style="${s}"></td></tr>`;
   }
   /* Determine grouping based on current report view */
   let groups={};let groupOrder=[];let groupIcon='';let groupColor='';let viewLabel='ALL ENTRIES';
