@@ -6518,6 +6518,36 @@ async function saveEntry(){
     const completedEntry=APP.records.find(r=>r.id===savedEntryId);
     if(completedEntry)completedEntry.needsReview=false;
   }
+  /* === COMPREHENSIVE APPROVED-REQUEST CLEANUP ============================
+     After ANY successful edit save (`id` is set), find ALL approved 'edit'
+     requests by this user for this entry and mark them completed.
+     Fixes the bug where:
+       - User had multiple approved edit requests for same entry (clicked
+         📩 Edit Request multiple times, admin approved all)
+       - Save only completed the FIRST one (via _pendingReqComplete)
+       - Others stayed 'approved' → green Edit (Approved) button stays after refresh
+     Now ALL approved edit requests get completed in one save. */
+  if(id&&currentUser){
+    let extraCompleted=0;
+    (APP.requests||[]).forEach(rq=>{
+      if(rq.id===_pendingReqId)return;/* already done above */
+      if(rq.entryId!==id)return;
+      if(rq.status!=='approved')return;
+      if(rq.type!=='edit')return;
+      if(rq.requestedBy!==currentUser.email)return;
+      rq.status='completed';
+      rq.adminNote=rq.adminNote||'Auto-completed — entry edited by user';
+      rq.actionBy=currentUser.email;
+      rq.updatedAt=new Date().toISOString();
+      extraCompleted++;
+    });
+    if(extraCompleted>0){
+      try{localStorage.setItem('requests-'+APP.company,JSON.stringify(APP.requests));}catch(e){}
+      if(typeof syncToFirestore==='function')syncToFirestore();
+      if(typeof updateReqBadge==='function')updateReqBadge();
+      console.log('Cleaned up',extraCompleted,'additional approved edit request(s) for entry',id);
+    }
+  }
   /* Auto-complete ANY orphan review requests for this entry — covers the case
      where admin edited from Records/Inward/Outward tab directly (not via
      "Fill Details" button on the request). */
