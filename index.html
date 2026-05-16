@@ -96,6 +96,15 @@
 .act-req{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
 .act-req:hover{background:#fde68a;transform:scale(1.1);}
 .hide-finance .fc{display:none!important;}
+/* === MOBILE: tab toolbar buttons wrap to new row instead of overflowing =====
+   On mobile, .th2 (the toolbar above each tab's table) had buttons that
+   extended off-screen without scroll. Now title stacks above and buttons
+   wrap onto a second row, all visible. */
+@media (max-width:768px){
+  .th2{flex-direction:column;align-items:stretch;gap:8px;padding:10px 12px;}
+  .th2 > div:last-child{flex-wrap:wrap;justify-content:center;gap:6px;}
+  .th2 > div:last-child button{flex:0 1 auto;}
+}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -289,7 +298,7 @@
       <select class="fs" id="rec-party" onchange="filterRecords()"><option value="">All Parties</option></select>
       <select class="fs" id="rec-item" onchange="filterRecords()"><option value="">All Items</option></select>
       <select class="fs" id="rec-type" onchange="filterRecords()"><option value="">All Type</option><option value="inward">Inward</option><option value="outward">Outward</option></select>
-      <button class="btn btn-ghost" onclick="resetFilter('rec')">↺</button>
+      <button class="btn btn-ghost" onclick="resetFilter('rec')" title="Saare filters clear karo" style="white-space:nowrap;font-size:11px">🔄 Clear Filters</button>
     </div>
     <div class="fg" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-top:8px;">
       <input type="number" class="fi" id="rec-rate" placeholder="Rate filter..." oninput="filterRecords()" title="Rate">
@@ -321,7 +330,7 @@
       <select class="fs" id="pty-item" onchange="filterParties()"><option value="">All Items</option></select>
       <select class="fs" id="pty-type" onchange="filterParties()"><option value="">All Type</option><option value="inward">Inward</option><option value="outward">Outward</option></select>
       <div></div>
-      <button class="btn btn-ghost" onclick="resetFilter('party')">↺</button>
+      <button class="btn btn-ghost" onclick="resetFilter('party')" title="Saare filters clear karo" style="white-space:nowrap;font-size:11px">🔄 Clear Filters</button>
     </div>
   </div>
   <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
@@ -352,7 +361,7 @@
       <input type="date" class="fi" id="in-to" onchange="filterInward()" title="Khatam">
       <select class="fs" id="in-party" onchange="filterInward()"><option value="">All Parties</option></select>
       <select class="fs" id="in-item" onchange="filterInward()"><option value="">All Items</option></select>
-      <button class="btn btn-ghost" onclick="resetFilter('inward')">↺</button>
+      <button class="btn btn-ghost" onclick="resetFilter('inward')" title="Saare filters clear karo" style="white-space:nowrap;font-size:11px">🔄 Clear Filters</button>
     </div>
   </div>
   <div class="tw">
@@ -388,7 +397,7 @@
       <input type="date" class="fi" id="out-to" onchange="filterOutward()" title="Khatam">
       <select class="fs" id="out-party" onchange="filterOutward()"><option value="">All Parties</option></select>
       <select class="fs" id="out-item" onchange="filterOutward()"><option value="">All Items</option></select>
-      <button class="btn btn-ghost" onclick="resetFilter('outward')">↺</button>
+      <button class="btn btn-ghost" onclick="resetFilter('outward')" title="Saare filters clear karo" style="white-space:nowrap;font-size:11px">🔄 Clear Filters</button>
     </div>
   </div>
   <div class="tw">
@@ -440,7 +449,7 @@
       <select class="fs" id="pay-party" onchange="filterPayment()"><option value="">All Parties</option></select>
       <select class="fs" id="pay-item" onchange="filterPayment()"><option value="">All Items</option></select>
       <select class="fs" id="pay-type" onchange="filterPayment()"><option value="">All Type</option><option value="inward">Inward</option><option value="outward">Outward</option></select>
-      <button class="btn btn-ghost" onclick="resetFilter('pay')">↺</button>
+      <button class="btn btn-ghost" onclick="resetFilter('pay')" title="Saare filters clear karo" style="white-space:nowrap;font-size:11px">🔄 Clear Filters</button>
     </div>
     <div class="fg" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-top:8px">
       <select class="fs" id="pay-broker" onchange="filterPayment()"><option value="">All Brokers</option></select>
@@ -513,7 +522,7 @@
       <select class="fs" id="rep-party" onchange="filterReport()"><option value="">All Parties</option></select>
       <select class="fs" id="rep-item" onchange="filterReport()"><option value="">All Items</option></select>
       <select class="fs" id="rep-type" onchange="filterReport()"><option value="">All Type</option><option value="inward">Inward</option><option value="outward">Outward</option></select>
-      <button class="btn btn-ghost" onclick="resetFilter('rep')">↺</button>
+      <button class="btn btn-ghost" onclick="resetFilter('rep')" title="Saare filters clear karo" style="white-space:nowrap;font-size:11px">🔄 Clear Filters</button>
     </div>
     <div class="fg" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-top:8px;">
       <input type="number" class="fi" id="rep-rate" placeholder="Rate filter..." oninput="filterReport()" title="Rate">
@@ -6432,16 +6441,25 @@ async function saveEntry(){
   const savedEntryId=id||(APP.records[APP.records.length-1]?APP.records[APP.records.length-1].id:null);
   localStorage.setItem(`data-${APP.company}`,JSON.stringify(APP.records));
   syncToFirestore();
+  /* === CRITICAL BUG FIX — capture pending-request flags BEFORE closeM ====
+     closeM('entry-modal') has logic that nulls _pendingReqComplete (to clean
+     up if user cancels). But if we save successfully, we still need those
+     flags to mark the approved request as completed. Snapshot them first,
+     then closeM, then use the snapshot for completion. Without this,
+     non-admin users' approved edit requests stayed 'approved' forever —
+     letting them edit the entry repeatedly with one approval. */
+  const _pendingReqId=window._pendingReqComplete;
+  const _pendingReqNote=window._pendingReqAdminNote;
+  window._pendingReqComplete=null;
+  window._pendingReqAdminNote=null;
   resetPhotoState();
   closeM('entry-modal');refreshAllViews();toast('Entry saved!','s');
   /* Complete any pending approved request — uses admin note if set (Khud Karunga flow) */
-  if(window._pendingReqComplete){
-    completeRequestWithNote(window._pendingReqComplete,window._pendingReqAdminNote);
+  if(_pendingReqId){
+    completeRequestWithNote(_pendingReqId,_pendingReqNote);
     /* Clear needsReview on the entry (admin filled it) */
     const completedEntry=APP.records.find(r=>r.id===savedEntryId);
     if(completedEntry)completedEntry.needsReview=false;
-    window._pendingReqComplete=null;
-    window._pendingReqAdminNote=null;
   }
   /* Auto-complete ANY orphan review requests for this entry — covers the case
      where admin edited from Records/Inward/Outward tab directly (not via
